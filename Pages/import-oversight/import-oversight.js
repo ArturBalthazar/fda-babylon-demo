@@ -92,7 +92,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
 
     // ✅ Lighting & Skybox
-    scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("Assets/Textures/warehouse.env", scene);
+    scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./Assets/Textures/warehouse.env", scene);
     scene.environmentIntensity = 1;
     scene.imageProcessingConfiguration.exposure = 1.2;
     scene.imageProcessingConfiguration.contrast = 1.3;
@@ -100,7 +100,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     scene.createDefaultSkybox(scene.environmentTexture, true, 1000);
 
     // ✅ Load GLTF Scene
-    BABYLON.SceneLoader.ImportMesh("", "Assets/Models/", "warehouse.gltf", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
         console.log("✅ warehouse.gltf loaded. Mesh count:", meshes.length);
 
         meshes.forEach(mesh => {
@@ -110,7 +110,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (mesh.material) {
                 const uv2 = mesh.getVerticesData(BABYLON.VertexBuffer.UV2Kind);
                 if (uv2) {
-                    const tex = new BABYLON.Texture(`Assets/Lightmaps/${mesh.name}_lightmap.png`, scene, false, false, BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
+                    const tex = new BABYLON.Texture(`./Assets/Lightmaps/${mesh.name}_lightmap.png`, scene, false, false, BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
                         () => {
                             tex.coordinatesIndex = 1;
                             mesh.material.lightmapTexture = tex;
