@@ -7,13 +7,119 @@ window.addEventListener("DOMContentLoaded", async () => {
     // ✅ Ammo.js Physics V1
     await Ammo();
     const plugin = new BABYLON.AmmoJSPlugin();
-    scene.enablePhysics(new BABYLON.Vector3(0, -15, 0), plugin);
+    scene.enablePhysics(new BABYLON.Vector3(0, -0, 0), plugin);
     const ammoWorld = plugin.world;
     console.log("✅ AmmoJS plugin enabled");
 
+    // ✅ Load GLTF Scene
+    BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
+        console.log("✅ warehouse.gltf loaded. Mesh count:", meshes.length);
+
+        meshes.forEach(mesh => {
+            if (!(mesh instanceof BABYLON.Mesh) || mesh.name === "__root__") return;
+
+            // 💡 Lightmaps
+            if (mesh.material) {
+                const uv2 = mesh.getVerticesData(BABYLON.VertexBuffer.UV2Kind);
+                if (uv2) {
+                    const tex = new BABYLON.Texture(`./Assets/Lightmaps/${mesh.name}_lightmap.png`, scene, false, false, BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
+                        () => {
+                            tex.coordinatesIndex = 1;
+                            mesh.material.lightmapTexture = tex;
+                            mesh.material.useLightmapAsShadowmap = true;
+                        },
+                        () => console.warn(`❌ Lightmap not found for ${mesh.name}`)
+                    );
+                }
+            }
+        });
+
+        // ✅ Apply raw Ammo collision to mk_collider
+        const ground = meshes.find(m => m.name === "mk_collider");
+        if (ground) {
+            console.log("✅ mk_collider found, creating raw Ammo body");
+
+            ground.refreshBoundingInfo();
+            const positions = ground.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+            const indices = ground.getIndices();
+
+            if (!positions || !indices) {
+                console.error("❌ mk_collider missing geometry");
+                return;
+            }
+
+            const ammoMesh = new Ammo.btTriangleMesh(true, true);
+            const scale = ground.scaling;
+
+            for (let i = 0; i < indices.length; i += 3) {
+                const i0 = indices[i] * 3;
+                const i1 = indices[i + 1] * 3;
+                const i2 = indices[i + 2] * 3;
+
+                const v0 = new Ammo.btVector3(-positions[i0] * scale.x, positions[i0 + 1] * scale.y, positions[i0 + 2] * scale.z);
+                const v1 = new Ammo.btVector3(-positions[i1] * scale.x, positions[i1 + 1] * scale.y, positions[i1 + 2] * scale.z);
+                const v2 = new Ammo.btVector3(-positions[i2] * scale.x, positions[i2 + 1] * scale.y, positions[i2 + 2] * scale.z);
+
+                ammoMesh.addTriangle(v0, v1, v2, true);
+            }
+
+            const shape = new Ammo.btBvhTriangleMeshShape(ammoMesh, true, true);
+            shape.setLocalScaling(new Ammo.btVector3(scale.x, scale.y, scale.z));
+
+            const transform = new Ammo.btTransform();
+            transform.setIdentity();
+            const origin = ground.getAbsolutePosition();
+            transform.setOrigin(new Ammo.btVector3(origin.x, origin.y, origin.z));
+            transform.setRotation(new Ammo.btQuaternion(0, 0, 0, 1));
+
+            const motionState = new Ammo.btDefaultMotionState(transform);
+            const localInertia = new Ammo.btVector3(0, 0, 0);
+            const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
+            const body = new Ammo.btRigidBody(rbInfo);
+
+            ammoWorld.addRigidBody(body);
+
+            console.log("✅ Raw Ammo rigid body added for mk_collider");
+
+            // ✅ Enable gravity now that collider is ready
+            console.log("🔄 Setting gravity now that scene is ready...");
+            scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, -15, 0));
+
+/*             // ✅ Visual debug mesh to inspect raw collider shape
+            const debugMesh = new BABYLON.Mesh("ammoDebugMesh", scene);
+            const debugVertexData = new BABYLON.VertexData();
+            debugVertexData.positions = positions;
+            debugVertexData.indices = indices;
+            debugVertexData.applyToMesh(debugMesh);
+
+            // Match transform
+            debugMesh.position.copyFrom(ground.getAbsolutePosition());
+            debugMesh.rotationQuaternion = ground.rotationQuaternion || BABYLON.Quaternion.Identity();
+            debugMesh.scaling.copyFrom(ground.scaling);
+
+            // Style the mesh
+            const debugMat = new BABYLON.StandardMaterial("debugMat", scene);
+            debugMat.wireframe = true;
+            debugMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0); // orange wireframe
+            debugMesh.material = debugMat;
+            debugMesh.scaling.x = -1; */
+            
+
+            console.log("🧠 Debug mesh rendered to inspect Ammo collider shape");
+
+            console.log("✅ Raw Ammo rigid body added for mk_collider");
+
+            ground.setEnabled(false);
+        } else {
+            console.warn("❌ mk_collider not found");
+        }
+
+        document.getElementById("loadingScreen").style.display = "none";
+    });
+
     // ✅ Capsule (player)
     const capsule = BABYLON.MeshBuilder.CreateBox("playerCapsule", { height: 1.6, width: 0.15, depth: 0.15 }, scene);
-    capsule.position = new BABYLON.Vector3(-6.5, 1.6, 10);
+    capsule.position = new BABYLON.Vector3(-6.5, .8, 10);
     capsule.physicsImpostor = new BABYLON.PhysicsImpostor(
         capsule,
         BABYLON.PhysicsImpostor.CapsuleImpostor,
@@ -98,106 +204,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     scene.imageProcessingConfiguration.contrast = 1.3;
     scene.createDefaultLight(true);
     scene.createDefaultSkybox(scene.environmentTexture, true, 1000);
-
-    // ✅ Load GLTF Scene
-    BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
-        console.log("✅ warehouse.gltf loaded. Mesh count:", meshes.length);
-
-        meshes.forEach(mesh => {
-            if (!(mesh instanceof BABYLON.Mesh) || mesh.name === "__root__") return;
-
-            // 💡 Lightmaps
-            if (mesh.material) {
-                const uv2 = mesh.getVerticesData(BABYLON.VertexBuffer.UV2Kind);
-                if (uv2) {
-                    const tex = new BABYLON.Texture(`./Assets/Lightmaps/${mesh.name}_lightmap.png`, scene, false, false, BABYLON.Texture.TRILINEAR_SAMPLINGMODE,
-                        () => {
-                            tex.coordinatesIndex = 1;
-                            mesh.material.lightmapTexture = tex;
-                            mesh.material.useLightmapAsShadowmap = true;
-                        },
-                        () => console.warn(`❌ Lightmap not found for ${mesh.name}`)
-                    );
-                }
-            }
-        });
-
-        // ✅ Apply raw Ammo collision to mk_collider
-        const ground = meshes.find(m => m.name === "mk_collider");
-        if (ground) {
-            console.log("✅ mk_collider found, creating raw Ammo body");
-
-            ground.refreshBoundingInfo();
-            const positions = ground.getVerticesData(BABYLON.VertexBuffer.PositionKind);
-            const indices = ground.getIndices();
-
-            if (!positions || !indices) {
-                console.error("❌ mk_collider missing geometry");
-                return;
-            }
-
-            const ammoMesh = new Ammo.btTriangleMesh(true, true);
-            const scale = ground.scaling;
-
-            for (let i = 0; i < indices.length; i += 3) {
-                const i0 = indices[i] * 3;
-                const i1 = indices[i + 1] * 3;
-                const i2 = indices[i + 2] * 3;
-
-                const v0 = new Ammo.btVector3(-positions[i0] * scale.x, positions[i0 + 1] * scale.y, positions[i0 + 2] * scale.z);
-                const v1 = new Ammo.btVector3(-positions[i1] * scale.x, positions[i1 + 1] * scale.y, positions[i1 + 2] * scale.z);
-                const v2 = new Ammo.btVector3(-positions[i2] * scale.x, positions[i2 + 1] * scale.y, positions[i2 + 2] * scale.z);
-
-                ammoMesh.addTriangle(v0, v1, v2, true);
-            }
-
-            const shape = new Ammo.btBvhTriangleMeshShape(ammoMesh, true, true);
-            shape.setLocalScaling(new Ammo.btVector3(scale.x, scale.y, scale.z));
-
-            const transform = new Ammo.btTransform();
-            transform.setIdentity();
-            const origin = ground.getAbsolutePosition();
-            transform.setOrigin(new Ammo.btVector3(origin.x, origin.y, origin.z));
-            transform.setRotation(new Ammo.btQuaternion(0, 0, 0, 1));
-
-            const motionState = new Ammo.btDefaultMotionState(transform);
-            const localInertia = new Ammo.btVector3(0, 0, 0);
-            const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
-            const body = new Ammo.btRigidBody(rbInfo);
-
-            ammoWorld.addRigidBody(body);
-
-/*             // ✅ Visual debug mesh to inspect raw collider shape
-            const debugMesh = new BABYLON.Mesh("ammoDebugMesh", scene);
-            const debugVertexData = new BABYLON.VertexData();
-            debugVertexData.positions = positions;
-            debugVertexData.indices = indices;
-            debugVertexData.applyToMesh(debugMesh);
-
-            // Match transform
-            debugMesh.position.copyFrom(ground.getAbsolutePosition());
-            debugMesh.rotationQuaternion = ground.rotationQuaternion || BABYLON.Quaternion.Identity();
-            debugMesh.scaling.copyFrom(ground.scaling);
-
-            // Style the mesh
-            const debugMat = new BABYLON.StandardMaterial("debugMat", scene);
-            debugMat.wireframe = true;
-            debugMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0); // orange wireframe
-            debugMesh.material = debugMat;
-            debugMesh.scaling.x = -1; */
-            
-
-            console.log("🧠 Debug mesh rendered to inspect Ammo collider shape");
-
-            console.log("✅ Raw Ammo rigid body added for mk_collider");
-
-            ground.setEnabled(false);
-        } else {
-            console.warn("❌ mk_collider not found");
-        }
-
-        document.getElementById("loadingScreen").style.display = "none";
-    });
 
     engine.runRenderLoop(() => scene.render());
     window.addEventListener("resize", () => engine.resize());
