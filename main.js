@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', e => {
             e.preventDefault();
-            const emailOk = emailInput.value.trim().toLowerCase().endsWith('@fda.gov.us');
+            //const emailOk = emailInput.value.trim().toLowerCase().endsWith('@fda.gov.us');
+            const emailOk = emailInput.value.trim().length > 0;
             const pwdOk   = pwdInput.value.trim().length > 0;
 
             if (emailOk && pwdOk) {
