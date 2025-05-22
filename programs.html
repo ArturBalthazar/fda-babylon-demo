@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FDA Training Platform – Programs</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header class="navbar">
+        <img class="logo" src="./assets/images/FDA-Logo-White.png" alt="FDA logo" />
+        <button class="nav-btn" id="navLoginBtn">Logout</button>
+    </header>
+
+    <!-- Full-width header section -->
+    <section class="programs-header">
+        <div class="header-inner">
+            <h1>Welcome to the FDA Training Platform</h1>
+            <p>This is an interactive platform designed to help FDA staff, partners and stakeholders understand key processes in product safety, import compliance and inspection protocols.</p>
+            <p>Select a program below to begin.</p>
+            <div class="search-wrapper">
+                <img class="search-icon" src="./assets/images/search.png" alt="Search icon">
+                <input type="text" id="searchInput" class="search-bar" placeholder="Search programs" />
+            </div>
+            
+        </div>
+    </section>
+
+    <main class="programs-container">
+        <aside class="sidebar">
+            <div class="filter-group">
+                <h4>Categories</h4>
+                <label><input type="checkbox"> Human Food</label>
+                <label><input type="checkbox"> Animal Food & Feed</label>
+                <label><input type="checkbox"> Drugs & Pharmaceuticals</label>
+                <label><input type="checkbox"> Medical Devices</label>
+                <label><input type="checkbox"> Cosmetics & Personal Care</label>
+                <label><input type="checkbox"> Tobacco Products</label>
+                <label><input type="checkbox"> Biologics</label>
+                <label><input type="checkbox"> Imports / Border Control</label>
+                <label><input type="checkbox"> Labeling & Packaging</label>
+            </div>
+
+            <div class="filter-group">
+                <h4>User Role</h4>
+                <label><input type="checkbox"> FDA Staff</label>
+                <label><input type="checkbox"> Partner</label>
+                <label><input type="checkbox"> Stakeholder</label>
+            </div>
+
+            <div class="filter-group">
+                <h4>Risk Level</h4>
+                <label><input type="checkbox"> Low Risk</label>
+                <label><input type="checkbox"> Moderate Risk</label>
+                <label><input type="checkbox"> High Risk</label>
+            </div>
+
+            <div class="filter-group">
+                <h4>Status</h4>
+                <label><input type="checkbox"> To Do</label>
+                <label><input type="checkbox"> In Progress</label>
+                <label><input type="checkbox"> Completed</label>
+                <label><input type="checkbox"> Locked</label>
+            </div>
+        </aside>
+
+        <section class="programs-content">
+            <div class="programs-grid">
+                <!-- 1 -->
+                <div class="program-card"
+                    data-link="import-oversight.html"
+                    data-category="Human Food"
+                    data-role="FDA Staff"
+                    data-risk="Low Risk"
+                    data-status="To Do">
+                    <img src="./assets/images/import-oversight.png" alt="Import Oversight">
+                    <h3>Import Oversight</h3>
+                    <p>Walk through the FDA’s import screening and sampling process at U.S. entry points.</p>
+                </div>
+
+                <!-- 2 -->
+                <div class="program-card"
+                    data-link="animal-feed.html"
+                    data-category="Animal Food & Feed"
+                    data-role="Partner"
+                    data-risk="Moderate Risk"
+                    data-status="In Progress">
+                    <img src="./assets/images/packeged-food.png" alt="Animal Feed Inspection">
+                    <h3>Animal Feed Safety Check</h3>
+                    <p>Evaluate compliance in animal food manufacturing with key microbial and labeling standards.</p>
+                </div>
+
+                <!-- 3 -->
+                <div class="program-card"
+                    data-link="pharma-audit.html"
+                    data-category="Drugs & Pharmaceuticals"
+                    data-role="FDA Staff"
+                    data-risk="High Risk"
+                    data-status="Completed">
+                    <img src="./assets/images/good-manufacturing-practices.png" alt="Pharma Audit">
+                    <h3>Pharmaceutical Audit Protocol</h3>
+                    <p>Understand how to inspect pharmaceutical facilities and assess manufacturing documentation.</p>
+                </div>
+
+                <!-- 4 -->
+                <div class="program-card"
+                    data-link="device-safety.html"
+                    data-category="Medical Devices"
+                    data-role="Stakeholder"
+                    data-risk="Moderate Risk"
+                    data-status="To Do">
+                    <img src="./assets/images/seafood.png" alt="Medical Devices">
+                    <h3>Device Safety & Recall Management</h3>
+                    <p>Track FDA procedures for evaluating medical device failures and initiating recalls.</p>
+                </div>
+
+                <!-- 5 -->
+                <div class="program-card"
+                    data-link="cosmetic-labeling.html"
+                    data-category="Cosmetics & Personal Care"
+                    data-role="FDA Staff"
+                    data-risk="Low Risk"
+                    data-status="In Progress">
+                    <img src="./assets/images/drugs-manufacturing-oversight.png" alt="Cosmetic Labeling">
+                    <h3>Cosmetic Labeling & Claims Review</h3>
+                    <p>Learn to evaluate personal care product labeling and ensure marketing claim compliance.</p>
+                </div>
+
+                <!-- 6 -->
+                <div class="program-card"
+                    data-link="tobacco-control.html"
+                    data-category="Tobacco Products"
+                    data-role="Partner"
+                    data-risk="High Risk"
+                    data-status="Locked">
+                    <img src="./assets/images/fresh-to-eat.png" alt="Tobacco Control">
+                    <h3>Tobacco Retail Inspection</h3>
+                    <p>Apply FDA rules when inspecting tobacco retailers for youth access and marketing violations.</p>
+                </div>
+
+                <!-- 7 -->
+                <div class="program-card"
+                    data-link="biologics-oversight.html"
+                    data-category="Biologics"
+                    data-role="FDA Staff"
+                    data-risk="High Risk"
+                    data-status="To Do">
+                    <img src="./assets/images/import-oversight.png" alt="Biologics">
+                    <h3>Biologics Facility Oversight</h3>
+                    <p>Gain skills in biologic sample tracking, storage protocols, and production compliance checks.</p>
+                </div>
+
+                <!-- 8 -->
+                <div class="program-card"
+                    data-link="import-alert-navigation.html"
+                    data-category="Imports / Border Control"
+                    data-role="Stakeholder"
+                    data-risk="Moderate Risk"
+                    data-status="Completed">
+                    <img src="./assets/images/packeged-food.png" alt="Border Control">
+                    <h3>Import Alert Navigation</h3>
+                    <p>Understand how to interpret and respond to FDA import alerts and red flags during screening.</p>
+                </div>
+
+                <!-- 9 -->
+                <div class="program-card"
+                    data-link="packaging-inspection.html"
+                    data-category="Labeling & Packaging"
+                    data-role="Partner"
+                    data-risk="Low Risk"
+                    data-status="In Progress">
+                    <img src="./assets/images/good-manufacturing-practices.png" alt="Labeling">
+                    <h3>Packaging Inspection Criteria</h3>
+                    <p>Review packaging standards for tamper evidence, allergen disclosure, and clear instructions.</p>
+                </div>
+
+                <!-- 10 -->
+                <div class="program-card"
+                    data-link="seafood-safety.html"
+                    data-category="Human Food"
+                    data-role="FDA Staff"
+                    data-risk="Low Risk"
+                    data-status="Completed">
+                    <img src="./assets/images/seafood.png" alt="Seafood Safety">
+                    <h3>Seafood Safety Control</h3>
+                    <p>Explore seafood-specific inspection steps, from parasite detection to time/temperature controls.</p>
+                </div>
+
+                <!-- 11 -->
+                <div class="program-card"
+                    data-link="drug-oversight.html"
+                    data-category="Drugs & Pharmaceuticals"
+                    data-role="FDA Staff"
+                    data-risk="High Risk"
+                    data-status="To Do">
+                    <img src="./assets/images/drugs-manufacturing-oversight.png" alt="Drug Oversight">
+                    <h3>Drug Manufacturing Oversight</h3>
+                    <p>Train on juice-specific Hazard Analysis and Critical Control Points (HACCP) during production and import.</p>
+                </div>
+
+                <!-- 12 -->
+                <div class="program-card"
+                    data-link="rte-meal.html"
+                    data-category="Human Food"
+                    data-role="Stakeholder"
+                    data-risk="Moderate Risk"
+                    data-status="Locked">
+                    <img src="./assets/images/fresh-to-eat.png" alt="Ready-to-Eat">
+                    <h3>Ready-to-Eat (RTE) Meal Inspection</h3>
+                    <p>Inspect prepared meals for allergen cross-contact, temperature abuse, and sanitation issues.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FDA Training Platform – Login</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header class="navbar">
+        <img class="logo" src="./assets/images/FDA-Logo-White.png" alt="FDA logo" />
+        <button class="nav-btn" id="navLoginBtn">Login</button>
+    </header>
+
+    <main>
+        <form id="loginForm" class="card">
+            <h2>FDA Training Platform</h2>
+
+            <label>Email address</label>
+            <input type="email" id="email" required autocomplete="username" />
+
+            <div class="label-row">
+                <label>Password</label>
+                <span class="aux-link">Forgot password?</span>
+            </div>
+
+            <div class="pwd-wrap">
+                <img id="togglePwd" src="./assets/images/eye-closed.png" alt="toggle password">
+                <input type="password" id="password" required autocomplete="current-password" />
+            </div>
+
+            <button type="submit" class="primary-btn">Sign In</button>
+
+            <p class="signup">
+                Don’t have an account? <span class="aux-link">Sign up</span>
+            </p>
+
+            <p class="error" id="errorMsg"></p>
+        </form>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+</html>
