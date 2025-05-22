@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const isHidden = pwdInput.type === 'password';
             pwdInput.type = isHidden ? 'text' : 'password';
             togglePwd.src = isHidden
-                ? './Assets/Images/eye-opened.png'
-                : './Assets/Images/eye-closed.png';
+                ? 'Assets/Images/eye-opened.png'
+                : 'Assets/Images/eye-closed.png';
         });
     }
 
