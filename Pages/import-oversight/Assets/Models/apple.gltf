@@ -95,17 +95,17 @@
 		{
 			"mimeType":"image/png",
 			"name":"Apple1_u1_v1_normal",
-			"uri":"Textures/Apple1_u1_v1_normal.png"
+			"uri":"appleTextures/Apple1_u1_v1_normal.png"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Apple1_u1_v1_diffuse",
-			"uri":"Textures/Apple1_u1_v1_diffuse.jpg"
+			"uri":"appleTextures/Apple1_u1_v1_diffuse.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Floor Dirt  2",
-			"uri":"Textures/Floor%20Dirt%20%202.png"
+			"uri":"appleTextures/Floor%20Dirt%20%202.png"
 		}
 	],
 	"accessors":[

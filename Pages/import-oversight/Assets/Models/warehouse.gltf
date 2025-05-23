@@ -2058,207 +2058,207 @@
 		{
 			"mimeType":"image/png",
 			"name":"Sandblaster_Aluminium_BaseColor_Darker",
-			"uri":"Textures/Sandblaster_Aluminium_BaseColor_Darker.png"
+			"uri":"warehouseTextures/Sandblaster_Aluminium_BaseColor_Darker.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Sandblaster_Aluminium_Metallic-Sandblaster_Aluminium_Roughness",
-			"uri":"Textures/Sandblaster_Aluminium_Metallic-Sandblaster_Aluminium_Roughness.png"
+			"uri":"warehouseTextures/Sandblaster_Aluminium_Metallic-Sandblaster_Aluminium_Roughness.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"21",
-			"uri":"Textures/21.png"
+			"uri":"warehouseTextures/21.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"21",
-			"uri":"Textures/21-1.png"
+			"uri":"warehouseTextures/21-1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"21-21",
-			"uri":"Textures/21-21.png"
+			"uri":"warehouseTextures/21-21.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"22",
-			"uri":"Textures/22.png"
+			"uri":"warehouseTextures/22.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"22",
-			"uri":"Textures/22-1.png"
+			"uri":"warehouseTextures/22-1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"22-22",
-			"uri":"Textures/22-22.png"
+			"uri":"warehouseTextures/22-22.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"28",
-			"uri":"Textures/28.png"
+			"uri":"warehouseTextures/28.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"28",
-			"uri":"Textures/28-1.png"
+			"uri":"warehouseTextures/28-1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"28-28",
-			"uri":"Textures/28-28.png"
+			"uri":"warehouseTextures/28-28.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Corrugated_Metal_Roofing_Product_Normal",
-			"uri":"Textures/Corrugated_Metal_Roofing_Product_Normal.png"
+			"uri":"warehouseTextures/Corrugated_Metal_Roofing_Product_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Corrugated_Metal_Roofing_Product_Roughness",
-			"uri":"Textures/Corrugated_Metal_Roofing_Product_Roughness.png"
+			"uri":"warehouseTextures/Corrugated_Metal_Roofing_Product_Roughness.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Resin_Epoxy_Normal",
-			"uri":"Textures/Resin_Epoxy_Normal.png"
+			"uri":"warehouseTextures/Resin_Epoxy_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"1Color",
-			"uri":"Textures/1Color.png"
+			"uri":"warehouseTextures/1Color.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Resin_Epoxy_Logo_Roughness_3",
-			"uri":"Textures/Resin_Epoxy_Logo_Roughness_3.png"
+			"uri":"warehouseTextures/Resin_Epoxy_Logo_Roughness_3.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"05. gerbang_Aggregated_Material",
-			"uri":"Textures/05_%20gerbang_Aggregated_Material.png"
+			"uri":"warehouseTextures/05_%20gerbang_Aggregated_Material.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"05. gerbang_Aggregated_Material",
-			"uri":"Textures/05_%20gerbang_Aggregated_Material-1.png"
+			"uri":"warehouseTextures/05_%20gerbang_Aggregated_Material-1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"05. gerbang_Aggregated_Material-05. gerbang_Aggregated_Material",
-			"uri":"Textures/05_%20gerbang_Aggregated_Material-05_%20gerbang_Aggregated_Material.png"
+			"uri":"warehouseTextures/05_%20gerbang_Aggregated_Material-05_%20gerbang_Aggregated_Material.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Apple1_u1_v1_normal",
-			"uri":"Textures/Apple1_u1_v1_normal.png"
+			"uri":"warehouseTextures/Apple1_u1_v1_normal.png"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Apple1_u1_v1_diffuse",
-			"uri":"Textures/Apple1_u1_v1_diffuse.jpg"
+			"uri":"warehouseTextures/Apple1_u1_v1_diffuse.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Floor Dirt  2",
-			"uri":"Textures/Floor%20Dirt%20%202.png"
+			"uri":"warehouseTextures/Floor%20Dirt%20%202.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Apple2_u1_v1_normal",
-			"uri":"Textures/Apple2_u1_v1_normal.png"
+			"uri":"warehouseTextures/Apple2_u1_v1_normal.png"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Apple2_u1_v1_diffuse",
-			"uri":"Textures/Apple2_u1_v1_diffuse.jpg"
+			"uri":"warehouseTextures/Apple2_u1_v1_diffuse.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"vgyidauaw_1K_Normal",
-			"uri":"Textures/vgyidauaw_1K_Normal.jpg"
+			"uri":"warehouseTextures/vgyidauaw_1K_Normal.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"vgyidauaw_1K_Basecolor",
-			"uri":"Textures/vgyidauaw_1K_Basecolor.jpg"
+			"uri":"warehouseTextures/vgyidauaw_1K_Basecolor.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"vgyidauaw_1K_Roughness",
-			"uri":"Textures/vgyidauaw_1K_Roughness.png"
+			"uri":"warehouseTextures/vgyidauaw_1K_Roughness.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"wood_bamboo_Bamboo_Wood_normal",
-			"uri":"Textures/wood_bamboo_Bamboo_Wood_normal.png"
+			"uri":"warehouseTextures/wood_bamboo_Bamboo_Wood_normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"wood_bamboo_baseColor",
-			"uri":"Textures/wood_bamboo_baseColor.png"
+			"uri":"warehouseTextures/wood_bamboo_baseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"wood_bamboo_metallic-wood_bamboo_roughness",
-			"uri":"Textures/wood_bamboo_metallic-wood_bamboo_roughness.png"
+			"uri":"warehouseTextures/wood_bamboo_metallic-wood_bamboo_roughness.png"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"banana",
-			"uri":"Textures/banana.jpg"
+			"uri":"warehouseTextures/banana.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_0",
-			"uri":"Textures/Image_0.jpg"
+			"uri":"warehouseTextures/Image_0.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_0",
-			"uri":"Textures/Image_0-1.jpg"
+			"uri":"warehouseTextures/Image_0-1.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"Textures/Image_1.png"
+			"uri":"warehouseTextures/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"toyota_forklift_3t_low_Material_Normal",
-			"uri":"Textures/toyota_forklift_3t_low_Material_Normal.png"
+			"uri":"warehouseTextures/toyota_forklift_3t_low_Material_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"toyota_forklift_3t_low_Material_BaseColor",
-			"uri":"Textures/toyota_forklift_3t_low_Material_BaseColor.png"
+			"uri":"warehouseTextures/toyota_forklift_3t_low_Material_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"toyota_forklift_3t_low_Material_Metallic-toyota_forklift_3t_low_Material_Roughness",
-			"uri":"Textures/toyota_forklift_3t_low_Material_Metallic-toyota_forklift_3t_low_Material_Roughness.png"
+			"uri":"warehouseTextures/toyota_forklift_3t_low_Material_Metallic-toyota_forklift_3t_low_Material_Roughness.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_2",
-			"uri":"Textures/Image_2.png"
+			"uri":"warehouseTextures/Image_2.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_3",
-			"uri":"Textures/Image_3.png"
+			"uri":"warehouseTextures/Image_3.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_4",
-			"uri":"Textures/Image_4.png"
+			"uri":"warehouseTextures/Image_4.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_5",
-			"uri":"Textures/Image_5.png"
+			"uri":"warehouseTextures/Image_5.png"
 		}
 	],
 	"accessors":[
