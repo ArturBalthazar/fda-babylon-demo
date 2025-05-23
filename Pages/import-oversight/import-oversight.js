@@ -138,7 +138,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
 
     for (let name of foodList) {
-        const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("./Assets/Models/", `${name}.glb`, scene);
+        const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("./Assets/Models/", `${name}.gltf`, scene);
         container.addAllToScene();
     
         const root = container.rootNodes[0];
@@ -147,7 +147,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         foodContainers[name] = container;
         foodMeshes[name] = root;
     
-        console.log(`✅ ${name}.glb loaded`);
+        console.log(`✅ ${name}.gltf loaded`);
     }
 
     // ✅ Capsule (player)
@@ -233,7 +233,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         camera.target.copyFrom(capsule.position);
     });
 
-    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.glb", scene, (container) => {
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.gltf", scene, (container) => {
         // Add the whole container to the scene
         container.addAllToScene();
     
