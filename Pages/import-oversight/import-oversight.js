@@ -4,6 +4,8 @@ let tabletMesh = null;
 let tabletSkeleton = null;
 let tabletAnimGroup = null;
 
+const inputMap = {};
+
 const foodMeshes = {}; // Store root containers by name
 const foodContainers = {};
 const foodList = ["apple", "banana", "fish"];
@@ -35,6 +37,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     const engine = new BABYLON.Engine(canvas, true);
     const scene = new BABYLON.Scene(engine);
     console.log("✅ Scene and engine initialized");
+
+    scene.actionManager = new BABYLON.ActionManager(scene);
+
+    scene.onKeyboardObservable.add((kbInfo) => {
+        const key = kbInfo.event.key;
+        if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN) {
+            inputMap[key] = true;
+        } else if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYUP) {
+            inputMap[key] = false;
+        }
+    });
 
     // ✅ Ammo.js Physics V1
     await Ammo();
@@ -134,7 +147,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (navBar) {
                 navBar.classList.add("visible");
             }
-        }, 600);
+        }, 2000);
     });
 
     for (let name of foodList) {
@@ -175,6 +188,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.alpha = Math.PI/2;
     camera.fov = 1.2;
     scene.activeCamera = camera;
+    camera.keysUp = [];
+    camera.keysDown = [];
+    camera.keysLeft = [];
+    camera.keysRight = [];
 
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
@@ -206,6 +223,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         const right = BABYLON.Vector3.Cross(BABYLON.Vector3.Up(), forward).normalize();
     
         let moveVec = BABYLON.Vector3.Zero();
+    
         if (inputMap["w"] || inputMap["ArrowUp"]) moveVec.addInPlace(forward);
         if (inputMap["s"] || inputMap["ArrowDown"]) moveVec.addInPlace(forward.scale(-1));
         if (inputMap["a"] || inputMap["ArrowLeft"]) moveVec.addInPlace(right.scale(-1));
@@ -232,6 +250,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
         camera.target.copyFrom(capsule.position);
     });
+    
 
     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.gltf", scene, (container) => {
         // Add the whole container to the scene
@@ -315,7 +334,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             button.style.top = `${screenPos.y - 25}px`;
     
             // Toggle visible class
-            if (distance <= 1.2 && isInView) {
+            if (distance <= 1.8 && isInView) {
                 if (!button.classList.contains("visible")) {
                     button.classList.add("visible");
                 }
