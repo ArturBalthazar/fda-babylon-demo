@@ -320,32 +320,32 @@
 		{
 			"mimeType":"image/png",
 			"name":"Image_2",
-			"uri":"Textures/Image_2.png"
+			"uri":"tabletTextures/Image_2.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"Textures/Image_1.png"
+			"uri":"tabletTextures/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Plane_Aggregated",
-			"uri":"Textures/Plane_Aggregated.png"
+			"uri":"tabletTextures/Plane_Aggregated.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"stretch_polyamide_fabric_Stretch_Polyamide_Fabric_normal",
-			"uri":"Textures/stretch_polyamide_fabric_Stretch_Polyamide_Fabric_normal.png"
+			"uri":"tabletTextures/stretch_polyamide_fabric_Stretch_Polyamide_Fabric_normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"stretch_polyamide_fabric_baseColor",
-			"uri":"Textures/stretch_polyamide_fabric_baseColor.png"
+			"uri":"tabletTextures/stretch_polyamide_fabric_baseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"iPdaTexture2",
-			"uri":"Textures/iPdaTexture2.png"
+			"uri":"tabletTextures/iPdaTexture2.png"
 		}
 	],
 	"skins":[

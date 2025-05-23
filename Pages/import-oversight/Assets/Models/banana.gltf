@@ -82,17 +82,17 @@
 		{
 			"mimeType":"image/jpeg",
 			"name":"Banana_tklkaixiw_Mid_2K_Normal",
-			"uri":"Textures/Banana_tklkaixiw_Mid_2K_Normal.jpg"
+			"uri":"bananaTextures/Banana_tklkaixiw_Mid_2K_Normal.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Banana_tklkaixiw_Mid_2K_BaseColor",
-			"uri":"Textures/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
+			"uri":"bananaTextures/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Banana_tklkaixiw_Mid_2K_Roughness",
-			"uri":"Textures/Banana_tklkaixiw_Mid_2K_Roughness.png"
+			"uri":"bananaTextures/Banana_tklkaixiw_Mid_2K_Roughness.png"
 		}
 	],
 	"accessors":[
