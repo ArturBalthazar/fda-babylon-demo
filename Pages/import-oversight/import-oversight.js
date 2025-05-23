@@ -315,7 +315,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             button.style.top = `${screenPos.y - 25}px`;
     
             // Toggle visible class
-            if (distance <= 1.8 && isInView) {
+            if (distance <= 1.2 && isInView) {
                 if (!button.classList.contains("visible")) {
                     button.classList.add("visible");
                 }
