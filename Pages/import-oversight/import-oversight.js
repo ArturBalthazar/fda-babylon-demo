@@ -134,7 +134,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (navBar) {
                 navBar.classList.add("visible");
             }
-        }, 2000);
+        }, 600);
     });
 
     for (let name of foodList) {
