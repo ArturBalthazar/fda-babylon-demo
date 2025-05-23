@@ -206,10 +206,10 @@ window.addEventListener("DOMContentLoaded", async () => {
         const right = BABYLON.Vector3.Cross(BABYLON.Vector3.Up(), forward).normalize();
     
         let moveVec = BABYLON.Vector3.Zero();
-        if (inputMap["w"]) moveVec.addInPlace(forward);
-        if (inputMap["s"]) moveVec.addInPlace(forward.scale(-1));
-        if (inputMap["a"]) moveVec.addInPlace(right.scale(-1));
-        if (inputMap["d"]) moveVec.addInPlace(right);
+        if (inputMap["w"] || inputMap["ArrowUp"]) moveVec.addInPlace(forward);
+        if (inputMap["s"] || inputMap["ArrowDown"]) moveVec.addInPlace(forward.scale(-1));
+        if (inputMap["a"] || inputMap["ArrowLeft"]) moveVec.addInPlace(right.scale(-1));
+        if (inputMap["d"] || inputMap["ArrowRight"]) moveVec.addInPlace(right);
     
         const currentY = capsule.physicsImpostor.getLinearVelocity().y;
         const finalY = currentY < 0 ? currentY : gravityAssist;
