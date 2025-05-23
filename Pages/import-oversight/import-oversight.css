@@ -1,9 +1,283 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Din,Helvetica,sans-serif;
+}
+
 html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
     height: 100%;
     width: 100%;
+}
+
+.navbar{
+    position: fixed;
+    background:#222C67;
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    height:70px;
+    z-index:100;
+    width:100%;
+    opacity: 0;
+}
+  
+.navbar.visible {
+    opacity: 1;
+}
+
+.logo{height:40px}
+.nav-btn{
+    margin-left:auto;
+    background:none;
+    border:none;
+    color:#ffffff;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.tablet-wrapper {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 150;
+}
+
+#tabletButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: relative;
+}
+
+#tabletButton img {
+    width: 80%; /* Adjust size of the icon as needed */
+    height: 80%;
+    margin-top: 0px;
+}
+
+#tabletButton::before {
+    content: '';
+    top: 5px;
+    left: 5px;
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    background: radial-gradient(circle, #002c7700 40%, #f5c451 100%);
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0;
+    z-index: -1;
+    animation: rotateGlow 1.5s linear infinite;
+    transition: all 0.3s ease;
+}
+
+.inspect-button {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    transition: transform 0.2s ease;
+    position: absolute;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.inspect-button:hover {
+    transform: scale(1.05);
+}
+
+.inspect-button:active {
+    transform: scale(0.95);
+}
+
+.inspect-button.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.inspect-button img {
+    width: 80%;
+    height: 80%;
+}
+
+/* Shared hover/click scaling */
+#tabletButton:hover,
+.circle-button:hover {
+    transform: scale(1.05);
+    transition: transform 0.15s ease;
+}
+
+#tabletButton:active,
+.circle-button:active {
+    transform: scale(0.95);
+}
+
+/* Rotate on toggle (tablet icon only) */
+#tabletButton.rotate img {
+    transform: rotate(360deg);
+    transition: transform 0.3s ease;
+}
+
+/* Replace icon glow */
+#tabletButton.glow-tablet::before {
+    opacity: 1;
+    background: conic-gradient(#e19beb, #7583ff, #ef8253, #e19beb);
+    animation: rotateGlow 5s linear infinite;
+}
+
+/* Audio icon glow toggle (optional visual cue) */
+#soundButton.glow-sound::before {
+    opacity: 1;
+    background: radial-gradient(circle, #444 30%, #0f0 100%);
+}
+
+.take-photo-wrapper {
+    position: fixed;
+    top: 80px;
+    
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.take-photo-button {
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
+    border-radius: 25px;
+    height: 50px;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.take-photo-button:hover {
+    transform: scale(1.05);
+}
+
+.take-photo-button:active {
+    transform: scale(0.95);
+}
+
+.take-photo-button img {
+    aspect-ratio: 1/1;
+    height: 100%;
+}
+
+.take-photo-button span {
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+}
+
+/* Hidden by default, fades in when active */
+.close-inspect-wrapper {
+    position: fixed;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.close-inspect-button {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Hover/Click scale effects */
+.close-inspect-button:hover {
+    transform: scale(1.05);
+    transition: transform 0.15s ease;
+}
+
+.close-inspect-button:active {
+    transform: scale(0.95);
+}
+
+.close-inspect-button img {
+    width: 80%;
+    height: 80%;
+}
+
+.top-button-group {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    display: flex;
+    gap: 16px;
+    z-index: 150;
+    transition: opacity 0.3s ease;
+    opacity: 0; /* Adjust to 0 if you plan to fade in */
+}
+
+.circle-button {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.circle-button img {
+    width: 60%;
+    height: 60%;
+}
+
+@keyframes rotateGlow {
+    0% {
+        transform: rotate(0deg) scale(1.35);
+
+    }
+    50% {
+        transform: rotate(180deg) scale(1.25);
+    }
+    100% {
+        transform: rotate(360deg) scale(1.35);
+    }
 }
 
 #renderCanvas {
@@ -32,3 +306,124 @@ html, body {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.7; }
 }
+
+.intro-overlay {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    transition: opacity 0.5s ease;
+}
+
+.intro-box {
+    background: white;
+    border-radius: 12px;
+    padding: 32px 40px;
+    max-width: 50vw;
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    color: #333;
+    text-align: left;
+    margin-bottom: 70px;
+}
+
+.intro-box h1 {
+    font-size: 32px;
+    color: #002C77;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.intro-box p {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+.intro-box ol {
+    padding-left: 18px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.intro-box li {
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.intro-box button {
+    display: block;
+    margin: 24px auto 0 auto; /* top margin + horizontal centering */
+}
+
+.primary-btn {
+    background-color: #007DBB;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    display: block;
+    margin: 24px auto 0 auto;
+    z-index: 100;
+}
+
+.primary-btn:hover {
+    background-color: #005fa0;
+    transform: translateY(-2px);
+}
+
+#startButton.hidden {
+    z-index: -999;
+    position: relative;
+}
+
+.intro-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.introCard {
+    background: white;
+    padding: 32px 48px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 400px;
+}
+
+.introCard h1 {
+    color: #007DBB;
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.introCard p {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+/* 🔒 Start with the box hidden */
+.intro-box {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  
+.intro-box.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+

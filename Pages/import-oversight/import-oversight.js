@@ -1,3 +1,35 @@
+let infoPanelOpen = false;
+let tabletOn = false;
+let tabletMesh = null;
+let tabletSkeleton = null;
+let tabletAnimGroup = null;
+
+const foodMeshes = {}; // Store root containers by name
+const foodContainers = {};
+const foodList = ["apple", "banana", "fish"];
+
+let audioManager = null;
+let audioEnabled = true;
+
+const anchorPoints = [];
+const anchorButtons = [];
+
+const tabletButton = document.getElementById("tabletButton");
+const topButtonGroup = document.getElementById("topButtonGroup");
+const introBox = document.getElementById("introBox");
+const navBar = document.getElementById("navbar");
+const introOverlay = document.getElementById("introOverlay");
+const tabletIcon = tabletButton.querySelector("img");
+const audioBtn = document.getElementById("soundButton");
+const audioIcon = document.getElementById("soundIcon");
+const infoBtn = document.getElementById("infoButton");
+const infoIcon = document.getElementById("infoIcon");
+const startBtn = document.getElementById("startButton");
+const closeInspect = document.getElementById("closeWrapper");
+const closeInspectButton = document.getElementById("closeInspectButton");
+const takePhotoWrapper = document.getElementById("takePhotoWrapper");
+const takePhotoButton = document.getElementById("takePhotoButton");
+
 window.addEventListener("DOMContentLoaded", async () => {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true);
@@ -85,26 +117,6 @@ window.addEventListener("DOMContentLoaded", async () => {
             console.log("🔄 Setting gravity now that scene is ready...");
             scene.getPhysicsEngine().setGravity(new BABYLON.Vector3(0, -15, 0));
 
-/*             // ✅ Visual debug mesh to inspect raw collider shape
-            const debugMesh = new BABYLON.Mesh("ammoDebugMesh", scene);
-            const debugVertexData = new BABYLON.VertexData();
-            debugVertexData.positions = positions;
-            debugVertexData.indices = indices;
-            debugVertexData.applyToMesh(debugMesh);
-
-            // Match transform
-            debugMesh.position.copyFrom(ground.getAbsolutePosition());
-            debugMesh.rotationQuaternion = ground.rotationQuaternion || BABYLON.Quaternion.Identity();
-            debugMesh.scaling.copyFrom(ground.scaling);
-
-            // Style the mesh
-            const debugMat = new BABYLON.StandardMaterial("debugMat", scene);
-            debugMat.wireframe = true;
-            debugMat.diffuseColor = new BABYLON.Color3(1, 0.5, 0); // orange wireframe
-            debugMesh.material = debugMat;
-            debugMesh.scaling.x = -1; */
-            
-
             console.log("🧠 Debug mesh rendered to inspect Ammo collider shape");
 
             console.log("✅ Raw Ammo rigid body added for mk_collider");
@@ -113,13 +125,36 @@ window.addEventListener("DOMContentLoaded", async () => {
         } else {
             console.warn("❌ mk_collider not found");
         }
+        setTimeout(() => {
+            document.getElementById("loadingScreen").style.display = "none";
 
-        document.getElementById("loadingScreen").style.display = "none";
+            if (introBox) {
+                introBox.classList.add("visible");
+            }
+            if (navBar) {
+                navBar.classList.add("visible");
+            }
+        }, 2000);
     });
 
+    for (let name of foodList) {
+        const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("./Assets/Models/", `${name}.glb`, scene);
+        container.addAllToScene();
+    
+        const root = container.rootNodes[0];
+        root.setEnabled(false); // Start hidden
+    
+        foodContainers[name] = container;
+        foodMeshes[name] = root;
+    
+        console.log(`✅ ${name}.glb loaded`);
+    }
+
     // ✅ Capsule (player)
-    const capsule = BABYLON.MeshBuilder.CreateBox("playerCapsule", { height: 1.6, width: 0.15, depth: 0.15 }, scene);
-    capsule.position = new BABYLON.Vector3(-6.5, .8, 10);
+    const capsule = BABYLON.MeshBuilder.CreateCapsule("playerCapsule", { height: 1.9, diameter: 0.1 }, scene);
+    capsule.isPickable = false;
+    capsule.isVisible = false;
+    capsule.position = new BABYLON.Vector3(-6.5, .95, 10);
     capsule.physicsImpostor = new BABYLON.PhysicsImpostor(
         capsule,
         BABYLON.PhysicsImpostor.CapsuleImpostor,
@@ -137,7 +172,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.lowerBetaLimit = 0.01;
     camera.lowerRadiusLimit = camera.radius;
     camera.upperRadiusLimit = camera.radius;
-    camera.alpha = Math.PI*2.73;
+    camera.alpha = Math.PI/2;
+    camera.fov = 1.2;
     scene.activeCamera = camera;
 
     // ✅ Lock rotation on X/Z every frame
@@ -180,7 +216,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
         // ✅ Only slow down if clearly falling (Y < -0.5)
         const isFalling = currentY < -0.5;
-        const effectiveSpeed = isFalling ? baseSpeed / 3 : baseSpeed;
+        const effectiveSpeed = isFalling ? baseSpeed / 10 : baseSpeed;
     
         if (!moveVec.equals(BABYLON.Vector3.Zero())) {
             const moveDirection = moveVec.normalize().scale(effectiveSpeed);
@@ -197,6 +233,228 @@ window.addEventListener("DOMContentLoaded", async () => {
         camera.target.copyFrom(capsule.position);
     });
 
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.glb", scene, (container) => {
+        // Add the whole container to the scene
+        container.addAllToScene();
+    
+        // Grab root node (usually __root__)
+        tabletRoot = container.rootNodes[0]; // This is the parent of everything: skeleton, meshes, etc.
+        tabletAnimGroup = container.animationGroups.find(group => group.name === "tabletAnim");
+    
+        // Stop animation and reset to frame 0
+        container.animationGroups.forEach(group => {
+            group.stop();
+            group.goToFrame(0);
+        });
+    
+        // Parent to camera, set relative position/rotation
+        tabletRoot.setParent(camera);
+        tabletRoot.position.set(0, -.145, 0.3);
+
+        // Position and parent each loaded food container
+        Object.entries(foodContainers).forEach(([name, container]) => {
+            const root = container.rootNodes[0];
+
+            root.setParent(camera); // parent to camera
+            root.position.set(0, 0, 0.16); // adjust relative to camera
+        });
+
+        camera.alpha = Math.PI*2.78;
+    
+        tabletRoot.setEnabled(false); // Hide initially
+        console.log("✅ Tablet loaded and set up");
+    });
+
+    await BABYLON.SceneLoader.ImportMeshAsync("", "./Assets/Models/", "anchors.glb", scene).then(result => {
+        result.meshes.forEach(mesh => {
+            if (mesh.name !== "__root__") {
+                mesh.setEnabled(false); // hide the cubes
+                anchorPoints.push(mesh);
+                console.log(`📌 Anchor found: ${mesh.name} at`, mesh.position);
+            }
+        });
+
+        anchorPoints.forEach((anchor, index) => {
+            const button = document.createElement("div");
+            button.className = "inspect-button";
+            button.style.position = "absolute";
+            button.style.pointerEvents = "auto";
+            button.innerHTML = `<img src="../../Assets/Images/inspect.png" alt="Inspect">`;
+            document.body.appendChild(button);
+            anchorButtons.push({ anchor, button });
+        });
+
+        anchorButtons.forEach(({ anchor, button }) => {
+            const foodType = anchor.name.split("-")[1]; // e.g. "inspect-apple" → "apple"
+            button.addEventListener("click", () => enterInspectMode(foodType));
+        });
+        
+    });
+
+    scene.onBeforeRenderObservable.add(() => {
+        anchorButtons.forEach(({ anchor, button }) => {
+            const anchorPos = anchor.getAbsolutePosition();
+            const capsulePos = capsule.getAbsolutePosition();
+            const distance = BABYLON.Vector3.Distance(anchorPos, capsulePos);
+    
+            const screenPos = BABYLON.Vector3.Project(
+                anchorPos,
+                BABYLON.Matrix.Identity(),
+                scene.getTransformMatrix(),
+                camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
+            );
+    
+            const isInView = (
+                screenPos.z > 0 &&
+                screenPos.x >= 0 && screenPos.x <= engine.getRenderWidth() &&
+                screenPos.y >= 0 && screenPos.y <= engine.getRenderHeight()
+            );
+    
+            // Update position
+            button.style.left = `${screenPos.x - 25}px`;
+            button.style.top = `${screenPos.y - 25}px`;
+    
+            // Toggle visible class
+            if (distance <= 1.8 && isInView) {
+                if (!button.classList.contains("visible")) {
+                    button.classList.add("visible");
+                }
+            } else {
+                if (button.classList.contains("visible")) {
+                    button.classList.remove("visible");
+                }
+            }
+        });
+    });
+
+    function enterInspectMode(foodName) {
+        // Disable movement and camera control
+        camera.detachControl(canvas);
+        capsule.physicsImpostor.sleep();
+
+        closeInspect.style.opacity = "1";
+        closeInspect.style.pointerEvents = "auto";
+        takePhotoWrapper.style.opacity = "1";
+        takePhotoWrapper.style.pointerEvents = "auto";
+
+        tabletButton.style.opacity = "0";
+        tabletButton.style.pointerEvents = "none";
+        anchorButtons.forEach(({ button }) => {
+            button.style.zIndex = "-999";
+        });
+    
+        // Hide all previously shown foods
+        Object.values(foodContainers).forEach(container => {
+            container.rootNodes[0].setEnabled(false);
+            const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
+            if (wrapper) wrapper.setEnabled(false);
+        });
+
+        // Show selected and rotate the wrapper
+        const container = foodContainers[foodName];
+        const rootNode = container.rootNodes[0];
+
+        // ✅ Create a wrapper node if it doesn't exist
+        let wrapper = scene.getNodeByName(`inspectWrapper-${foodName}`);
+        if (!wrapper) {
+            wrapper = new BABYLON.TransformNode(`inspectWrapper-${foodName}`, scene);
+            wrapper.setParent(camera);
+            wrapper.position = new BABYLON.Vector3(0, -.01, 0.1);
+            rootNode.setParent(wrapper);
+            rootNode.position.set(0, 0, 0);                       // ① zero-out the local offset
+            setupObjectRotation(wrapper);
+            
+        }
+
+        // ✅ Show it and rotate the wrapper
+        wrapper.setEnabled(true);
+        rootNode.setEnabled(true);
+
+    
+        console.log(`🔍 Inspecting ${foodName}`);
+    }
+
+    function exitInspectMode() {
+        camera.attachControl(canvas, true);
+        capsule.physicsImpostor.wakeUp();
+    
+        // Hide all food + wrappers
+        Object.values(foodContainers).forEach(container => {
+            container.rootNodes[0].setEnabled(false);
+            const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
+            if (wrapper) wrapper.setEnabled(false);
+        });
+    
+        // Restore UI
+        tabletButton.style.opacity = "1";
+        tabletButton.style.pointerEvents = "auto";
+        anchorButtons.forEach(({ button }) => {
+            button.style.zIndex = "1000";
+        });
+    
+        // Hide close button
+        closeInspect.style.opacity = "0";
+        closeInspect.style.pointerEvents = "none";
+        takePhotoWrapper.style.opacity = "0";
+        takePhotoWrapper.style.pointerEvents = "none";
+    }
+
+    function setupObjectRotation(targetNode) {
+        let isDragging = false;
+        let lastX = 0;
+        let lastY = 0;
+    
+        const rotationSpeed = 0.01;
+    
+        const onPointerDown = (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        };
+    
+        const onPointerUp = () => {
+            isDragging = false;
+        };
+    
+        const onPointerMove = (e) => {
+            if (!isDragging) return;
+    
+            const deltaX = e.clientX - lastX;
+            const deltaY = e.clientY - lastY;
+    
+            // 🧭 Rotate around world Y and X axes (consistent no matter current orientation)
+            const qx = BABYLON.Quaternion.RotationAxis(BABYLON.Axis.Y, -deltaX * rotationSpeed);
+            const qy = BABYLON.Quaternion.RotationAxis(BABYLON.Axis.X, -deltaY * rotationSpeed);
+    
+            const currentRotation = targetNode.rotationQuaternion ?? BABYLON.Quaternion.RotationYawPitchRoll(
+                targetNode.rotation.y, targetNode.rotation.x, targetNode.rotation.z
+            );
+    
+            // 🔁 Apply world-space quaternion rotation
+            targetNode.rotationQuaternion = qx.multiply(qy).multiply(currentRotation);
+    
+            // Track mouse
+            lastX = e.clientX;
+            lastY = e.clientY;
+        };
+    
+        canvas.addEventListener("pointerdown", onPointerDown);
+        canvas.addEventListener("pointerup", onPointerUp);
+        canvas.addEventListener("pointermove", onPointerMove);
+    
+        // Clean-up handler
+        targetNode._cleanupRotationEvents = () => {
+            canvas.removeEventListener("pointerdown", onPointerDown);
+            canvas.removeEventListener("pointerup", onPointerUp);
+            canvas.removeEventListener("pointermove", onPointerMove);
+        };
+    
+        // Ensure rotation mode is quaternion-based
+        targetNode.rotationQuaternion = BABYLON.Quaternion.FromEulerVector(targetNode.rotation);
+        targetNode.rotation = new BABYLON.Vector3.Zero(); // reset Euler to avoid conflict
+    }
+    
+    
     // ✅ Lighting & Skybox
     scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./Assets/Textures/warehouse.env", scene);
     scene.environmentIntensity = 1;
@@ -204,6 +462,159 @@ window.addEventListener("DOMContentLoaded", async () => {
     scene.imageProcessingConfiguration.contrast = 1.3;
     scene.createDefaultLight(true);
     scene.createDefaultSkybox(scene.environmentTexture, true, 1000);
+
+    function startTraining() {
+        if (introOverlay) {
+            introOverlay.classList.add("hidden");
+        }
+    
+        if (tabletButton) {
+            setTimeout(() => {
+                tabletButton.style.opacity = "1";
+                topButtonGroup.style.opacity = "1";
+            }, 500);
+        }
+    
+        if (startBtn) {
+            startBtn.style.opacity = "0";
+            startBtn.style.pointerEvents = "none";
+        }
+    
+        // ✅ Play ambient sound using native Audio
+        if (!window.ambientSound) {
+            window.ambientSound = new Audio("./Assets/Sounds/warehouse.m4a");
+            ambientSound.loop = true;
+            ambientSound.volume = 0.5;
+            audioManager.add(ambientSound); // optional if using audioManager
+        }
+    
+        ambientSound.play().then(() => {
+            console.log("✅ Ambient sound started");
+        }).catch(err => {
+            console.warn("⚠️ Could not play ambient sound:", err);
+        });
+    }
+
+    function animateCameraFOV(camera, from, to, duration = 300) {
+        const startTime = performance.now();
+    
+        const animate = () => {
+            const now = performance.now();
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / duration, 1);
+            const easedT = t * (2 - t); // easeOutQuad
+    
+            camera.fov = from + (to - from) * easedT;
+    
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+    
+        requestAnimationFrame(animate);
+    }
+
+    tabletButton.addEventListener("click", () => {
+        if (!tabletRoot || !tabletAnimGroup) return;
+
+        if (!tabletOn) {
+            anchorButtons.forEach(({ button }) => {
+                button.style.zIndex = "-999";
+            });
+
+            tabletRoot.setEnabled(true);
+
+            // Play forward
+            tabletAnimGroup.reset();
+            tabletAnimGroup.speedRatio = 1;
+            tabletAnimGroup.play(false);
+
+            // Animate FOV wider
+            setTimeout(() => {
+                animateCameraFOV(camera, camera.fov, 1.1, 1000);
+            }, 300);
+
+            tabletOn = true;
+            tabletIcon.src = "../../Assets/Images/close.png";
+            tabletButton.classList.add("rotate");
+        } else {
+            anchorButtons.forEach(({ button }) => {
+                button.style.zIndex = "1000";
+            });
+            // Play backward
+            tabletAnimGroup.reset();
+            tabletAnimGroup.speedRatio = -1;
+            tabletAnimGroup.play(true);
+            tabletAnimGroup.goToFrame(tabletAnimGroup.to); // Start from end when reversing
+
+
+            setTimeout(() => {
+                tabletAnimGroup.play(false);
+            }, 700);
+            tabletAnimGroup.onAnimationEndObservable.addOnce(() => {
+                tabletRoot.setEnabled(false);
+            });
+
+            // Animate FOV back
+            animateCameraFOV(camera, camera.fov, 1.2, 300);
+
+            tabletOn = false;
+            tabletIcon.src = "../../Assets/Images/tablet.png";
+            tabletButton.classList.remove("rotate");
+        }
+    });
+
+    audioManager = {
+        audios: [],
+        enabled: true,
+        add(audio) {
+            this.audios.push(audio);
+        },
+        setEnabled(state) {
+            this.enabled = state;
+            this.audios.forEach(audio => {
+                if (audio) audio.muted = !state;
+            });
+        }
+    };
+
+    infoBtn.addEventListener("click", () => {
+        if (!introOverlay || !infoIcon) return;
+    
+        infoPanelOpen = !infoPanelOpen;
+    
+        if (infoPanelOpen) {
+            introOverlay.classList.remove("hidden");
+            introBox.classList.add("visible");
+            infoIcon.src = "../../Assets/Images/close.png";
+            infoIcon.classList.add("rotate");
+    
+            // ⬇️ Hide the start button
+            const startBtn = document.getElementById("startButton");
+        } else {
+            introOverlay.classList.add("hidden");
+            introBox.classList.remove("visible");
+            infoIcon.src = "../../Assets/Images/info.png";
+            infoIcon.classList.remove("rotate");
+    
+            // ⬇️ Restore z-index to default
+            
+        }
+    });
+
+    audioBtn.addEventListener("click", () => {
+        audioEnabled = !audioEnabled;
+        audioIcon.src = audioEnabled
+            ? "../../Assets/Images/sound-on.png"
+            : "../../Assets/Images/sound-off.png";
+    
+        audioManager.setEnabled(audioEnabled);
+        console.log(audioEnabled ? "🔊 Audio Enabled" : "🔇 Audio Muted");
+    });
+
+    startButton.addEventListener("click", startTraining);
+    closeInspectButton.addEventListener("click", exitInspectMode);
+
 
     engine.runRenderLoop(() => scene.render());
     window.addEventListener("resize", () => engine.resize());

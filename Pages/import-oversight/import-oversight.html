@@ -2,16 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Import Oversight</title>
+    <title>FDA Training</title>
     <link rel="stylesheet" href="import-oversight.css" />
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://cdn.babylonjs.com/ammo.js"></script>
+    <link rel="icon" type="image/png" href="../../Assets/Images/FDA-LogoOnly-Blue.png">
+
 </head>
 <body>
     <div id="loadingScreen">
         <img src="../../Assets/Images/FDA-Logo-White.png" alt="Loading..." />
     </div>
+
+    <header class="navbar" id="navbar">
+        <img class="logo" src="../../Assets/Images/FDA-Logo-White.png" alt="FDA logo" />
+        <button class="nav-btn" id="navLoginBtn">Logout</button>
+    </header>
+
+    <div id="introOverlay" class="intro-overlay">
+        <div class="intro-box" id="introBox">
+          <h1>Import Oversight Training Program</h1>
+          <p>The Import Oversight training program aims to help users understand how the FDA evaluates and enforces compliance for imported food, drug, and medical products entering the United States.</p>
+          <p>Throughout this module, we will walk through the key components of FDA import oversight at the entry level:</p>
+          <ol>
+            <li><strong>Entry Review & Electronic Screening</strong> – All imported shipments of FDA-regulated products are reviewed by the FDA and its predictive system for compliance with laws and regulations.</li>
+            <li><strong>Physical Examination & Sampling</strong> – Products may be opened and sampled for lab testing if they are flagged for further evaluation.</li>
+            <li><strong>Compliance Review</strong> – After physical examination, a report is created and sent for the FDA compliance review staff to determine whether the product should be released or detained.</li>
+          </ol>
+          <p>At the end, you will receive a performance report and, if your results meet the criteria, a completion certificate.</p>
+          <button id="startButton" class="primary-btn">Start</button>
+        </div>
+    </div>
+
+    <div class="tablet-wrapper">
+        <div id="tabletButton" class="tablet-button">
+            <img src="../../Assets/Images/tablet.png" alt="Tablet" id="tabletIcon">
+        </div>
+    </div>
+
+    <div class="close-inspect-wrapper" id="closeWrapper">
+        <div id="closeInspectButton" class="close-inspect-button">
+            <img src="../../Assets/Images/close.png" alt="Close" id="closeInspectIcon">
+        </div>
+    </div>
+
+    <div class="take-photo-wrapper" id="takePhotoWrapper">
+        <div id="takePhotoButton" class="take-photo-button">
+            <img src="../../Assets/Images/photo.png" alt="Take Photo" />
+            <span>Register</span>
+        </div>
+    </div>
+
+    <div class="top-button-group" id="topButtonGroup">
+        <div class="circle-button" id="infoButton">
+            <img src="../../Assets/Images/info.png" alt="Info" id="infoIcon">
+        </div>
+        <div class="circle-button" id="returnButton">
+            <img src="../../Assets/Images/return.png" alt="Return" id="returnIcon">
+        </div>
+        <div class="circle-button" id="soundButton">
+            <img src="../../Assets/Images/sound-on.png" alt="Sound" id="soundIcon">
+        </div>
+    </div>
+    
+      
     <canvas id="renderCanvas"></canvas>
     <script src="import-oversight.js"></script>
 </body>
