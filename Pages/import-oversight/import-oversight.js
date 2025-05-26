@@ -189,6 +189,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const engine = new BABYLON.Engine(canvas, true);
     const scene = new BABYLON.Scene(engine);
     console.log("✅ Scene and engine initialized");
+    
 
     scene.actionManager = new BABYLON.ActionManager(scene);
 
@@ -1430,6 +1431,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
 
 
-    engine.runRenderLoop(() => scene.render());
+    engine.runRenderLoop(() => {
+        scene.render();
+        const fpsCounter = document.getElementById('fpsCounter');
+        fpsCounter.textContent = `FPS: ${engine.getFps().toFixed(0)}`;
+    });
     window.addEventListener("resize", () => engine.resize());
 });
