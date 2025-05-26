@@ -23,8 +23,8 @@
     <div id="introOverlay" class="intro-overlay">
         <div class="intro-box" id="introBox">
           <h1>Import Oversight Training Program</h1>
-          <p>The Import Oversight training program aims to help users understand how the FDA evaluates and enforces compliance for imported food, drug, and medical products entering the United States.</p>
-          <p>Throughout this module, we will walk through the key components of FDA import oversight at the entry level:</p>
+          <hr>
+          <p>The Import Oversight training program shows how the FDA reviews imported food, drugs, and medical products to ensure they meet U.S. standards. You'll learn the key steps taken by the FDA at the border to decide if products can enter:</p>
           <ol>
             <li><strong>Entry Review & Electronic Screening</strong> – All imported shipments of FDA-regulated products are reviewed by the FDA and its predictive system for compliance with laws and regulations.</li>
             <li><strong>Physical Examination & Sampling</strong> – Products may be opened and sampled for lab testing if they are flagged for further evaluation.</li>
@@ -35,38 +35,117 @@
         </div>
     </div>
 
-    <div class="tablet-wrapper">
-        <div id="tabletButton" class="tablet-button">
+    <div id="trainingTooltip" class="training-tooltip">
+        Check flagged products for inspection during entry review
+    </div>
+
+    <div class="tablet-wrapper" id="tabletWrapper">
+        <div id="tabletButton" class="tablet-button tooltip-wrapper">
             <img src="../../Assets/Images/tablet.png" alt="Tablet" id="tabletIcon">
+            <span class="tooltip above" id="tabletTooltip">Open Tablet</span>
+
         </div>
     </div>
+
+    <div id="anchorButtonContainer"></div>
 
     <div class="close-inspect-wrapper" id="closeWrapper">
-        <div id="closeInspectButton" class="close-inspect-button">
+        <div id="closeInspectButton" class="close-inspect-button tooltip-wrapper">
             <img src="../../Assets/Images/close.png" alt="Close" id="closeInspectIcon">
-        </div>
-    </div>
-
-    <div class="take-photo-wrapper" id="takePhotoWrapper">
-        <div id="takePhotoButton" class="take-photo-button">
-            <img src="../../Assets/Images/photo.png" alt="Take Photo" />
-            <span>Register</span>
-        </div>
-    </div>
-
-    <div class="top-button-group" id="topButtonGroup">
-        <div class="circle-button" id="infoButton">
-            <img src="../../Assets/Images/info.png" alt="Info" id="infoIcon">
-        </div>
-        <div class="circle-button" id="returnButton">
-            <img src="../../Assets/Images/return.png" alt="Return" id="returnIcon">
-        </div>
-        <div class="circle-button" id="soundButton">
-            <img src="../../Assets/Images/sound-on.png" alt="Sound" id="soundIcon">
+            <span class="tooltip above">Close Inspection</span>
         </div>
     </div>
     
-      
+
+    <div class="top-center-button-group" id="topCenterButtonGroup">
+        <div class="default-button tooltip-wrapper" id="getSampleButton">
+            <img src="../../Assets/Images/sample.png" alt="Collect Sample" />
+            <span class="tooltip">Collect Sample</span>
+        </div>
+        <div class="default-button tooltip-wrapper" id="checkTempButton">
+            <img src="../../Assets/Images/temperature.png" alt="Check Temperature" />
+            <span class="tooltip">Measure Temperature</span>
+        </div>
+        <div class="default-button tooltip-wrapper" id="inspectPhotoButton">
+            <img src="../../Assets/Images/photo.png" alt="Capture Photo">
+            <span class="tooltip">Take a Photo</span>
+        </div>
+    </div>
+    
+    
+
+    <div class="top-right-button-group" id="topRightButtonGroup">
+        <div class="default-button tooltip-wrapper" id="globalPhotoButton">
+            <img src="../../Assets/Images/photo.png" alt="Capture Photo">
+            <span class="tooltip">Take a Photo</span>
+        </div>
+        <div class="default-button tooltip-wrapper" id="infoButton">
+            <img src="../../Assets/Images/info.png" alt="Info" id="infoIcon">
+            <span class="tooltip">Program Info</span>
+        </div>
+        <div class="default-button tooltip-wrapper" id="returnButton">
+            <img src="../../Assets/Images/return.png" alt="Return" id="returnIcon">
+            <span class="tooltip">End Session</span>
+        </div>
+        <div class="default-button tooltip-wrapper" id="soundButton">
+            <img src="../../Assets/Images/sound-on.png" alt="Sound" id="soundIcon">
+            <span class="tooltip">Sound</span>
+        </div>
+
+    </div>
+
+    <div id="exitModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-btn" id="exitClose">&times;</span>
+          <h2>End Session</h2>
+          <hr>
+          <p>Restarting or quitting this session will erase all data gathered during the training.</p>
+          <p class="spacer"></p>
+          <p>
+            Press <strong>Restart</strong> if you wish to start from the beginning or 
+            <strong>Quit</strong> to return to the program selection screen.
+          </p>
+          <div class="button-group">
+            <button id="restartBtn" class="modal-btn">Restart</button>
+            <button id="quitBtn" class="modal-btn">Quit</button>
+          </div>
+        </div>
+    </div>
+
+    <div id="tabletWindow" class="tablet-window hidden">
+        <div class="tab-header">
+            <button class="tab-button active" id="tabEntry">Entry Review</button>
+            <button class="tab-button" id="tabReport">Inspection Logs</button>
+        </div>
+        <div class="tab-content" id="entryContent">
+            <p class="intro-text">
+                The Pacific Port Depot has some imported products currently under FDA’s review. These items were flagged for further examination and now require manual inspection by you in the role of an FDA investigator.
+            </p>
+            <p class="spacer""></p>
+            <p class="entry-note">
+                All of your findings will be automatically logged under the <strong>Inspection Logs</strong> tab. Once inspection is complete, you must review and submit your report for the FDA’s compliance review staff.
+            </p>
+            <p class="spacer"></p>
+            <p class="spacer"></p>
+            <h3>Flagged Products</h3>
+            <hr>
+            <div id="flaggedProducts" class="product-list"></div>
+        </div>
+        <div class="tab-content hidden" id="reportContent"></div>
+    </div>
+
+    <div id="photoOverlay" class="photo-overlay hidden">
+        <img id="overlayImg" src="" alt="Screenshot Preview" />
+        <div class="overlay-controls-bottom">
+            <div class="default-button tooltip-wrapper" id="deletePhotoBtn">
+                <img src="../../Assets/Images/trash.png" alt="Delete">
+            </div>
+            <div class="default-button tooltip-wrapper" id="closeOverlayBtn">
+                <img src="../../Assets/Images/close.png" alt="Close">
+            </div>
+        </div>
+    </div>
+    
     <canvas id="renderCanvas"></canvas>
     <script src="import-oversight.js"></script>
 </body>

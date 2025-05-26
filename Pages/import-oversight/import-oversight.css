@@ -20,7 +20,7 @@ html, body {
     align-items:center;
     padding:0 24px;
     height:70px;
-    z-index:100;
+    z-index:2000;
     width:100%;
     opacity: 0;
 }
@@ -45,6 +45,10 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 150;
+}
+
+.tablet-wrapper.hidden {
+    z-index: -999;
 }
 
 #tabletButton {
@@ -96,10 +100,10 @@ html, body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 999;
+    z-index: -999;
     transition: transform 0.2s ease;
     position: absolute;
-    pointer-events: auto;
+    pointer-events: none;
     transition: opacity 0.3s ease;
     opacity: 0;
 }
@@ -124,13 +128,13 @@ html, body {
 
 /* Shared hover/click scaling */
 #tabletButton:hover,
-.circle-button:hover {
+.default-button:hover {
     transform: scale(1.05);
     transition: transform 0.15s ease;
 }
 
 #tabletButton:active,
-.circle-button:active {
+.default-button:active {
     transform: scale(0.95);
 }
 
@@ -140,62 +144,445 @@ html, body {
     transition: transform 0.3s ease;
 }
 
-/* Replace icon glow */
-#tabletButton.glow-tablet::before {
-    opacity: 1;
-    background: conic-gradient(#e19beb, #7583ff, #ef8253, #e19beb);
-    animation: rotateGlow 5s linear infinite;
-}
-
-/* Audio icon glow toggle (optional visual cue) */
-#soundButton.glow-sound::before {
-    opacity: 1;
-    background: radial-gradient(circle, #444 30%, #0f0 100%);
-}
-
-.take-photo-wrapper {
+.tablet-window {
     position: fixed;
-    top: 80px;
-    
+    bottom: 90px;
+    background: white;
+    border-radius: 14px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    min-width: 400px;
+    max-width: 1000px;
+    width: 70%;
+    height: 75%;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 150;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 99;
+    font-family: sans-serif;
+    overflow : hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.tablet-window.hidden {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
 }
 
-.take-photo-button {
-    background-color: rgba(116, 116, 116, 0.233);
-    box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
-    border-radius: 25px;
-    height: 50px;
+.tab-header {
+    display: flex;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 20px;
+    width: 350px;
+    margin-left: 2.5%;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 0;
+    background: none;
+    border: none;
+    font-weight: bold;
+    font-size: 16px;
+    color: #696969;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.2s ease, border-bottom 0.2s ease;
+}
+
+.tab-button:hover {
+    color: #3f3f3f;
+}
+
+.tab-button.active {
+    border-bottom: 3px solid #0046a5;
+    color: #0046a5;
+}
+
+.tab-content {
+    flex: 1;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: auto; /* prevents overflow outside tab-content */
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-content .spacer {
+    margin: 8px 0;
+  }
+
+.tab-content.hidden {
+    display: none;
+}
+
+.tab-content hr {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.product-list {
+    margin-top: 0px;
+    overflow-y: auto;
+    padding-right: 10px;
+    
+}
+
+.product-entry {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.product-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.product-item img {
+    width: 90px;
+    height: auto;
+    border-radius: 6px;
+}
+
+.product-item .details {
+    flex: 1;
+    margin-left: 30px;
+}
+
+.product-item .details h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.product-item .details ul {
+    margin: 6px 0 0 0;
+    padding-left: 18px;
+}
+
+.facility-grid {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.facility-photo {
+    width: 150px;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.facility-fields,
+.product-inspect-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical; /* disables dragging to resize */
+}
+
+.product-block {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.product-thumb {
+    width: 150px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.sample-toggle {
+    margin-left: 8px;
+    padding: 4px 12px;
+    border: 1px solid #999;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.photo-grid {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.photo-item {
+    position: relative;
+    display: inline-block;
+}
+
+/* ✅ Thumbnail in photo grid */
+.photo-thumb {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+}
+
+
+.thumb-img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    object-fit: cover;
+    cursor: pointer;
+    z-index: 1;
+    position: relative;
+}
+
+
+.photo-thumb .delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* ✅ Overlay view */
+.photo-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.photo-overlay.hidden {
+    display: none;
+}
+
+/* ✅ Image in overlay should max at half screen size */
+#photoOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+#photoOverlay.hidden {
+    display: none;
+}
+
+#overlayImg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 80vw;
+    max-height: 80vh;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+.photo-overlay img {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.photo-overlay.hidden {
+    display: none;
+}
+
+/* ✅ Delete button, always inside image */
+.photo-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 2;
+    display: none;
+}
+
+.photo-delete:hover {
+    background: #e60000;
+}
+
+.overlay-controls-bottom {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 10;
+}
+
+.training-tooltip {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.9); /* more visible */
+    color: white;
+    padding: 10px 18px;
+    font-size: 17px;
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    opacity: 0; /* for testing visibility */
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+/* Tail arrow pointing down */
+.training-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid rgba(0, 0, 0, 0.9); /* match the box background */
+}
+
+
+@keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0px 0px #F5C451;
+    }
+
+    100% {
+      box-shadow: 0 0 10px 10px #f5c45100;
+    }
+  }
+  
+  .pulse-highlight {
+    animation: pulse-glow 1.5s ease-in-out infinite;
+    border-color: #F5C451;
+  }
+
+
+
+.icon-button {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(116, 116, 116, 0.233);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.452);
+    backdrop-filter: blur(5px);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
+    justify-content: center;
     cursor: pointer;
-    transition: transform 0.15s ease;
+    transition: transform 0.15s ease, opacity 0.3s ease;
 }
 
-.take-photo-button:hover {
+.icon-button img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+}
+
+.icon-button:hover {
     transform: scale(1.05);
 }
 
-.take-photo-button:active {
+.icon-button:active {
     transform: scale(0.95);
 }
 
-.take-photo-button img {
-    aspect-ratio: 1/1;
-    height: 100%;
+.icon-button.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
 }
 
-.take-photo-button span {
-    font-size: 16px;
-    font-weight: 500;
+
+
+.tooltip {
+    position: absolute;
+    bottom: 110%; /* place tooltip above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
     color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+}
+
+
+.tooltip-wrapper {
+    position: relative;
+}
+
+
+
+.tooltip-wrapper:hover .tooltip {
+    opacity: 1;
+}
+
+.tooltip.above {
+    bottom: 70px; /* or however much above the button you want */
+}
+
+.tooltip.disabled {
+    display: none;
+}
+
+.icon-button:hover .tooltip {
+    opacity: 1;
 }
 
 /* Hidden by default, fades in when active */
@@ -210,6 +597,10 @@ html, body {
     transition: opacity 0.3s ease;
 }
 
+.close-inspect-wrapper.hidden {
+    z-index: -999;
+}
+
 .close-inspect-button {
     width: 60px;
     height: 60px;
@@ -221,6 +612,7 @@ html, body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: opacity 0.3s ease;
 }
 
 /* Hover/Click scale effects */
@@ -233,12 +625,51 @@ html, body {
     transform: scale(0.95);
 }
 
+.close-inspect-button.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+}
+
 .close-inspect-button img {
     width: 80%;
     height: 80%;
 }
 
-.top-button-group {
+.top-center-button-group {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    z-index: 150;
+    transition: opacity 0.3s ease;
+    opacity: 0; /* or 0 if you're toggling */
+}
+
+
+.tooltip-wrapper .tooltip:not(.above) {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.tooltip-wrapper:hover .tooltip {
+    opacity: 1;
+}
+
+.top-right-button-group {
     position: fixed;
     top: 80px;
     right: 20px;
@@ -249,9 +680,9 @@ html, body {
     opacity: 0; /* Adjust to 0 if you plan to fade in */
 }
 
-.circle-button {
-    width: 50px;
-    height: 50px;
+.default-button {
+    width: 60px;
+    height: 60px;
     background-color: rgba(116, 116, 116, 0.233);
     box-shadow: inset 0 0px 0px 1px rgba(255, 255, 255, 0.452);
     border-radius: 50%;
@@ -262,11 +693,123 @@ html, body {
     cursor: pointer;
 }
 
-.circle-button img {
+.default-button img {
     width: 60%;
     height: 60%;
 }
 
+.default-button.hidden {
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: all 1s ease;
+    opacity: 1;
+  }
+  
+  .modal.hidden {
+    display: none;
+    backdrop-filter: blur(0px);
+    opacity: 0;
+  }
+  
+  .modal-content {
+    background: white;
+    padding: 2em;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 30%;
+    text-align: left; /* ✨ Align text content left */
+    position: relative;
+    font-family: sans-serif;
+  }
+  
+  .modal-content h2 {
+    color: #1f2d5a;
+    margin-bottom: 1em;
+  }
+  
+  .modal-content hr {
+    width: 100%;
+    margin: 0 auto;
+    margin-top: -1em;
+    margin-bottom: 1em;
+  }
+
+.modal-content p {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+  .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 2em;
+    text-align: center; /* ✨ Align buttons back to center */
+  }
+
+  .spacer {
+    margin: 16px 0;
+  }
+  
+  .modal-content .close-btn {
+    position: absolute;
+    top: 33px;
+    right: 30px;
+    height: 9%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    color: #797979;
+    border: 1px solid #797979;
+    font-size: 30px;
+    cursor: pointer;
+    display: flex;
+    padding-bottom: 6px;
+    padding-left: 1px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-btn {
+    width: 120px;
+    height: 44px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #0074bd;
+    border-radius: 8px;
+    background-color: white;
+    color: #0074bd;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .modal-btn:hover {
+    background-color: #0074bd;
+    transform: scale(1.05);
+    color: white;
+  }
+
+  .modal-btn:active {
+    background-color: #0074bd;
+    transform: scale(0.95);
+    color: white;
+  }
+  
+
+  
 @keyframes rotateGlow {
     0% {
         transform: rotate(0deg) scale(1.35);
@@ -341,6 +884,11 @@ html, body {
     font-weight: 700;
 }
 
+
+.intro-box hr {
+    margin-bottom: 16px;
+}
+
 .intro-box p {
     font-size: 16px;
     margin-bottom: 12px;
@@ -361,6 +909,9 @@ html, body {
 .intro-box button {
     display: block;
     margin: 24px auto 0 auto; /* top margin + horizontal centering */
+    width: 20%;
+    min-width: 100px;
+    
 }
 
 .primary-btn {
@@ -369,7 +920,7 @@ html, body {
     border: none;
     border-radius: 6px;
     padding: 12px 24px;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -381,7 +932,12 @@ html, body {
 
 .primary-btn:hover {
     background-color: #005fa0;
-    transform: translateY(-2px);
+    transform: scale(1.05);
+}
+
+.primary-btn:active {
+    background-color: #005fa0;
+    transform: scale(0.95);
 }
 
 #startButton.hidden {

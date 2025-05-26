@@ -3,6 +3,12 @@ let tabletOn = false;
 let tabletMesh = null;
 let tabletSkeleton = null;
 let tabletAnimGroup = null;
+let firstTabletOpen = true;
+
+let idleTimer = 0;
+let lastMoveTime = performance.now();
+let walkTime = 0;
+let isWalking = false;
 
 const inputMap = {};
 
@@ -10,14 +16,28 @@ const foodMeshes = {}; // Store root containers by name
 const foodContainers = {};
 const foodList = ["apple", "banana", "fish"];
 
+let currentOverlayPhotoId = null;
+
 let audioManager = null;
 let audioEnabled = true;
+let audioWalking = null;
+let audioPhoto = null;
+let audioClick = null;
+let audioAmbient = null;
+let flyBuzz = null;
 
 const anchorPoints = [];
 const anchorButtons = [];
+let anchorWrapper = null;
+let currentInspectedProduct = null;
+
+let thermometerRoot = null;
+let tempAnimGroup = null;
 
 const tabletButton = document.getElementById("tabletButton");
-const topButtonGroup = document.getElementById("topButtonGroup");
+const tabletWrapper = document.getElementById("tabletWrapper");
+const topRightButtonGroup = document.getElementById("topRightButtonGroup");
+const topCenterButtonGroup = document.getElementById("topCenterButtonGroup");
 const introBox = document.getElementById("introBox");
 const navBar = document.getElementById("navbar");
 const introOverlay = document.getElementById("introOverlay");
@@ -29,8 +49,140 @@ const infoIcon = document.getElementById("infoIcon");
 const startBtn = document.getElementById("startButton");
 const closeInspect = document.getElementById("closeWrapper");
 const closeInspectButton = document.getElementById("closeInspectButton");
-const takePhotoWrapper = document.getElementById("takePhotoWrapper");
-const takePhotoButton = document.getElementById("takePhotoButton");
+const checkTemp = document.getElementById("checkTempButton");
+const getSample = document.getElementById("getSampleButton");
+const inspectPhoto = document.getElementById("inspectPhotoButton");
+const globalPhoto = document.getElementById("globalPhotoButton");
+const entryReviewGroup = document.getElementById("entryReviewGroup");
+const returnButton = document.getElementById("returnButton");
+const exitModal = document.getElementById("exitModal");
+const restartBtn = document.getElementById("restartBtn");
+const quitBtn = document.getElementById("quitBtn");
+const exitClose = document.getElementById("exitClose");
+const tabletTooltip = document.getElementById("tabletTooltip");
+const tabletCustomTooltip = document.getElementById("trainingTooltip");
+const entryButton = document.querySelector(".entry-review");
+const inspectButtons = document.getElementById("anchorButtonContainer");
+const tabletWindow = document.getElementById("tabletWindow");
+const flaggedProductsContainer = document.getElementById("flaggedProducts");
+const tabEntry = document.getElementById("tabEntry");
+const tabReport = document.getElementById("tabReport");
+const entryContent = document.getElementById("entryContent");
+const reportContent = document.getElementById("reportContent");
+const overlay = document.getElementById("photoOverlay");
+const overlayImg = document.getElementById("overlayImg");
+const closeOverlayBtn = document.getElementById("closeOverlayBtn");
+const deletePhotoBtn = document.getElementById("deletePhotoBtn");
+
+
+// 🟨 Example product list
+const flaggedProducts = [
+    {
+        name: "Brazilian Fuji Apples",
+        id: "apple",
+        image: "../../Assets/Images/apples.png",
+        reasons: [
+            "Shipment origin from a high-risk region for pesticide residue",
+            "Missing certificate of analysis in submitted documents",
+            "Previous history of violations by the same exporter"
+        ]
+    },
+    {
+        name: "Donkey Kong Bananas",
+        id: "banana",
+        image: "../../Assets/Images/bananas.png",
+        reasons: [
+            "Barcode mismatch between manifest and product labels",
+            "Randomized hold based on FDA predictive risk model"
+        ]
+    },
+    {
+        name: "Nemo Nuggets Fishes",
+        id: "fish",
+        image: "../../Assets/Images/fishes.png",
+        reasons: [
+            "Temperature irregularities during shipping",
+            "Unusual visual discoloration reported by customs"
+        ]
+    }
+];
+
+// 🌀 Shuffle helper
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+// 📦 Render N random products
+function showRandomFlaggedProducts(limit = 2) {
+    flaggedProductsContainer.innerHTML = "";
+    const selected = shuffle(flaggedProducts).slice(0, limit);
+
+    selected.forEach(prod => {
+        const item = document.createElement("div");
+        item.className = "product-item";
+
+        item.innerHTML = `
+            <div class="product-entry">
+                <img src="${prod.image}" alt="${prod.name}">
+                <div class="details">
+                    <h4>${prod.name}</h4>
+                    <ul>${prod.reasons.map(r => `<li>${r}</li>`).join("")}</ul>
+                </div>
+            </div>
+        `;
+        
+        flaggedProductsContainer.appendChild(item);
+    });
+}
+
+function createProductInspectionBlock(product) {
+    const div = document.createElement("div");
+    div.className = "product-inspection";
+
+    div.innerHTML = `
+        <div class="product-entry">
+            <img src="${product.image}" style="width:90px; height:auto; border-radius:6px;">
+            <div style="flex:1">
+                <!-- existing content -->
+            </div>
+            <div class="details">
+                <h4>${product.name}</h4>
+                <label>Checked Temperature: 
+                    <input type="number" step="0.01" placeholder="°F" onchange="formatTemp(this)">
+                </label>
+                <label>Sample Collected: 
+                    <button class="sample-toggle" onclick="toggleSample(this)">No</button>
+                </label>
+                <label>Inspection Details: 
+                    <input type="text" placeholder="Describe relevant details about your inspection...">
+                </label>
+            </div>
+        </div>
+        <span>Captured Photos</span>
+        <div class="photo-placeholder">
+            <div class="photo-grid"></div>
+        </div>
+    `;
+    return div;
+}
+
+function toggleSample(btn) {
+    btn.textContent = btn.textContent === "Yes" ? "No" : "Yes";
+}
+
+function formatSmartNumber(value, suffix) {
+    const num = parseFloat(value);
+    if (isNaN(num)) return "";
+
+    const parts = value.split(".");
+    if (parts.length === 1) {
+        return `${num.toFixed(0)}${suffix}`; // Integer
+    } else if (parts[1].length === 1) {
+        return `${num.toFixed(1)}${suffix}`; // One decimal
+    } else {
+        return `${num.toFixed(2)}${suffix}`; // Two or more decimals
+    }
+}
 
 window.addEventListener("DOMContentLoaded", async () => {
     const canvas = document.getElementById("renderCanvas");
@@ -56,12 +208,26 @@ window.addEventListener("DOMContentLoaded", async () => {
     const ammoWorld = plugin.world;
     console.log("✅ AmmoJS plugin enabled");
 
+    showRandomFlaggedProducts(3);
+
     // ✅ Load GLTF Scene
     BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
         console.log("✅ warehouse.gltf loaded. Mesh count:", meshes.length);
 
         meshes.forEach(mesh => {
             if (!(mesh instanceof BABYLON.Mesh) || mesh.name === "__root__") return;
+
+            if (mesh.material) {
+                const mat = mesh.material;
+                mat.backFaceCulling = false;
+                if (mesh.material.name === "mk_Plastic") {
+                    mat.needDepthPrePass = true;
+                    mat.alpha = .45;
+                    console.log("🧪 mk_plastic material adjusted for alpha");
+                } else {
+                    console.log("🧪 mk_plastic material not found");
+                }
+            }
 
             // 💡 Lightmaps
             if (mesh.material) {
@@ -164,14 +330,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ✅ Capsule (player)
-    const capsule = BABYLON.MeshBuilder.CreateCapsule("playerCapsule", { height: 1.9, diameter: 0.1 }, scene);
+    const capsule = BABYLON.MeshBuilder.CreateBox("playerCapsule", { height: 3.2, width: .5, depth: .5 }, scene);
     capsule.isPickable = false;
     capsule.isVisible = false;
-    capsule.position = new BABYLON.Vector3(-6.5, .95, 10);
+    capsule.position = new BABYLON.Vector3(-5.5, 1.6, 10);
     capsule.physicsImpostor = new BABYLON.PhysicsImpostor(
         capsule,
         BABYLON.PhysicsImpostor.CapsuleImpostor,
-        { mass: 100, restitution: 2, friction: 100 },
+        { mass: 1, restitution: 0},
         scene
     );
     console.log("✅ Capsule impostor applied");
@@ -181,8 +347,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.attachControl(canvas, true);
     camera.minZ = 0.01;
     camera.radius = 0;
-    camera.upperBetaLimit = Math.PI;
-    camera.lowerBetaLimit = 0.01;
+
     camera.lowerRadiusLimit = camera.radius;
     camera.upperRadiusLimit = camera.radius;
     camera.alpha = Math.PI/2;
@@ -198,6 +363,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         const angVel = capsule.physicsImpostor.getAngularVelocity();
         capsule.physicsImpostor.setAngularVelocity(new BABYLON.Vector3(0, angVel.y, 0));
         capsule.rotationQuaternion = BABYLON.Quaternion.Identity();
+        
     });
 
     // ✅ Input tracking
@@ -210,51 +376,144 @@ window.addEventListener("DOMContentLoaded", async () => {
         inputMap[evt.sourceEvent.key.toLowerCase()] = false;
     }));
 
-    // ✅ Movement logic
     scene.onBeforeRenderObservable.add(() => {
-        const isBoosting = inputMap["shift"] === true;
-        const baseSpeed = isBoosting ? 3 : 1;
-        const gravityAssist = -0.3;
+        if (!window.inInspectMode) {
+            const isBoosting = inputMap["shift"] === true;
+            const baseSpeed = isBoosting ? 2.5 : 1;
+            const gravityAssist = -0.3;
+        
+            // Flatten forward vector for horizontal movement
+            let forward = camera.getForwardRay().direction;
+            forward.y = 0;
+            forward.normalize();
+            const right = BABYLON.Vector3.Cross(BABYLON.Vector3.Up(), forward).normalize();
+        
+            let moveVec = BABYLON.Vector3.Zero();
     
-        // Flatten forward vector
-        let forward = camera.getForwardRay().direction;
-        forward.y = 0;
-        forward.normalize();
-        const right = BABYLON.Vector3.Cross(BABYLON.Vector3.Up(), forward).normalize();
+            if (inputMap["w"] || inputMap["ArrowUp"]) moveVec.addInPlace(forward);
+            if (inputMap["s"] || inputMap["ArrowDown"]) moveVec.addInPlace(forward.scale(-1));
+            if (inputMap["a"] || inputMap["ArrowLeft"]) moveVec.addInPlace(right.scale(-1));
+            if (inputMap["d"] || inputMap["ArrowRight"]) moveVec.addInPlace(right);
     
-        let moveVec = BABYLON.Vector3.Zero();
+            const isMoving = !moveVec.equals(BABYLON.Vector3.Zero());
     
-        if (inputMap["w"] || inputMap["ArrowUp"]) moveVec.addInPlace(forward);
-        if (inputMap["s"] || inputMap["ArrowDown"]) moveVec.addInPlace(forward.scale(-1));
-        if (inputMap["a"] || inputMap["ArrowLeft"]) moveVec.addInPlace(right.scale(-1));
-        if (inputMap["d"] || inputMap["ArrowRight"]) moveVec.addInPlace(right);
+            if (isMoving && audioWalking) {
+                if (!isWalking && audioEnabled && !audioWalking.isPlaying) {
+                    audioWalking.playbackRate = isBoosting ? 1.5 : 1.0;
+                    audioWalking.currentTime = 2.35;
+                    audioWalking.play();
+                    isWalking = true;
+                } else {
+                    audioWalking.playbackRate = isBoosting ? 1.5 : 1.0;
+                }
+            } else if (isWalking && audioWalking) {
+                audioWalking.pause();
+                isWalking = false;
+            }
+        
+            const velocity = capsule.physicsImpostor.getLinearVelocity();
+            const currentY = velocity.y;
+            const finalY = currentY < 0 ? currentY : gravityAssist;
+        
+            const isFalling = currentY < -0.5;
+            const effectiveSpeed = isFalling ? baseSpeed / 10 : baseSpeed;
+        
+            const now = performance.now();
+            const horizontalVelocity = Math.sqrt(velocity.x ** 2 + velocity.z ** 2);
+            const justStopped = moveVec.equals(BABYLON.Vector3.Zero()) && now - lastMoveTime < 150;
+        
+            if (!moveVec.equals(BABYLON.Vector3.Zero())) {
+                const moveDirection = moveVec.normalize().scale(effectiveSpeed);
+                capsule.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(
+                    moveDirection.x,
+                    finalY,
+                    moveDirection.z
+                ));
+                capsule.physicsImpostor.wakeUp();
+                lastMoveTime = now;
+            } else {
+                if (horizontalVelocity < 0.3 || justStopped) {
+                    // ✨ Smoothly dampen movement instead of snapping to 0
+                    const dampingFactor = .9; // lower = stronger damp
+                    const dampedX = velocity.x * dampingFactor;
+                    const dampedZ = velocity.z * dampingFactor;
+            
+                    capsule.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(dampedX, currentY, dampedZ));
+            
+                    const body = capsule.physicsImpostor.physicsBody;
+                    if (body) {
+                        body.setLinearVelocity(new Ammo.btVector3(dampedX, currentY, dampedZ));
+                        body.clearForces();
+                        body.activate();
+                    }
+                } else {
+                    capsule.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(velocity.x, currentY, velocity.z));
+                }
+            }
     
-        const currentY = capsule.physicsImpostor.getLinearVelocity().y;
-        const finalY = currentY < 0 ? currentY : gravityAssist;
+            // 🎥 Camera bobbing based on movement speed
+            if (!moveVec.equals(BABYLON.Vector3.Zero())) {
+                walkTime += scene.getEngine().getDeltaTime() * 0.005;
+                const speedFactor = effectiveSpeed / 1;
+            
+                const bobOffset = new BABYLON.Vector3(
+                    Math.sin(walkTime * 2) * 0.005 * speedFactor,
+                    Math.sin(walkTime * 3) * 0.005 * speedFactor,
+                    0
+                );
+            
+                const baseTarget = capsule.position.clone();
+                camera.target.copyFrom(baseTarget.add(bobOffset));
     
-        // ✅ Only slow down if clearly falling (Y < -0.5)
-        const isFalling = currentY < -0.5;
-        const effectiveSpeed = isFalling ? baseSpeed / 10 : baseSpeed;
-    
-        if (!moveVec.equals(BABYLON.Vector3.Zero())) {
-            const moveDirection = moveVec.normalize().scale(effectiveSpeed);
-            capsule.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(
-                moveDirection.x,
-                finalY,
-                moveDirection.z
-            ));
-            capsule.physicsImpostor.wakeUp();
+                // Camera alpha/beta sway (keep minimal)
+                camera.alpha += Math.sin(walkTime * 0.5) * 0.0002;
+                camera.beta  += Math.cos(walkTime * 0.4) * 0.0002;
+            } else {
+                walkTime += scene.getEngine().getDeltaTime() * 0.001;
+            
+                // Subtle idle motion: tiny position offset + camera sway
+                const idleOffset = new BABYLON.Vector3(
+                    Math.sin(walkTime * 0.6) * 0.002, // X sway
+                    Math.sin(walkTime * 0.9) * 0.002, // Y sway
+                    0
+                );
+            
+                const baseTarget = capsule.position.clone();
+                camera.target.copyFrom(baseTarget.add(idleOffset));
+            
+                // Camera alpha/beta sway (keep minimal)
+                camera.alpha += Math.sin(walkTime * 0.5) * 0.00002;
+                camera.beta  += Math.cos(walkTime * 0.4) * 0.00002;
+            }
         } else {
-            capsule.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, currentY, 0));
+            walkTime += scene.getEngine().getDeltaTime() * 0.001;
+            
+            // Subtle idle motion: tiny position offset + camera sway
+            const idleOffset = new BABYLON.Vector3(
+                Math.sin(walkTime * 0.6) * 0.002, // X sway
+                Math.sin(walkTime * 0.9) * 0.002, // Y sway
+                0
+            );
+        
+            const baseTarget = capsule.position.clone();
+            camera.target.copyFrom(baseTarget.add(idleOffset));
+        
+            // Camera alpha/beta sway (keep minimal)
+            camera.alpha += Math.sin(walkTime * 0.5) * 0.00002;
+            camera.beta  += Math.cos(walkTime * 0.4) * 0.00002;
         }
-    
-        camera.target.copyFrom(capsule.position);
     });
     
-
     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.gltf", scene, (container) => {
         // Add the whole container to the scene
         container.addAllToScene();
+
+        const screenMat = scene.materials.find(mat => mat.name === "screen");
+        if (screenMat) {
+            screenMat.reflectionTexture = null; // disable environment reflections
+            screenMat.environmentIntensity = 0; // extra safety
+            screenMat.disableLighting = true;   // makes it unlit (optional, depending on your design)
+        }
     
         // Grab root node (usually __root__)
         tabletRoot = container.rootNodes[0]; // This is the parent of everything: skeleton, meshes, etc.
@@ -268,7 +527,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
         // Parent to camera, set relative position/rotation
         tabletRoot.setParent(camera);
-        tabletRoot.position.set(0, -.145, 0.3);
+        tabletRoot.position.set(0, -.145, 0.33);
 
         // Position and parent each loaded food container
         Object.entries(foodContainers).forEach(([name, container]) => {
@@ -278,12 +537,30 @@ window.addEventListener("DOMContentLoaded", async () => {
             root.position.set(0, 0, 0.16); // adjust relative to camera
         });
 
-        camera.alpha = Math.PI*2.78;
+        camera.alpha = Math.PI*2.75;
     
         tabletRoot.setEnabled(false); // Hide initially
         console.log("✅ Tablet loaded and set up");
     });
 
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "thermometer.gltf", scene, (container) => {
+        container.addAllToScene();
+    
+        thermometerRoot = container.rootNodes[0]; // root node of thermometer
+        thermometerRoot.setParent(camera);
+        thermometerRoot.position.set(0, -.01, 0.17); // 🔧 adjust position as needed
+        thermometerRoot.setEnabled(false);
+    
+        tempAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
+        if (tempAnimGroup) {
+            tempAnimGroup.stop();
+            tempAnimGroup.goToFrame(0);
+        }
+    
+        
+        console.log("✅ Thermometer loaded and parented to camera");
+    });
+    
     await BABYLON.SceneLoader.ImportMeshAsync("", "./Assets/Models/", "anchors.glb", scene).then(result => {
         result.meshes.forEach(mesh => {
             if (mesh.name !== "__root__") {
@@ -294,27 +571,49 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
 
         anchorPoints.forEach((anchor, index) => {
-            const button = document.createElement("div");
-            button.className = "inspect-button";
-            button.style.position = "absolute";
-            button.style.pointerEvents = "auto";
-            button.innerHTML = `<img src="../../Assets/Images/inspect.png" alt="Inspect">`;
-            document.body.appendChild(button);
-            anchorButtons.push({ anchor, button });
+            const anchorButton = document.createElement("div");
+            anchorButton.style.zIndex = "-999";
+            anchorButton.className = "inspect-button";
+            anchorButton.id = `inspectButton-${index}`; // ensure unique IDs
+            anchorButton.innerHTML = `<img src="../../Assets/Images/inspect.png" alt="Inspect">`;
+            anchorButton.style.position = "absolute";
+            anchorButton.style.pointerEvents = "auto";
+        
+            inspectButtons.appendChild(anchorButton);
+            anchorButtons.push({ anchor, anchorButton });
         });
 
-        anchorButtons.forEach(({ anchor, button }) => {
-            const foodType = anchor.name.split("-")[1]; // e.g. "inspect-apple" → "apple"
-            button.addEventListener("click", () => enterInspectMode(foodType));
+        anchorButtons.forEach(({ anchor, anchorButton }) => {
+            const foodType = anchor.name.split("-")[1];
+            anchorButton.addEventListener("click", () => {enterInspectMode(foodType); playClickSound(false);});
         });
         
     });
 
     scene.onBeforeRenderObservable.add(() => {
-        anchorButtons.forEach(({ anchor, button }) => {
+        if (window.inInspectMode || window.inInfoMode || window.inTabletMode) {
+            anchorButtons.forEach(({ anchorButton }) => {
+                anchorButton.classList.remove("visible");
+                setTimeout(() => {
+                    anchorButton.style.zIndex = "-999";
+                }, 300);
+            });
+            return;
+        }
+    
+        const viewMatrix = camera.getViewMatrix();
+    
+        anchorButtons.forEach(({ anchor, anchorButton }) => {
             const anchorPos = anchor.getAbsolutePosition();
             const capsulePos = capsule.getAbsolutePosition();
             const distance = BABYLON.Vector3.Distance(anchorPos, capsulePos);
+            const viewSpacePos = BABYLON.Vector3.TransformCoordinates(anchorPos, viewMatrix);
+    
+            if (viewSpacePos.z < 0) {
+                anchorButton.classList.remove("visible");
+                anchorButton.style.zIndex = "-999";
+                return;
+            }
     
             const screenPos = BABYLON.Vector3.Project(
                 anchorPos,
@@ -323,45 +622,49 @@ window.addEventListener("DOMContentLoaded", async () => {
                 camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
             );
     
-            const isInView = (
-                screenPos.z > 0 &&
-                screenPos.x >= 0 && screenPos.x <= engine.getRenderWidth() &&
-                screenPos.y >= 0 && screenPos.y <= engine.getRenderHeight()
-            );
+            const isInScreenBounds =
+                screenPos.x >= 0 &&
+                screenPos.x <= engine.getRenderWidth() &&
+                screenPos.y >= 0 &&
+                screenPos.y <= engine.getRenderHeight();
     
-            // Update position
-            button.style.left = `${screenPos.x - 25}px`;
-            button.style.top = `${screenPos.y - 25}px`;
+            anchorButton.style.left = `${screenPos.x - 25}px`;
+            anchorButton.style.top = `${screenPos.y - 25}px`;
     
-            // Toggle visible class
-            if (distance <= 1.8 && isInView) {
-                if (!button.classList.contains("visible")) {
-                    button.classList.add("visible");
-                }
+            const shouldBeVisible = distance <= 2.4 && isInScreenBounds;
+    
+            if (shouldBeVisible) {
+                anchorButton.classList.add("visible");
+                anchorButton.style.zIndex = "1000";
             } else {
-                if (button.classList.contains("visible")) {
-                    button.classList.remove("visible");
-                }
+                anchorButton.classList.remove("visible");
+                anchorButton.style.zIndex = "-999";
             }
         });
     });
 
     function enterInspectMode(foodName) {
+        currentInspectedProduct = foodName;
+        window.inInspectMode = true;
+        animateCameraFOV(camera, camera.fov, .8, 300);
+        scene.environmentIntensity = 0.2;
         // Disable movement and camera control
         camera.detachControl(canvas);
         capsule.physicsImpostor.sleep();
 
         closeInspect.style.opacity = "1";
         closeInspect.style.pointerEvents = "auto";
-        takePhotoWrapper.style.opacity = "1";
-        takePhotoWrapper.style.pointerEvents = "auto";
+
+        checkTemp.style.display = "flex";
+        getSample.style.display = "flex";
+        inspectPhoto.style.display = "flex";
+        globalPhoto.style.display = "none";
+        topCenterButtonGroup.style.opacity = "1";
+
 
         tabletButton.style.opacity = "0";
         tabletButton.style.pointerEvents = "none";
-        anchorButtons.forEach(({ button }) => {
-            button.style.zIndex = "-999";
-        });
-    
+        
         // Hide all previously shown foods
         Object.values(foodContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
@@ -378,9 +681,9 @@ window.addEventListener("DOMContentLoaded", async () => {
         if (!wrapper) {
             wrapper = new BABYLON.TransformNode(`inspectWrapper-${foodName}`, scene);
             wrapper.setParent(camera);
-            wrapper.position = new BABYLON.Vector3(0, -.01, 0.1);
+            wrapper.position = new BABYLON.Vector3(0, -.01, 0.16);
             rootNode.setParent(wrapper);
-            rootNode.position.set(0, 0, 0);                       // ① zero-out the local offset
+            rootNode.position.set(0, 0, 0);
             setupObjectRotation(wrapper);
             
         }
@@ -394,6 +697,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     function exitInspectMode() {
+        currentInspectedProduct = null;
+        window.inInspectMode = false;
+        animateCameraFOV(camera, camera.fov, 1.2, 200);
+        scene.environmentIntensity = 1.3;
         camera.attachControl(canvas, true);
         capsule.physicsImpostor.wakeUp();
     
@@ -407,15 +714,20 @@ window.addEventListener("DOMContentLoaded", async () => {
         // Restore UI
         tabletButton.style.opacity = "1";
         tabletButton.style.pointerEvents = "auto";
-        anchorButtons.forEach(({ button }) => {
-            button.style.zIndex = "1000";
-        });
-    
+
+        topCenterButtonGroup.style.opacity = "0";
+        globalPhoto.style.display = "flex";
+        setTimeout(() => {
+            checkTemp.style.display = "none";
+            getSample.style.display = "none";
+            inspectPhoto.style.display = "none";
+            
+        }, 300);
+
         // Hide close button
         closeInspect.style.opacity = "0";
         closeInspect.style.pointerEvents = "none";
-        takePhotoWrapper.style.opacity = "0";
-        takePhotoWrapper.style.pointerEvents = "none";
+        
     }
 
     function setupObjectRotation(targetNode) {
@@ -472,38 +784,159 @@ window.addEventListener("DOMContentLoaded", async () => {
         targetNode.rotationQuaternion = BABYLON.Quaternion.FromEulerVector(targetNode.rotation);
         targetNode.rotation = new BABYLON.Vector3.Zero(); // reset Euler to avoid conflict
     }
+
+    async function captureScreenshot() {
+
+        audioPhoto.play();
+    
+        await new Promise(r => setTimeout(r, 1)); // allow DOM update
+    
+        const width = window.innerWidth / 2;
+        const height = window.innerHeight / 2;
+    
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+    
+        scene.render(); // render a frame
+        ctx.drawImage(engine.getRenderingCanvas(), 0, 0, width, height);
+        const screenshotDataURL = canvas.toDataURL("image/png");
+
+        // 🔦 Flash effect
+        const originalExposure = scene.imageProcessingConfiguration.exposure;
+        scene.imageProcessingConfiguration.exposure = 6; // Bright flash
+
+        setTimeout(() => {
+            const startTime = performance.now();
+            function animateFlash() {
+                const now = performance.now();
+                const t = (now - startTime) / 50; // 100ms total
+                if (t < 1) {
+                    // ease out flash
+                    scene.imageProcessingConfiguration.exposure = 6 - (6 - originalExposure) * t;
+                    requestAnimationFrame(animateFlash);
+                } else {
+                    scene.imageProcessingConfiguration.exposure = originalExposure;
+                }
+            }
+            animateFlash();
+        }, 16); // slight delay to let the exposure actually apply first frame
+    
+        // Create thumbnail element
+        const uniqueId = `photo-${Date.now()}`;
+        const photo = document.createElement("div");
+        photo.className = "photo-thumb";
+        photo.id = `thumb-${uniqueId}`;
+    
+        const img = new Image();
+        img.src = screenshotDataURL;
+        img.alt = "Screenshot";
+        img.className = "thumb-img";
+        img.id = uniqueId;
+    
+        // Preview in overlay on click
+        img.addEventListener("click", (e) => {
+            e.stopPropagation();
+            overlayImg.src = screenshotDataURL;
+            overlay.classList.remove("hidden");
+            currentOverlayPhotoId = uniqueId; // ✅ Track for deletion
+        });
+    
+        photo.appendChild(img);
+        
+    
+        // Determine correct grid
+        let targetGrid = null;
+    
+        if (window.inInspectMode && currentInspectedProduct) {
+            document.querySelectorAll(".product-inspection").forEach(section => {
+                const title = section.querySelector("h3")?.textContent?.trim();
+                const match = flaggedProducts.find(p => p.name === title && p.id === currentInspectedProduct);
+                if (match) {
+                    const grid = section.querySelector(".photo-grid");
+                    if (grid && grid.children.length < 3) targetGrid = grid;
+                }
+            });
+        } else {
+            const facilityGrid = document.querySelector(".facility-section .photo-grid");
+            if (facilityGrid && facilityGrid.children.length < 5) {
+                targetGrid = facilityGrid;
+            }
+        }
+    
+        if (targetGrid) {
+            targetGrid.appendChild(photo);
+        
+            // Count how many photos currently exist in the grid
+            const photoCount = targetGrid.querySelectorAll(".photo-thumb").length;
+            console.log(`📸 Photo added. Total visible in grid: ${photoCount}`);
+        } else {
+            console.warn("⚠️ No target grid found. Photo not added.");
+        }
+        
+    }
+    
     
     
     // ✅ Lighting & Skybox
     scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./Assets/Textures/warehouse.env", scene);
-    scene.environmentIntensity = 1;
+    scene.environmentIntensity = 1.3;
     scene.imageProcessingConfiguration.exposure = 1.2;
     scene.imageProcessingConfiguration.contrast = 1.3;
     scene.createDefaultLight(true);
     scene.createDefaultSkybox(scene.environmentTexture, true, 1000);
 
     function startTraining() {
-        if (introOverlay) {
-            introOverlay.classList.add("hidden");
-        }
-    
-        if (tabletButton) {
+        introOverlay.classList.add("hidden");
+        const tooltip = document.getElementById("trainingTooltip");
+        if (tooltip) {
             setTimeout(() => {
-                tabletButton.style.opacity = "1";
-                topButtonGroup.style.opacity = "1";
-            }, 500);
+                tooltip.style.opacity = "1";
+            }, 2000); // optional delay before showing
         }
     
-        if (startBtn) {
-            startBtn.style.opacity = "0";
-            startBtn.style.pointerEvents = "none";
-        }
+        setTimeout(() => {
+            tabletButton.style.opacity = "1";
+            topRightButtonGroup.style.opacity = "1";
+        }, 500);
     
+        startBtn.style.opacity = "0";
+        startBtn.style.pointerEvents = "none";
+
+        checkTemp.style.display = "none";
+        getSample.style.display = "none";
+        inspectPhoto.style.display = "none";
+
+        // ✅ Now user has interacted — safe to load & play audio
+        audioWalking = new Audio("./Assets/Sounds/walking.m4a");
+        audioWalking.loop = true;
+        audioWalking.volume = 1;
+        if (audioWalking) {
+            console.log("✅ Walking sound loaded and ready");
+        }
+
+        // ✅ Now user has interacted — safe to load & play audio
+        audioPhoto = new Audio("./Assets/Sounds/photo.m4a");
+        audioPhoto.loop = false;
+        audioPhoto.volume = .8;
+        if (audioPhoto) {
+            console.log("✅ Photo sound loaded and ready");
+        }
+
+        // ✅ Now user has interacted — safe to load & play audio
+        audioClick = new Audio("./Assets/Sounds/click.m4a");
+        audioClick.loop = false;
+        audioClick.volume = .5;
+        audioClick.addEventListener("canplaythrough", () => {
+            console.log("✅ Click sound loaded and ready");
+        });
+        
         // ✅ Play ambient sound using native Audio
         if (!window.ambientSound) {
             window.ambientSound = new Audio("./Assets/Sounds/warehouse.m4a");
             ambientSound.loop = true;
-            ambientSound.volume = 0.5;
+            ambientSound.volume = 0.15;
             audioManager.add(ambientSound); // optional if using audioManager
         }
     
@@ -512,6 +945,45 @@ window.addEventListener("DOMContentLoaded", async () => {
         }).catch(err => {
             console.warn("⚠️ Could not play ambient sound:", err);
         });
+    
+        // 🔊 Load fly buzz sound and attach to it
+        const flyBuzz = new Audio("./Assets/Sounds/fly.m4a");
+        flyBuzz.loop = true;
+        flyBuzz.volume = 0;
+        flyBuzz.play();
+        
+        const spawnCenter = new BABYLON.Vector3(-3.1, 0.6, .9);
+        const fadeRadius = 5; // how far you want to hear the buzz
+        
+        scene.registerBeforeRender(() => {
+            if (!capsule) return;
+        
+            const dist = BABYLON.Vector3.Distance(capsule.position, spawnCenter);
+            const volume = Math.max(0, .8 - dist / fadeRadius);
+        
+            flyBuzz.volume = volume;
+        });
+    
+        // 🪳 Now create the swarm visually
+        pestParticles(scene, 30, 0.02, spawnCenter, 1, 2, 1, "../../Assets/Images/fly.png");
+        pestParticles(scene, 20, 0.07, new BABYLON.Vector3(0, 0.05, -8), 6, 0, .5, "../../Assets/Images/cockroach.png");
+        
+    }
+
+    // ✅ Play first 0.5s only
+    function playClickSound(forward = true) {
+        if (forward) {
+            audioClick.currentTime = 0;
+        } else {
+            audioClick.currentTime = 0.01;
+        }
+        audioClick.play();
+
+        // Stop it after 500ms
+        setTimeout(() => {
+            audioClick.pause();
+            audioClick.currentTime = 0;
+        }, 500);
     }
 
     function animateCameraFOV(camera, from, to, duration = 300) {
@@ -533,55 +1005,95 @@ window.addEventListener("DOMContentLoaded", async () => {
         requestAnimationFrame(animate);
     }
 
+    checkTemp.addEventListener("click", () => {
+        playClickSound(false)
+        if (!thermometerRoot || !tempAnimGroup) return;
+    
+        window.inTempCheck = true;
+
+        // 🔒 Disable and dim the button
+        checkTemp.classList.add("disabled");
+        getSample.classList.add("disabled");
+        inspectPhoto.classList.add("disabled");
+        closeInspectButton.classList.add("disabled");
+    
+        // Enable and play forward
+        thermometerRoot.setEnabled(true);
+    
+        tempAnimGroup.reset();
+        tempAnimGroup.speedRatio = 1.0;
+        tempAnimGroup.play(false);
+        setTimeout(() => {
+            thermometerRoot.setEnabled(false);
+            window.inTempCheck = false;
+            checkTemp.classList.remove("disabled");
+            getSample.classList.remove("disabled");
+            inspectPhoto.classList.remove("disabled");
+            closeInspectButton.classList.remove("disabled");
+        }, 7800);
+    });
+    
+
     tabletButton.addEventListener("click", () => {
-        if (!tabletRoot || !tabletAnimGroup) return;
-
-        if (!tabletOn) {
-            anchorButtons.forEach(({ button }) => {
-                button.style.zIndex = "-999";
-            });
-
-            tabletRoot.setEnabled(true);
-
-            // Play forward
-            tabletAnimGroup.reset();
-            tabletAnimGroup.speedRatio = 1;
-            tabletAnimGroup.play(false);
-
-            // Animate FOV wider
+        
+        if (tabletCustomTooltip) {
+            tabletCustomTooltip.style.opacity = "0";
             setTimeout(() => {
-                animateCameraFOV(camera, camera.fov, 1.1, 1000);
-            }, 300);
-
+                tabletCustomTooltip.remove();
+            }, 400);
+        }
+    
+        if (!tabletOn) {
+            playClickSound(false);
+            window.inTabletMode = true;
+            if (firstTabletOpen) {
+                if (entryButton) {
+                    entryButton.classList.add("pulse-highlight");
+                }
+                firstTabletOpen = false;
+            }
+    
+            tabletWindow.classList.toggle("hidden");
+            scene.environmentIntensity = 0;
+    
+            animateCameraFOV(camera, camera.fov, 1.1, 200);
+    
             tabletOn = true;
             tabletIcon.src = "../../Assets/Images/close.png";
             tabletButton.classList.add("rotate");
-        } else {
-            anchorButtons.forEach(({ button }) => {
-                button.style.zIndex = "1000";
-            });
-            // Play backward
-            tabletAnimGroup.reset();
-            tabletAnimGroup.speedRatio = -1;
-            tabletAnimGroup.play(true);
-            tabletAnimGroup.goToFrame(tabletAnimGroup.to); // Start from end when reversing
-
+    
+            // Temporarily hide the tooltip
+            tabletTooltip.classList.add("disabled");
 
             setTimeout(() => {
-                tabletAnimGroup.play(false);
-            }, 700);
-            tabletAnimGroup.onAnimationEndObservable.addOnce(() => {
-                tabletRoot.setEnabled(false);
-            });
+                tabletTooltip.textContent = "Close Tablet";
+                tabletTooltip.classList.remove("disabled");
+            }, 1000); // 1 second delay or whatever feels right
 
-            // Animate FOV back
+            
+        } else {
+            playClickSound(true);
+            window.inTabletMode = false;
+    
+            tabletWindow.classList.add("hidden");  
+            scene.environmentIntensity = 1;      
+    
             animateCameraFOV(camera, camera.fov, 1.2, 300);
-
+    
             tabletOn = false;
             tabletIcon.src = "../../Assets/Images/tablet.png";
             tabletButton.classList.remove("rotate");
+    
+            // Temporarily hide the tooltip
+            tabletTooltip.classList.add("disabled");
+
+            setTimeout(() => {
+                tabletTooltip.textContent = "Open Tablet";
+                tabletTooltip.classList.remove("disabled");
+            }, 1000); // 1 second delay or whatever feels right
         }
     });
+    
 
     audioManager = {
         audios: [],
@@ -597,31 +1109,164 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
+    function pestParticles(scene, count, size, spawnCenter, spawnRadius, height = 0, speedMultiplier, imagePath = "../../Assets/Images/cockroach.png") {
+        const is3D = height > 0;
+    
+        const roachMesh = BABYLON.MeshBuilder.CreatePlane("roach", { size: size }, scene);
+        roachMesh.rotation.x = Math.PI / 2;
+        roachMesh.isVisible = false;
+    
+        const SPS = new BABYLON.SolidParticleSystem("roaches", scene);
+        SPS._speedMultiplier = speedMultiplier/100;
+        SPS.addShape(roachMesh, count);
+    
+        const roachMat = new BABYLON.StandardMaterial("roachMat", scene);
+        roachMat.diffuseTexture = new BABYLON.Texture(imagePath, scene);
+        roachMat.diffuseTexture.hasAlpha = true;
+        roachMat.backFaceCulling = false;
+        roachMat.specularColor = new BABYLON.Color3(0, 0, 0);
+    
+        const spsMesh = SPS.buildMesh();
+        spsMesh.material = roachMat;
+        spsMesh.checkCollisions = false;
+        spsMesh.isPickable = false;
+        spsMesh.doNotSyncBoundingInfo = true;
+        spsMesh.alwaysSelectAsActiveMesh = true;
+        spsMesh.isBlocker = false;
+        spsMesh.physicsImpostor = null;
+    
+        const directions = new Array(count);
+        const speeds = new Array(count);
+        const turningFlags = new Array(count).fill(false);
+        const targetAngles = new Array(count).fill(0);
+    
+        speedMultiplier = 1; // Or make this a parameter if needed
+    
+        SPS.initParticles = function () {
+            for (let i = 0; i < SPS.nbParticles; i++) {
+                const p = SPS.particles[i];
+    
+                const angle = Math.random() * 2 * Math.PI;
+                const radius = Math.sqrt(Math.random()) * spawnRadius;
+                const x = spawnCenter.x + Math.cos(angle) * radius;
+                const z = spawnCenter.z + Math.sin(angle) * radius;
+                const y = is3D
+                    ? spawnCenter.y + (Math.random() - 0.5) * height
+                    : spawnCenter.y;
+    
+                p.position = new BABYLON.Vector3(x, y, z);
+    
+                const dirAngle = Math.random() * Math.PI * 2;
+                speeds[i] = 1;
+                directions[i] = dirAngle;
+    
+                p.rotation = new BABYLON.Vector3(Math.PI / 2, dirAngle, 0);
+            }
+        };
+    
+        SPS.updateParticle = function (p) {
+            const index = p.idx;
+            let angle = directions[index];
+            let speed = speeds[index] * SPS._speedMultiplier;
+            const speedFlicker = speed * (0.9 + Math.random() * 0.2);
+    
+            if (turningFlags[index]) {
+                const target = targetAngles[index];
+                const delta = target - angle;
+                const wrappedDelta = Math.atan2(Math.sin(delta), Math.cos(delta));
+                angle += wrappedDelta * 0.2;
+    
+                if (Math.abs(wrappedDelta) < 0.05) {
+                    turningFlags[index] = false;
+                }
+            } else {
+                const dx = Math.sin(angle) * speedFlicker;
+                const dz = Math.cos(angle) * speedFlicker;
+                const dy = is3D ? (Math.random() - 0.5) * speedFlicker * 1 : 0;
+    
+                p.position.x += dx;
+                p.position.z += dz;
+                p.position.y += dy;
+    
+                if (Math.random() < 0.15) {
+                    angle += (Math.random() - 0.5) * 0.6;
+                }
+    
+                const dx2 = p.position.x - spawnCenter.x;
+                const dz2 = p.position.z - spawnCenter.z;
+                const dy2 = is3D ? p.position.y - spawnCenter.y : 0;
+    
+                const distSq = dx2 * dx2 + dz2 * dz2 + (is3D ? dy2 * dy2 : 0);
+                const dist = Math.sqrt(distSq);
+    
+                if (dist > spawnRadius * 0.9) {
+                    const steerVec = new BABYLON.Vector3(-dx2, -dy2, -dz2).normalize();
+                    const moveVec = new BABYLON.Vector3(Math.sin(angle), 0, Math.cos(angle)).normalize();
+                    const steerStrength = Math.min(1, (dist - spawnRadius * 0.7) / (spawnRadius * 0.3));
+                    const blended = moveVec.scale(1 - steerStrength).add(steerVec.scale(steerStrength)).normalize();
+    
+                    angle = Math.atan2(blended.x, blended.z);
+                    if (is3D) {
+                        p.position.y += steerVec.y * speed * steerStrength * 0.5;
+                    }
+                }
+            }
+    
+            directions[index] = angle;
+    
+            if (is3D) {
+                const toCamera = camera.position.subtract(p.position).normalize();
+                const yaw = Math.atan2(toCamera.x, toCamera.z);
+                const pitch = Math.asin(toCamera.y);
+                p.rotation = new BABYLON.Vector3(pitch, yaw, 0);
+            } else {
+                p.rotation = new BABYLON.Vector3(Math.PI / 2, angle, 0);
+            }
+
+            return p;
+        };
+    
+        SPS.initParticles();
+        SPS.setParticles();
+    
+        scene.registerBeforeRender(() => {
+            SPS.setParticles();
+        });
+    
+        return SPS;
+    }
+
     infoBtn.addEventListener("click", () => {
+        
         if (!introOverlay || !infoIcon) return;
     
         infoPanelOpen = !infoPanelOpen;
     
         if (infoPanelOpen) {
+            playClickSound(false);
             introOverlay.classList.remove("hidden");
             introBox.classList.add("visible");
             infoIcon.src = "../../Assets/Images/close.png";
             infoIcon.classList.add("rotate");
+            tabletWrapper.classList.add("hidden");
+            closeInspect.classList.add("hidden");
+            window.inInfoMode = true;
+
     
-            // ⬇️ Hide the start button
-            const startBtn = document.getElementById("startButton");
         } else {
+            playClickSound(false);
             introOverlay.classList.add("hidden");
             introBox.classList.remove("visible");
             infoIcon.src = "../../Assets/Images/info.png";
             infoIcon.classList.remove("rotate");
-    
-            // ⬇️ Restore z-index to default
-            
+            tabletWrapper.classList.remove("hidden");
+            closeInspect.classList.remove("hidden");
+            window.inInfoMode = false;
         }
     });
 
     audioBtn.addEventListener("click", () => {
+        playClickSound(false);
         audioEnabled = !audioEnabled;
         audioIcon.src = audioEnabled
             ? "../../Assets/Images/sound-on.png"
@@ -631,8 +1276,158 @@ window.addEventListener("DOMContentLoaded", async () => {
         console.log(audioEnabled ? "🔊 Audio Enabled" : "🔇 Audio Muted");
     });
 
-    startButton.addEventListener("click", startTraining);
-    closeInspectButton.addEventListener("click", exitInspectMode);
+    tabEntry.addEventListener("click", () => {
+        playClickSound(false);
+        tabEntry.classList.add("active");
+        tabReport.classList.remove("active");
+        entryContent.classList.remove("hidden");
+        reportContent.classList.add("hidden");
+    });
+
+    tabReport.addEventListener("click", () => {
+        playClickSound(false);
+        tabReport.classList.add("active");
+        tabEntry.classList.remove("active");
+        reportContent.classList.remove("hidden");
+        entryContent.classList.add("hidden");
+    
+        if (!reportContent.dataset.initialized) {
+            // Facility Block
+            const facilitySection = document.createElement("div");
+            facilitySection.className = "facility-section";
+            facilitySection.innerHTML = `
+            
+                <div class="facility-grid">
+                    <img src="../../Assets/Images/warehouse.png" class="facility-photo" />
+                    <div class="facility-fields">
+                        <h3>Pacific Port Depot</h3>
+                        <label>Room Humidity:
+                            <input type="text" id="facilityHumidity" placeholder="e.g. 55" />
+                        </label>
+                        <label>Room Temperature:
+                            <input type="text" id="facilityTemperature" placeholder="e.g. 68" />
+                        </label>
+                        <label>Structural Condition:
+                            <textarea placeholder="Describe physical condition..."></textarea>
+                        </label>
+                        <label>Cleanliness and Sanitation:
+                            <textarea placeholder="Any visible hygiene issues..."></textarea>
+                        </label>
+                        <label>Additional Comments:
+                            <textarea placeholder="Other observations..."></textarea>
+                        </label>
+                        <label>Captured Photos:
+                            <div class="photo-placeholder">
+                            <div class="photo-grid">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            reportContent.appendChild(facilitySection);
+    
+            // Product Blocks
+            flaggedProducts.forEach(product => {
+                const div = document.createElement("div");
+                div.className = "product-inspection";
+                div.dataset.id = product.id;                
+                div.innerHTML = `
+                    <hr />
+                    <div class="product-block">
+                        <img src="${product.image}" class="product-thumb" />
+                        <div class="product-inspect-fields">
+                            <h3>${product.name}</h3>
+                            <label>Measured Temperature:
+                                <input type="text" class="temperature-input" placeholder="e.g. 67" />
+                            </label>
+                            <label>Sample Collected?
+                                <button class="sample-toggle">No</button>
+                            </label>
+                            <label>Inspection Details:
+                                <textarea placeholder="Describe relevant details..."></textarea>
+                            </label>
+                            <label>Captured Photos:
+                                <div class="photo-placeholder">
+                                    <div class="photo-grid"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                `;
+                reportContent.appendChild(div);
+            });
+    
+            // Format inputs on blur
+            reportContent.querySelectorAll(".temperature-input").forEach(input => {
+                input.addEventListener("blur", () => {
+                    const num = parseFloat(input.value);
+                    if (!isNaN(num)) input.value = `${num.toFixed(2)}°F`;
+                });
+            });
+    
+            const hum = document.getElementById("facilityHumidity");
+            const temp = document.getElementById("facilityTemperature");
+            
+            hum.addEventListener("blur", () => {
+                hum.value = formatSmartNumber(hum.value, "% RH");
+            });
+            temp.addEventListener("blur", () => {
+                temp.value = formatSmartNumber(temp.value, "°F");
+            });
+            
+    
+            // Toggle buttons
+            reportContent.querySelectorAll(".sample-toggle").forEach(button => {
+                button.addEventListener("click", () => {
+                    const isActive = button.classList.toggle("active");
+                    button.textContent = isActive ? "Yes" : "No";
+                });
+            });
+    
+            reportContent.dataset.initialized = "true";
+        }
+    });
+    
+    startBtn.addEventListener("click", startTraining);
+    closeInspectButton.addEventListener("click", () => {playClickSound(); exitInspectMode();});
+    
+    quitBtn.addEventListener("click", () => {window.location.href = "../../programs.html";playClickSound(false);});
+    restartBtn.addEventListener("click", () => {location.reload();playClickSound(false);});
+    exitClose.addEventListener("click", () => {exitModal.classList.add("hidden");playClickSound(false);});
+    returnButton.addEventListener("click", () => {exitModal.classList.remove("hidden"); playClickSound(false);});
+    inspectPhoto.addEventListener("click", captureScreenshot);
+    globalPhoto.addEventListener("click", captureScreenshot);
+    // Overlay close on click outside
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+            overlay.classList.add("hidden");
+            overlayImg.src = ""; // Just hide, nothing else
+            console.log("🧼 Overlay closed. Image not deleted.");
+        }
+    });
+
+    closeOverlayBtn.addEventListener("click", () => {
+        overlay.classList.add("hidden");
+        overlayImg.src = "";
+        currentOverlayPhotoId = null;
+    
+        console.log("🧼 Overlay closed");
+    });
+    
+    deletePhotoBtn.addEventListener("click", () => {
+        if (!currentOverlayPhotoId) return;
+    
+        const thumb = document.getElementById(`thumb-${currentOverlayPhotoId}`);
+        if (thumb) thumb.remove();
+    
+        overlay.classList.add("hidden");
+        overlayImg.src = "";
+        currentOverlayPhotoId = null;
+    
+        console.log("🗑️ Photo deleted via overlay button");
+    });
 
 
     engine.runRenderLoop(() => scene.render());
