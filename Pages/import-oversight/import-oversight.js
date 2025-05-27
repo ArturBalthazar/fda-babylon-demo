@@ -990,7 +990,13 @@ window.addEventListener("DOMContentLoaded", async () => {
             const facilitySection = document.createElement("div");
             facilitySection.className = "facility-section";
             facilitySection.innerHTML = `
-            
+                <div class="inspection-logs-header">
+                    <p class="intro-text">
+                        Any data collected throughout inspection will be automatically logged under its respective item below. To strenghten your report, you should also write any additional comments about your inspection that you believe are relevant for the FDA's compliance review staff.
+                    </p>
+                    <p class="spacer"></p>
+                    <p class="spacer"></p>
+                </div>
                 <div class="facility-grid">
                     <img src="../../Assets/Images/warehouse.png" class="facility-photo" />
                     <div class="facility-fields">
@@ -1581,16 +1587,22 @@ window.addEventListener("DOMContentLoaded", async () => {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(11);
         y = drawLabeledBox(doc, "Room Humidity:", facilityHumidity, rightColX, y, colWidth);
+        y += 2;
         y = drawLabeledBox(doc, "Room Temperature:", facilityTemperature, rightColX, y, colWidth);
+        y += 2;
         y = drawLabeledBox(doc, "Structural Condition:", facilityStructure, rightColX, y, colWidth);
+        y += 2;
         y = drawLabeledBox(doc, "Cleanliness and Sanitation:", facilitySanitation, rightColX, y, colWidth);
+        y += 2;
         y = drawLabeledBox(doc, "Additional Comments:", facilityComments, rightColX, y, colWidth);
+        y += 2;
         
-        doc.setFont("helvetica", "bold");
-        doc.text("Captured Photos:", rightColX, y); y += 6;
-        y = renderColumnImages(doc, facilityPhotos, y, rightColX, colWidth);
-        y += 3;
-        doc.line(margin, y, pageWidth - margin, y); y += 10;
+        if (facilityPhotos.length > 0) {
+            doc.setFont("helvetica", "bold");
+            doc.text("Captured Photos:", rightColX, y); y += 2;
+            y = renderColumnImages(doc, facilityPhotos, y, rightColX, colWidth);
+            y += 3;
+        }
     
         // ===== Products =====
         document.querySelectorAll(".product-inspection").forEach(product => {
@@ -1603,12 +1615,16 @@ window.addEventListener("DOMContentLoaded", async () => {
         
             const wrapped = doc.splitTextToSize(notes, colWidth - 5);
             const estimatedHeight = 60 + wrapped.length * 5 + productPhotos.length * 50;
-        
+            
             if (y + estimatedHeight > pageHeight - 20) {
                 doc.addPage();
                 y = 20;
             }
-        
+
+            y += 3;
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+
             // 🔠 Product Name
             doc.setFont("helvetica", "bold");
             doc.setFontSize(18);
@@ -1628,27 +1644,26 @@ window.addEventListener("DOMContentLoaded", async () => {
             doc.text("Temperature:", rightColX, y);
             doc.setFont("helvetica", "normal");
             y = drawLabeledBox(doc, "Temperature:", temp, rightColX, y, colWidth);
-            y += 6;
+            y += 2;
         
             doc.setFont("helvetica", "bold");
             doc.text("Sample Collected:", rightColX, y);
             doc.setFont("helvetica", "normal");
             y = drawLabeledBox(doc, "Sample Collected:", sample, rightColX, y, colWidth);
-            y += 6;
+            y += 2;
         
             // ✏️ Inspection Notes with wrapped box
             y = drawLabeledBox(doc, "Inspection Notes:", notes, rightColX, y, colWidth);
-        
-            // 📸 Captured Photos
-            doc.setFont("helvetica", "bold");
-            doc.text("Captured Photos:", rightColX, y);
-            y += 6;
-            y = renderColumnImages(doc, productPhotos, y, rightColX, colWidth);
-        
+            y += 2;
+         
+            if (productPhotos.length > 0) { 
+                // 📸 Captured Photos
+                doc.setFont("helvetica", "bold");
+                doc.text("Captured Photos:", rightColX, y);
+                y += 2;
+                y = renderColumnImages(doc, productPhotos, y, rightColX, colWidth);
+            }
             // ➖ Separator Line
-            y += 3;
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
         });
         
     

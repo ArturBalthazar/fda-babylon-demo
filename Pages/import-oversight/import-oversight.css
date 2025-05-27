@@ -868,6 +868,9 @@ textarea {
   .spacer {
     margin: 16px 0;
   }
+  .inspection-logs-header .spacer {
+    margin: 24px 0;
+  }
   
   .modal-content .close-btn {
     position: absolute;
