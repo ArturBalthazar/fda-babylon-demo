@@ -18,7 +18,13 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana"
+			"name":"mk_banana",
+			"rotation":[
+				0,
+				0.3798302412033081,
+				0,
+				0.9250563383102417
+			]
 		}
 	],
 	"materials":[
