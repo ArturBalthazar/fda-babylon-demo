@@ -7,6 +7,11 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://cdn.babylonjs.com/ammo.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
     <link rel="icon" type="image/png" href="../../Assets/Images/FDA-LogoOnly-Blue.png">
 
 </head>
@@ -18,7 +23,6 @@
 
     <header class="navbar" id="navbar">
         <img class="logo" src="../../Assets/Images/FDA-Logo-White.png" alt="FDA logo" />
-        <button class="nav-btn" id="navLoginBtn">Logout</button>
     </header>
 
     <div id="introOverlay" class="intro-overlay">
@@ -36,9 +40,7 @@
         </div>
     </div>
 
-    <div id="trainingTooltip" class="training-tooltip">
-        Check flagged products for inspection during entry review
-    </div>
+    <div id="hintTooltip" class="hint-tooltip"></div>
 
     <div class="tablet-wrapper" id="tabletWrapper">
         <div id="tabletButton" class="tablet-button tooltip-wrapper">
@@ -117,8 +119,9 @@
         <div class="tab-header">
             <button class="tab-button active" id="tabEntry">Entry Review</button>
             <button class="tab-button" id="tabReport">Inspection Logs</button>
+            <button class="tab-button" id="tabSubmit">Submit Report</button>
         </div>
-        <div class="tab-content" id="entryContent">
+        <div class="tab-content" id="entryReview">
             <p class="intro-text">
                 The Pacific Port Depot has some imported products currently under FDA’s review. These items were flagged for further examination and now require manual inspection by you in the role of an FDA investigator.
             </p>
@@ -132,7 +135,14 @@
             <hr>
             <div id="flaggedProducts" class="product-list"></div>
         </div>
-        <div class="tab-content hidden" id="reportContent"></div>
+        <div class="tab-content hidden" id="inspectionLogs"></div>
+        <div class="tab-content hidden" id="submitReport">
+            <div class="submit-wrapper">
+                <p class="submit-info">Once you've completed your inspection, you can click below to submit your report for the FDA's Compliance Review staff.</p>
+                <button class="submit-button" id="submitReportButton">Submit Report for Review</button>
+                <div id="pdfPreview" class="hidden"></div> <!-- Optional preview container -->
+            </div>
+        </div>
     </div>
 
     <div id="photoOverlay" class="photo-overlay hidden">
@@ -140,12 +150,17 @@
         <div class="overlay-controls-bottom">
             <div class="default-button tooltip-wrapper" id="deletePhotoBtn">
                 <img src="../../Assets/Images/trash.png" alt="Delete">
+                <span class="tooltip above">Delete Photo</span>
             </div>
             <div class="default-button tooltip-wrapper" id="closeOverlayBtn">
                 <img src="../../Assets/Images/close.png" alt="Close">
+                <span class="tooltip above">Exit Viewer</span>
             </div>
         </div>
     </div>
+
+    <div id="reportExport" style="display: none;"></div>
+
     
     <canvas id="renderCanvas"></canvas>
     <script src="import-oversight.js"></script>

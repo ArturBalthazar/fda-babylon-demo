@@ -14,7 +14,7 @@ const inputMap = {};
 
 const foodMeshes = {}; // Store root containers by name
 const foodContainers = {};
-const foodList = ["apple", "banana", "fish"];
+const foodList = ["apple", "banana", "fish", "petfood", "medicaldevice"];
 
 let currentOverlayPhotoId = null;
 
@@ -60,19 +60,22 @@ const restartBtn = document.getElementById("restartBtn");
 const quitBtn = document.getElementById("quitBtn");
 const exitClose = document.getElementById("exitClose");
 const tabletTooltip = document.getElementById("tabletTooltip");
-const tabletCustomTooltip = document.getElementById("trainingTooltip");
+const hintTooltip = document.getElementById("hintTooltip");
 const entryButton = document.querySelector(".entry-review");
 const inspectButtons = document.getElementById("anchorButtonContainer");
 const tabletWindow = document.getElementById("tabletWindow");
 const flaggedProductsContainer = document.getElementById("flaggedProducts");
 const tabEntry = document.getElementById("tabEntry");
 const tabReport = document.getElementById("tabReport");
-const entryContent = document.getElementById("entryContent");
-const reportContent = document.getElementById("reportContent");
+const tabSubmit = document.getElementById("tabSubmit");
+const entryReview = document.getElementById("entryReview");
+const inspectionLogs = document.getElementById("inspectionLogs");
+const submitReport = document.getElementById("submitReport");
 const overlay = document.getElementById("photoOverlay");
 const overlayImg = document.getElementById("overlayImg");
 const closeOverlayBtn = document.getElementById("closeOverlayBtn");
 const deletePhotoBtn = document.getElementById("deletePhotoBtn");
+const submitReportButton = document.getElementById("submitReportButton");
 
 
 // 🟨 Example product list
@@ -80,6 +83,7 @@ const flaggedProducts = [
     {
         name: "Brazilian Fuji Apples",
         id: "apple",
+        temperature: Math.floor(Math.random() * (86 - 55 + 1)) + 55,
         image: "../../Assets/Images/apples.png",
         reasons: [
             "Shipment origin from a high-risk region for pesticide residue",
@@ -90,6 +94,7 @@ const flaggedProducts = [
     {
         name: "Donkey Kong Bananas",
         id: "banana",
+        temperature: Math.floor(Math.random() * (86 - 58 + 1)) + 58,
         image: "../../Assets/Images/bananas.png",
         reasons: [
             "Barcode mismatch between manifest and product labels",
@@ -99,10 +104,31 @@ const flaggedProducts = [
     {
         name: "Nemo Nuggets Fishes",
         id: "fish",
+        temperature: Math.floor(Math.random() * (45 - 0 + 1)) + 0,
         image: "../../Assets/Images/fishes.png",
         reasons: [
             "Temperature irregularities during shipping",
             "Unusual visual discoloration reported by customs"
+        ]
+    },
+    {
+        name: "Pawsome Premium Pet Food",
+        id: "petfood",
+        temperature: Math.floor(Math.random() * (86 - 58 + 1)) + 58,
+        image: "../../Assets/Images/petfood.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
+    },
+    {
+        name: "Glucose Reading Device",
+        id: "medicaldevice",
+        temperature: null,
+        image: "../../Assets/Images/medicaldevice.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
         ]
     }
 ];
@@ -166,24 +192,6 @@ function createProductInspectionBlock(product) {
     return div;
 }
 
-function toggleSample(btn) {
-    btn.textContent = btn.textContent === "Yes" ? "No" : "Yes";
-}
-
-function formatSmartNumber(value, suffix) {
-    const num = parseFloat(value);
-    if (isNaN(num)) return "";
-
-    const parts = value.split(".");
-    if (parts.length === 1) {
-        return `${num.toFixed(0)}${suffix}`; // Integer
-    } else if (parts[1].length === 1) {
-        return `${num.toFixed(1)}${suffix}`; // One decimal
-    } else {
-        return `${num.toFixed(2)}${suffix}`; // Two or more decimals
-    }
-}
-
 window.addEventListener("DOMContentLoaded", async () => {
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true);
@@ -209,7 +217,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const ammoWorld = plugin.world;
     console.log("✅ AmmoJS plugin enabled");
 
-    showRandomFlaggedProducts(3);
+    showRandomFlaggedProducts(5);
 
     // ✅ Load GLTF Scene
     BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
@@ -351,7 +359,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     camera.lowerRadiusLimit = camera.radius;
     camera.upperRadiusLimit = camera.radius;
-    camera.alpha = Math.PI/2;
+    camera.alpha = Math.PI*2.75;
     camera.fov = 1.2;
     scene.activeCamera = camera;
     camera.keysUp = [];
@@ -505,7 +513,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
     });
     
-    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.gltf", scene, (container) => {
+/*     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "tablet.gltf", scene, (container) => {
         // Add the whole container to the scene
         container.addAllToScene();
 
@@ -542,15 +550,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     
         tabletRoot.setEnabled(false); // Hide initially
         console.log("✅ Tablet loaded and set up");
-    });
+    }); */
 
     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "thermometer.gltf", scene, (container) => {
         container.addAllToScene();
+        camera.alpha = Math.PI/2;
     
         thermometerRoot = container.rootNodes[0]; // root node of thermometer
         thermometerRoot.setParent(camera);
         thermometerRoot.position.set(0, -.01, 0.17); // 🔧 adjust position as needed
         thermometerRoot.setEnabled(false);
+        camera.alpha = Math.PI*2.75;
     
         tempAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
         if (tempAnimGroup) {
@@ -644,8 +654,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    function enterInspectMode(foodName) {
-        currentInspectedProduct = foodName;
+    function enterInspectMode(productName) {
+        currentInspectedProduct = productName;
+
+        if (currentInspectedProduct === "medicaldevice") {
+            getSample.classList.add("disabled");
+            checkTemp.classList.add("disabled");
+        }
+
         window.inInspectMode = true;
         animateCameraFOV(camera, camera.fov, .8, 300);
         scene.environmentIntensity = 0.2;
@@ -674,15 +690,15 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
 
         // Show selected and rotate the wrapper
-        const container = foodContainers[foodName];
+        const container = foodContainers[productName];
         const rootNode = container.rootNodes[0];
 
         // ✅ Create a wrapper node if it doesn't exist
-        let wrapper = scene.getNodeByName(`inspectWrapper-${foodName}`);
+        let wrapper = scene.getNodeByName(`inspectWrapper-${productName}`);
         if (!wrapper) {
-            wrapper = new BABYLON.TransformNode(`inspectWrapper-${foodName}`, scene);
+            wrapper = new BABYLON.TransformNode(`inspectWrapper-${productName}`, scene);
             wrapper.setParent(camera);
-            wrapper.position = new BABYLON.Vector3(0, -.01, 0.16);
+            wrapper.position = new BABYLON.Vector3(0, -.005, 0.16);
             rootNode.setParent(wrapper);
             rootNode.position.set(0, 0, 0);
             setupObjectRotation(wrapper);
@@ -691,17 +707,20 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         // ✅ Show it and rotate the wrapper
         wrapper.setEnabled(true);
+        wrapper.rotationQuaternion = BABYLON.Quaternion.Identity();
         rootNode.setEnabled(true);
 
     
-        console.log(`🔍 Inspecting ${foodName}`);
+        console.log(`🔍 Inspecting ${productName}`);
+
+        return productName;
     }
 
     function exitInspectMode() {
         currentInspectedProduct = null;
         window.inInspectMode = false;
         animateCameraFOV(camera, camera.fov, 1.2, 200);
-        scene.environmentIntensity = 1.3;
+        scene.environmentIntensity = 1.5;
         camera.attachControl(canvas, true);
         capsule.physicsImpostor.wakeUp();
     
@@ -856,13 +875,29 @@ window.addEventListener("DOMContentLoaded", async () => {
                 const match = flaggedProducts.find(p => p.name === title && p.id === currentInspectedProduct);
                 if (match) {
                     const grid = section.querySelector(".photo-grid");
-                    if (grid && grid.children.length < 3) targetGrid = grid;
+                    if (grid && grid.children.length < 3) {
+                        targetGrid = grid;
+                        setTimeout(() => {  
+                            giveHint(tabletButton, true, "Photo added to inspection report", true, 3000);
+                        }, 700);
+                    } else {
+                        setTimeout(() => {  
+                            giveHint(tabletButton, true, "You have reached the maximum number of photos for this item.", true, 3000);
+                        }, 200);
+                    }
                 }
             });
         } else {
             const facilityGrid = document.querySelector(".facility-section .photo-grid");
             if (facilityGrid && facilityGrid.children.length < 5) {
                 targetGrid = facilityGrid;
+                setTimeout(() => {  
+                    giveHint(tabletButton, true, "Photo added to inspection report", true, 3000);
+                }, 700);
+            } else {
+                setTimeout(() => {  
+                    giveHint(tabletButton, true, "You have reached the maximum number of photos for this facility.", true, 3000);
+                }, 200);
             }
         }
     
@@ -878,11 +913,54 @@ window.addEventListener("DOMContentLoaded", async () => {
         
     }
     
-    
+    function giveHint(buttonElement, show = true, text = "", autoHide = true, duration = 3000) {
+
+        if (!hintTooltip || !buttonElement) return;
+
+        if (!show) {
+            hintTooltip.style.opacity = "0";
+            return;
+        } else {
+            // Set content
+            hintTooltip.innerHTML = text;
+        
+            // Get button position
+            const rect = buttonElement.getBoundingClientRect();
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+        
+            // Position the tooltip above the button
+            const tooltipHeight = 40;
+            const spaceAbove = rect.top;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            
+            if (spaceAbove >= tooltipHeight + 20) {
+                // Place above
+                hintTooltip.style.top = `${rect.top + scrollTop - tooltipHeight - 12}px`; // 12px gap
+                hintTooltip.classList.remove("bottom-arrow");
+                hintTooltip.classList.add("top-arrow");
+            } else {
+                // Not enough space above — place below
+                hintTooltip.style.top = `${rect.bottom + scrollTop + 12}px`;
+                hintTooltip.classList.remove("top-arrow");
+                hintTooltip.classList.add("bottom-arrow");
+            }
+            
+            hintTooltip.style.left = `${rect.left + scrollLeft + rect.width / 2}px`;
+            hintTooltip.style.transform = "translateX(-50%)";
+            hintTooltip.style.opacity = "1";
+        
+            if (autoHide) {
+                setTimeout(() => {
+                    hintTooltip.style.opacity = "0";
+                }, duration);
+            }
+        }
+    }
     
     // ✅ Lighting & Skybox
     scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./Assets/Textures/warehouse.env", scene);
-    scene.environmentIntensity = 1.3;
+    scene.environmentIntensity = 2;
     scene.imageProcessingConfiguration.exposure = 1.2;
     scene.imageProcessingConfiguration.contrast = 1.3;
     scene.createDefaultLight(true);
@@ -890,13 +968,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     function startTraining() {
         introOverlay.classList.add("hidden");
-        const tooltip = document.getElementById("trainingTooltip");
-        if (tooltip) {
-            setTimeout(() => {
-                tooltip.style.opacity = "1";
-            }, 2000); // optional delay before showing
-        }
-    
+
+        setTimeout(() => {
+            giveHint(tabletButton, true, "Check flagged products for inspection", false, 0);
+        }, 1500); // optional delay before showing
+
         setTimeout(() => {
             tabletButton.style.opacity = "1";
             topRightButtonGroup.style.opacity = "1";
@@ -908,6 +984,76 @@ window.addEventListener("DOMContentLoaded", async () => {
         checkTemp.style.display = "none";
         getSample.style.display = "none";
         inspectPhoto.style.display = "none";
+
+        if (!inspectionLogs.dataset.initialized) {
+            // Facility Block
+            const facilitySection = document.createElement("div");
+            facilitySection.className = "facility-section";
+            facilitySection.innerHTML = `
+            
+                <div class="facility-grid">
+                    <img src="../../Assets/Images/warehouse.png" class="facility-photo" />
+                    <div class="facility-fields">
+                        <h3>Pacific Port Depot</h3>
+                        <label>Room Humidity:
+                            <input type="text" id="facilityHumidity" readonly value="Not measured ❌" />
+                        </label>
+                        <label>Room Temperature:
+                            <input type="text" id="facilityTemperature" readonly value="Not measured ❌" />
+                        </label>
+                        <label>Structural Condition:
+                            <textarea id="facilityStructure" placeholder="Describe physical condition..."></textarea>
+                        </label>
+                        <label>Cleanliness and Sanitation:
+                            <textarea id="facilitySanitation" placeholder="Any visible hygiene issues..."></textarea>
+                        </label>
+                        <label>Additional Comments:
+                            <textarea id="facilityComments" placeholder="Other observations..."></textarea>
+                        </label>
+                        <label>Captured Photos:
+                            <div class="photo-placeholder">
+                            <div class="photo-grid">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            inspectionLogs.appendChild(facilitySection);
+    
+            // Product Blocks
+            flaggedProducts.forEach(product => {
+                const div = document.createElement("div");
+                div.className = "product-inspection";
+                div.dataset.id = product.id;                
+                div.innerHTML = `
+                    <hr />
+                    <div class="product-block">
+                        <img src="${product.image}" class="product-thumb" />
+                        <div class="product-inspect-fields">
+                            <h3>${product.name}</h3>
+                            <label>Measured Temperature:
+                                <input type="text" class="temperature-input" readonly value="Not measured ❌" />
+                            </label>
+                            <label>Sample Collected:
+                                <input type="text" class="sample-status" readonly value="No ❌" />
+                            </label>
+                            <label>Inspection Details:
+                                <textarea placeholder="Describe relevant details..."></textarea>
+                            </label>
+                            <label>Captured Photos:
+                                <div class="photo-placeholder">
+                                    <div class="photo-grid"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                inspectionLogs.appendChild(div);
+            });
+    
+            inspectionLogs.dataset.initialized = "true";
+        }
 
         // ✅ Now user has interacted — safe to load & play audio
         audioWalking = new Audio("./Assets/Sounds/walking.m4a");
@@ -1032,17 +1178,63 @@ window.addEventListener("DOMContentLoaded", async () => {
             inspectPhoto.classList.remove("disabled");
             closeInspectButton.classList.remove("disabled");
         }, 7800);
+        setTimeout(() => {
+            const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
+            // Log into the correct input field
+            document.querySelectorAll(".product-inspection").forEach(section => {
+                const title = section.querySelector("h3")?.textContent?.trim();
+                if (title === product.name) {
+                    const tempInput = section.querySelector(".temperature-input");
+                    if (tempInput) {
+                        tempInput.value = `${product.temperature}°F ✅`;
+                    }
+                }
+            });
+            if (product) {
+                giveHint(tabletButton, true, `Temperature of <strong>${product.temperature}°F</strong> logged for <strong>${product.name}</strong> ✅`, true, 3000);
+            }
+        }, 6000);
+    });
+
+    getSample.addEventListener("click", () => {
+        playClickSound(false)
+    
+        window.inCollectSample = true;
+
+        // 🔒 Disable and dim the button
+        checkTemp.classList.add("disabled");
+        getSample.classList.add("disabled");
+        inspectPhoto.classList.add("disabled");
+        closeInspectButton.classList.add("disabled");
+    
+        setTimeout(() => {
+            window.inCollectSample = false;
+            checkTemp.classList.remove("disabled");
+            getSample.classList.remove("disabled");
+            inspectPhoto.classList.remove("disabled");
+            closeInspectButton.classList.remove("disabled");
+        }, 2000);
+        setTimeout(() => {
+            const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
+            // Log into the correct input field
+            document.querySelectorAll(".product-inspection").forEach(section => {
+                const title = section.querySelector("h3")?.textContent?.trim();
+                if (title === product.name) {
+                    const sampleInput = section.querySelector(".sample-status");
+                    if (sampleInput) {
+                        sampleInput.value = `Yes ✅`;
+                    }
+                }
+            });
+            if (product) {
+                giveHint(tabletButton, true, `Sample collected for <strong>${product.name}</strong> ✅`, true, 3000);
+            }
+        }, 1000);
     });
     
-
     tabletButton.addEventListener("click", () => {
         
-        if (tabletCustomTooltip) {
-            tabletCustomTooltip.style.opacity = "0";
-            setTimeout(() => {
-                tabletCustomTooltip.remove();
-            }, 400);
-        }
+        giveHint(tabletButton, false, "Check flagged products for inspection", false, 0);
     
         if (!tabletOn) {
             playClickSound(false);
@@ -1281,116 +1473,32 @@ window.addEventListener("DOMContentLoaded", async () => {
         playClickSound(false);
         tabEntry.classList.add("active");
         tabReport.classList.remove("active");
-        entryContent.classList.remove("hidden");
-        reportContent.classList.add("hidden");
+        tabSubmit.classList.remove("active");
+        entryReview.classList.remove("hidden");
+        inspectionLogs.classList.add("hidden");
+        submitReport.classList.add("hidden");
     });
 
     tabReport.addEventListener("click", () => {
         playClickSound(false);
         tabReport.classList.add("active");
         tabEntry.classList.remove("active");
-        reportContent.classList.remove("hidden");
-        entryContent.classList.add("hidden");
-    
-        if (!reportContent.dataset.initialized) {
-            // Facility Block
-            const facilitySection = document.createElement("div");
-            facilitySection.className = "facility-section";
-            facilitySection.innerHTML = `
-            
-                <div class="facility-grid">
-                    <img src="../../Assets/Images/warehouse.png" class="facility-photo" />
-                    <div class="facility-fields">
-                        <h3>Pacific Port Depot</h3>
-                        <label>Room Humidity:
-                            <input type="text" id="facilityHumidity" placeholder="e.g. 55" />
-                        </label>
-                        <label>Room Temperature:
-                            <input type="text" id="facilityTemperature" placeholder="e.g. 68" />
-                        </label>
-                        <label>Structural Condition:
-                            <textarea placeholder="Describe physical condition..."></textarea>
-                        </label>
-                        <label>Cleanliness and Sanitation:
-                            <textarea placeholder="Any visible hygiene issues..."></textarea>
-                        </label>
-                        <label>Additional Comments:
-                            <textarea placeholder="Other observations..."></textarea>
-                        </label>
-                        <label>Captured Photos:
-                            <div class="photo-placeholder">
-                            <div class="photo-grid">
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            reportContent.appendChild(facilitySection);
-    
-            // Product Blocks
-            flaggedProducts.forEach(product => {
-                const div = document.createElement("div");
-                div.className = "product-inspection";
-                div.dataset.id = product.id;                
-                div.innerHTML = `
-                    <hr />
-                    <div class="product-block">
-                        <img src="${product.image}" class="product-thumb" />
-                        <div class="product-inspect-fields">
-                            <h3>${product.name}</h3>
-                            <label>Measured Temperature:
-                                <input type="text" class="temperature-input" placeholder="e.g. 67" />
-                            </label>
-                            <label>Sample Collected?
-                                <button class="sample-toggle">No</button>
-                            </label>
-                            <label>Inspection Details:
-                                <textarea placeholder="Describe relevant details..."></textarea>
-                            </label>
-                            <label>Captured Photos:
-                                <div class="photo-placeholder">
-                                    <div class="photo-grid"></div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    
-                `;
-                reportContent.appendChild(div);
-            });
-    
-            // Format inputs on blur
-            reportContent.querySelectorAll(".temperature-input").forEach(input => {
-                input.addEventListener("blur", () => {
-                    const num = parseFloat(input.value);
-                    if (!isNaN(num)) input.value = `${num.toFixed(2)}°F`;
-                });
-            });
-    
-            const hum = document.getElementById("facilityHumidity");
-            const temp = document.getElementById("facilityTemperature");
-            
-            hum.addEventListener("blur", () => {
-                hum.value = formatSmartNumber(hum.value, "% RH");
-            });
-            temp.addEventListener("blur", () => {
-                temp.value = formatSmartNumber(temp.value, "°F");
-            });
-            
-    
-            // Toggle buttons
-            reportContent.querySelectorAll(".sample-toggle").forEach(button => {
-                button.addEventListener("click", () => {
-                    const isActive = button.classList.toggle("active");
-                    button.textContent = isActive ? "Yes" : "No";
-                });
-            });
-    
-            reportContent.dataset.initialized = "true";
-        }
+        tabSubmit.classList.remove("active");
+        inspectionLogs.classList.remove("hidden");
+        entryReview.classList.add("hidden");
+        submitReport.classList.add("hidden");
     });
-    
+
+    tabSubmit.addEventListener("click", () => {
+        playClickSound(false);
+        tabSubmit.classList.add("active");
+        tabEntry.classList.remove("active");
+        tabReport.classList.remove("active");
+        submitReport.classList.remove("hidden");
+        entryReview.classList.add("hidden");
+        inspectionLogs.classList.add("hidden");
+    });
+
     startBtn.addEventListener("click", startTraining);
     closeInspectButton.addEventListener("click", () => {playClickSound(); exitInspectMode();});
     
@@ -1430,6 +1538,246 @@ window.addEventListener("DOMContentLoaded", async () => {
         console.log("🗑️ Photo deleted via overlay button");
     });
 
+    
+    function generateFinalPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const rightColX = margin + 50;
+        const colWidth = pageWidth - margin * 2 - 50;
+        let y = 20;
+    
+        const clean = txt => txt?.replace(/[^\x20-\x7E]/g, "").replace(/'L/g, "").trim() || "—";
+    
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(24);
+        doc.text("FDA Physical Examination Report", pageWidth / 2, y, { align: "center" });
+        y += 4;
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
+    
+        // ===== Facility =====
+        const facilityHumidity = clean(document.getElementById("facilityHumidity")?.value);
+        const facilityTemperature = clean(document.getElementById("facilityTemperature")?.value);
+        const facilityStructure = clean(document.getElementById("facilityStructure")?.value);
+        const facilitySanitation = clean(document.getElementById("facilitySanitation")?.value);
+        const facilityComments = clean(document.getElementById("facilityComments")?.value);
+        const facilityPhotos = document.querySelectorAll(".facility-section .photo-grid img");
+        const facilityThumb = document.querySelector(".facility-photo");
+    
+        doc.setFontSize(18);
+        doc.text("Pacific Port Depot", margin, y);
+        y += 8;
+    
+        if (facilityThumb) {
+            const { dataUrl, imgWidth, imgHeight } = getImageWithRadius(facilityThumb, 40);
+            doc.addImage(dataUrl, "PNG", margin, y, imgWidth, imgHeight);
+        }
+
+        y += 2;
+    
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        y = drawLabeledBox(doc, "Room Humidity:", facilityHumidity, rightColX, y, colWidth);
+        y = drawLabeledBox(doc, "Room Temperature:", facilityTemperature, rightColX, y, colWidth);
+        y = drawLabeledBox(doc, "Structural Condition:", facilityStructure, rightColX, y, colWidth);
+        y = drawLabeledBox(doc, "Cleanliness and Sanitation:", facilitySanitation, rightColX, y, colWidth);
+        y = drawLabeledBox(doc, "Additional Comments:", facilityComments, rightColX, y, colWidth);
+        
+        doc.setFont("helvetica", "bold");
+        doc.text("Captured Photos:", rightColX, y); y += 6;
+        y = renderColumnImages(doc, facilityPhotos, y, rightColX, colWidth);
+        y += 3;
+        doc.line(margin, y, pageWidth - margin, y); y += 10;
+    
+        // ===== Products =====
+        document.querySelectorAll(".product-inspection").forEach(product => {
+            const name = clean(product.querySelector("h3")?.textContent);
+            const temp = clean(product.querySelector(".temperature-input")?.value);
+            const sample = clean(product.querySelector("input.sample-status")?.value);
+            const notes = clean(product.querySelector("textarea")?.value);
+            const productPhotos = product.querySelectorAll(".photo-grid img");
+            const productThumb = product.querySelector(".product-thumb");
+        
+            const wrapped = doc.splitTextToSize(notes, colWidth - 5);
+            const estimatedHeight = 60 + wrapped.length * 5 + productPhotos.length * 50;
+        
+            if (y + estimatedHeight > pageHeight - 20) {
+                doc.addPage();
+                y = 20;
+            }
+        
+            // 🔠 Product Name
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text(name, margin, y);
+            y += 8;
+        
+            // 🖼️ Product Thumbnail
+            if (productThumb) {
+                const { dataUrl, imgWidth, imgHeight } = getImageWithRadius(productThumb, 40);
+                doc.addImage(dataUrl, "PNG", margin, y, imgWidth, imgHeight);
+            }
+            y += 6;
+            // 📋 Data Fields
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.text("Temperature:", rightColX, y);
+            doc.setFont("helvetica", "normal");
+            y = drawLabeledBox(doc, "Temperature:", temp, rightColX, y, colWidth);
+            y += 6;
+        
+            doc.setFont("helvetica", "bold");
+            doc.text("Sample Collected:", rightColX, y);
+            doc.setFont("helvetica", "normal");
+            y = drawLabeledBox(doc, "Sample Collected:", sample, rightColX, y, colWidth);
+            y += 6;
+        
+            // ✏️ Inspection Notes with wrapped box
+            y = drawLabeledBox(doc, "Inspection Notes:", notes, rightColX, y, colWidth);
+        
+            // 📸 Captured Photos
+            doc.setFont("helvetica", "bold");
+            doc.text("Captured Photos:", rightColX, y);
+            y += 6;
+            y = renderColumnImages(doc, productPhotos, y, rightColX, colWidth);
+        
+            // ➖ Separator Line
+            y += 3;
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+        });
+        
+    
+        doc.save("FDA-Inspection-Report.pdf");
+    }
+
+    function drawLabeledBox(doc, label, text, x, y, maxWidth) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, x, y);
+        y += 2;
+    
+        const lines = doc.splitTextToSize(text, maxWidth - 6);
+        const height = lines.length * 5 + 4;
+    
+        // Gray background box
+        doc.setDrawColor(220);
+        doc.setFillColor(245);
+        doc.roundedRect(x, y, maxWidth, height, 3, 3, 'F');
+    
+        doc.setFont("helvetica", "normal");
+        lines.forEach((line, i) => {
+            doc.text(line, x + 3, y + 6 + i * 5);
+        });
+    
+        return y + height + 5;
+    }
+
+    
+    // 🖼️ Mask image with border radius using canvas
+    function getImageWithRadius(img, targetDisplayWidth = 40, radius = 6) {
+        const naturalWidth = img.naturalWidth || 300;
+        const naturalHeight = img.naturalHeight || 200;
+        const aspectRatio = naturalHeight / naturalWidth;
+    
+        // 🧠 2x resolution canvas for sharper PDF image
+        const canvasWidth = 4 * targetDisplayWidth;
+        const canvasHeight = canvasWidth * aspectRatio;
+        const canvas = document.createElement("canvas");
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+    
+        const ctx = canvas.getContext("2d");
+    
+        // 🟢 Draw rounded rectangle path
+        const r = radius * 2;
+        ctx.beginPath();
+        ctx.moveTo(r, 0);
+        ctx.lineTo(canvasWidth - r, 0);
+        ctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, r);
+        ctx.lineTo(canvasWidth, canvasHeight - r);
+        ctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - r, canvasHeight);
+        ctx.lineTo(r, canvasHeight);
+        ctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - r);
+        ctx.lineTo(0, r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath();
+        ctx.clip();
+    
+        // 🖼️ Draw high-res image scaled into canvas
+        ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+    
+        const dataUrl = canvas.toDataURL("image/png");
+        return {
+            dataUrl,
+            imgWidth: targetDisplayWidth,
+            imgHeight: targetDisplayWidth * aspectRatio
+        };
+    }
+    
+    
+    // 📸 Render inspection photos in column layout with full width
+    function renderColumnImages(doc, imgList, startY, x, maxWidth) {
+        let y = startY;
+    
+        imgList.forEach(img => {
+            const naturalWidth = img.naturalWidth || 300;
+            const naturalHeight = img.naturalHeight || 200;
+    
+            // 🔎 Maintain aspect ratio
+            const aspectRatio = naturalHeight / naturalWidth;
+            const targetWidth = maxWidth;
+            const targetHeight = targetWidth * aspectRatio;
+    
+            // 🧼 Avoid overflow
+            const pageHeight = doc.internal.pageSize.getHeight();
+            if (y + targetHeight > pageHeight - 20) {
+                doc.addPage();
+                y = 20;
+            }
+    
+            // 🖼️ Prepare canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = naturalWidth;
+            canvas.height = naturalHeight;
+            const ctx = canvas.getContext("2d");
+    
+            // 🟢 Rounded rectangle
+            const radius = 20;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(naturalWidth - radius, 0);
+            ctx.quadraticCurveTo(naturalWidth, 0, naturalWidth, radius);
+            ctx.lineTo(naturalWidth, naturalHeight - radius);
+            ctx.quadraticCurveTo(naturalWidth, naturalHeight, naturalWidth - radius, naturalHeight);
+            ctx.lineTo(radius, naturalHeight);
+            ctx.quadraticCurveTo(0, naturalHeight, 0, naturalHeight - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.clip();
+    
+            ctx.drawImage(img, 0, 0);
+    
+            // Convert to base64 PNG
+            const dataUrl = canvas.toDataURL("image/png");
+    
+            // 📦 Insert into PDF
+            doc.addImage(dataUrl, "PNG", x, y, targetWidth, targetHeight);
+            y += targetHeight + 6;
+        });
+    
+        return y;
+    }
+    
+    
+    submitReportButton.addEventListener("click", generateFinalPDF);
+
+    
+    
 
     engine.runRenderLoop(() => {
         scene.render();
