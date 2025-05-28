@@ -488,24 +488,34 @@ window.addEventListener("DOMContentLoaded", async () => {
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("trigger");
-
+            
                     if (triggerComponent) {
                         triggerComponent.onButtonStateChangedObservable.add(() => {
-                            // Detect press
                             if (triggerComponent.changes.pressed && triggerComponent.pressed) {
                                 const pick = scene.pickWithRay(controller.getForwardRay(1.0));
-
+                                
                                 if (pick.hit && pick.pickedMesh) {
                                     const name = pick.pickedMesh.name;
-
+            
                                     if (name === "mk_apples_01" || name === "mk_apples_02") {
-                                        const appleRoot = pick.pickedMesh.parent;
+                                        const appleRoot = foodMeshes["apple"];
                                         if (appleRoot) {
-                                            console.log("🍎 Grabbed", name);
-                                            grabbedApple = appleRoot;
-                                            appleRoot.setParent(controller.grip || controller.pointer); // Attach to hand
+                                            console.log("🍎 Grabbed real apple from glTF");
+            
+                                            appleRoot.setEnabled(true);
+                                            appleRoot.setParent(controller.grip || controller.pointer);
+                                            grabbedItem = appleRoot;
                                         }
                                     }
+                                }
+                            }
+            
+                            // Release on button up
+                            if (triggerComponent.changes.pressed && !triggerComponent.pressed) {
+                                if (grabbedItem) {
+                                    console.log("👐 Released item");
+                                    grabbedItem.setParent(null);
+                                    grabbedItem = null;
                                 }
                             }
                         });
