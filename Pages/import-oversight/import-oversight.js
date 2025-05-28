@@ -425,6 +425,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
+    const cube = BABYLON.MeshBuilder.CreateBox("grabbableCube", { size: 0.2 }, scene);
+    cube.position = new BABYLON.Vector3(0, 1.5, 1);
+    cube.material = new BABYLON.StandardMaterial("cubeMat", scene);
+    cube.material.diffuseColor = new BABYLON.Color3(0.2, 0.8, 1);
+    cube.isPickable = true;
+
     async function enableVR(scene, ground) {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({
@@ -479,22 +485,18 @@ window.addEventListener("DOMContentLoaded", async () => {
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const trigger = motionController.getComponent("trigger");
-
+            
                     if (trigger) {
                         trigger.onButtonStateChangedObservable.add(() => {
-                            // On trigger press
                             if (trigger.changes.pressed && trigger.pressed) {
                                 const pick = scene.pickWithRay(controller.getForwardRay(1.0));
                                 if (pick.hit && pick.pickedMesh && pick.pickedMesh.name === "grabbableCube") {
-                                    console.log("🟦 Grabbed cube");
                                     grabbedItem = cube;
                                     cube.setParent(controller.grip || controller.pointer);
                                 }
                             }
-
-                            // On trigger release
+            
                             if (trigger.changes.pressed && !trigger.pressed && grabbedItem) {
-                                console.log("👐 Released cube");
                                 grabbedItem.setParent(null);
                                 grabbedItem = null;
                             }
