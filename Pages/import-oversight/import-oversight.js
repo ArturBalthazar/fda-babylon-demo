@@ -34,8 +34,13 @@ const anchorButtons = [];
 let anchorWrapper = null;
 let currentInspectedProduct = null;
 
-let thermometerRoot = null;
-let tempAnimGroup = null;
+let thermRoot = null;
+let thermAnimGroup = null;
+let thermMaterial = null;
+
+let sampleRoot = null;
+let sampleAnimGroup = null;
+let sampleMaterial = null;
 
 const tabletButton = document.getElementById("tabletButton");
 const tabletWrapper = document.getElementById("tabletWrapper");
@@ -420,27 +425,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    function enableVR(scene, groundMesh = null) {
-        scene.createDefaultXRExperienceAsync({
-            floorMeshes: groundMesh ? [groundMesh] : []
-        }).then((xrHelper) => {
-            console.log("✅ XR experience created");
-    
-            xrHelper.baseExperience.onStateChangedObservable.add((state) => {
-                if (state === BABYLON.WebXRState.IN_XR) {
-                    console.log("🎯 Entered XR");
-                    // Optional: hide desktop UI, change lighting, etc.
-                } else if (state === BABYLON.WebXRState.EXITING_XR) {
-                    console.log("👋 Exited XR");
-                    // Optional: restore desktop state
-                }
-            });
-        }).catch(err => {
-            console.error("❌ Failed to create XR experience", err);
-        });
-    }
-    
-
     async function enableVR(scene, ground) {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({
@@ -485,38 +469,34 @@ window.addEventListener("DOMContentLoaded", async () => {
                 }
             );
 
+            // Create a simple cube to test grabbing
+            const cube = BABYLON.MeshBuilder.CreateBox("grabbableCube", { size: 0.2 }, scene);
+            cube.position = new BABYLON.Vector3(0, 1.5, 1);
+            cube.material = new BABYLON.StandardMaterial("cubeMat", scene);
+            cube.material.diffuseColor = new BABYLON.Color3(0.2, 0.8, 1); // Light blue
+            cube.isPickable = true;
+
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
-                    const triggerComponent = motionController.getComponent("trigger");
-            
-                    if (triggerComponent) {
-                        triggerComponent.onButtonStateChangedObservable.add(() => {
-                            if (triggerComponent.changes.pressed && triggerComponent.pressed) {
+                    const trigger = motionController.getComponent("trigger");
+
+                    if (trigger) {
+                        trigger.onButtonStateChangedObservable.add(() => {
+                            // On trigger press
+                            if (trigger.changes.pressed && trigger.pressed) {
                                 const pick = scene.pickWithRay(controller.getForwardRay(1.0));
-                                
-                                if (pick.hit && pick.pickedMesh) {
-                                    const name = pick.pickedMesh.name;
-            
-                                    if (name === "mk_apples_01" || name === "mk_apples_02") {
-                                        const appleRoot = foodMeshes["apple"];
-                                        if (appleRoot) {
-                                            console.log("🍎 Grabbed real apple from glTF");
-            
-                                            appleRoot.setEnabled(true);
-                                            appleRoot.setParent(controller.grip || controller.pointer);
-                                            grabbedItem = appleRoot;
-                                        }
-                                    }
+                                if (pick.hit && pick.pickedMesh && pick.pickedMesh.name === "grabbableCube") {
+                                    console.log("🟦 Grabbed cube");
+                                    grabbedItem = cube;
+                                    cube.setParent(controller.grip || controller.pointer);
                                 }
                             }
-            
-                            // Release on button up
-                            if (triggerComponent.changes.pressed && !triggerComponent.pressed) {
-                                if (grabbedItem) {
-                                    console.log("👐 Released item");
-                                    grabbedItem.setParent(null);
-                                    grabbedItem = null;
-                                }
+
+                            // On trigger release
+                            if (trigger.changes.pressed && !trigger.pressed && grabbedItem) {
+                                console.log("👐 Released cube");
+                                grabbedItem.setParent(null);
+                                grabbedItem = null;
                             }
                         });
                     }
@@ -720,20 +700,42 @@ window.addEventListener("DOMContentLoaded", async () => {
         container.addAllToScene();
         camera.alpha = Math.PI/2;
     
-        thermometerRoot = container.rootNodes[0]; // root node of thermometer
-        thermometerRoot.setParent(camera);
-        thermometerRoot.position.set(0, -.01, 0.17); // 🔧 adjust position as needed
-        thermometerRoot.setEnabled(false);
+        thermRoot = container.rootNodes[0]; // root node of thermometer
+        thermRoot.setParent(camera);
+        thermRoot.position.set(0, -.01, 0.17); // 🔧 adjust position as needed
+        thermRoot.setEnabled(false);
         camera.alpha = Math.PI*2.75;
     
-        tempAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
-        if (tempAnimGroup) {
-            tempAnimGroup.stop();
-            tempAnimGroup.goToFrame(0);
+        thermAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
+        if (thermAnimGroup) {
+            thermAnimGroup.stop();
+            thermAnimGroup.goToFrame(0);
         }
     
+        thermMaterial = container.materials[0];
         
         console.log("✅ Thermometer loaded and parented to camera");
+    });
+
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "sample.gltf", scene, (container) => {
+        container.addAllToScene();
+        camera.alpha = Math.PI/2;
+    
+        sampleRoot = container.rootNodes[0]; // root node of thermometer
+        sampleRoot.setParent(camera);
+        sampleRoot.position.set(-.17, -.05, 0.35); // 🔧 adjust position as needed
+        sampleRoot.setEnabled(false);
+        camera.alpha = Math.PI*2.75;
+    
+        sampleAnimGroup = container.animationGroups.find(g => g.name === "Samples");
+        if (sampleAnimGroup) {
+            sampleAnimGroup.stop();
+            sampleAnimGroup.goToFrame(0);
+        }
+
+        sampleMaterial = container.materials[0];
+    
+        console.log("✅ Sample loaded and parented to camera");
     });
     
     await BABYLON.SceneLoader.ImportMeshAsync("", "./Assets/Models/", "anchors.glb", scene).then(result => {
@@ -1325,9 +1327,55 @@ window.addEventListener("DOMContentLoaded", async () => {
         requestAnimationFrame(animate);
     }
 
+    function fadeSampleMaterial(show = true, durationInSeconds = 0.5, material = sampleMaterial) {
+        if (!material) return;
+    
+        const fps = 30;
+        const totalFrames = durationInSeconds * fps;
+    
+        // Setup for blending
+        material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLENDANDTEST;
+        material.needDepthPrePass = true;
+        material.backFaceCulling = true;
+    
+        const fromAlpha = show ? 0.01 : 1;
+        const toAlpha   = show ? 1 : 0;
+        material.alpha = fromAlpha;
+    
+        // Create fade animation
+        const alphaAnimation = new BABYLON.Animation(
+            "fadeAlpha",
+            "alpha",
+            fps,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+            BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+        );
+    
+        alphaAnimation.setKeys([
+            { frame: 0, value: fromAlpha },
+            { frame: totalFrames, value: toAlpha }
+        ]);
+    
+        const easing = new BABYLON.CubicEase();
+        easing.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEOUT);
+        alphaAnimation.setEasingFunction(easing);
+    
+        material.animations = [alphaAnimation];
+        scene.beginAnimation(material, 0, totalFrames, false);
+    
+        // Restore material settings after animation
+        if (show) {
+            setTimeout(() => {
+                material.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE;
+                material.needDepthPrePass = false;
+                material.backFaceCulling = false;
+            }, durationInSeconds * 1000);
+        }
+    }
+
     checkTemp.addEventListener("click", () => {
         playClickSound(false)
-        if (!thermometerRoot || !tempAnimGroup) return;
+        if (!thermRoot || !thermAnimGroup) return;
     
         window.inTempCheck = true;
 
@@ -1338,13 +1386,15 @@ window.addEventListener("DOMContentLoaded", async () => {
         closeInspectButton.classList.add("disabled");
     
         // Enable and play forward
-        thermometerRoot.setEnabled(true);
+        thermRoot.setEnabled(true);
+
+        fadeSampleMaterial(true, 3, thermMaterial);
     
-        tempAnimGroup.reset();
-        tempAnimGroup.speedRatio = 1.0;
-        tempAnimGroup.play(false);
+        thermAnimGroup.reset();
+        thermAnimGroup.speedRatio = 1.0;
+        thermAnimGroup.play(false);
         setTimeout(() => {
-            thermometerRoot.setEnabled(false);
+            thermRoot.setEnabled(false);
             window.inTempCheck = false;
             checkTemp.classList.remove("disabled");
             getSample.classList.remove("disabled");
@@ -1366,27 +1416,38 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (product) {
                 giveHint(tabletButton, true, `Temperature of <strong>${product.temperature}°F</strong> logged for <strong>${product.name}</strong> ✅`, true, 3000);
             }
+            fadeSampleMaterial(false, 1, thermMaterial);
         }, 6000);
     });
 
     getSample.addEventListener("click", () => {
         playClickSound(false)
+        if (!sampleRoot || !sampleAnimGroup) return;
     
-        window.inCollectSample = true;
+        window.inSampleCheck = true;
 
         // 🔒 Disable and dim the button
         checkTemp.classList.add("disabled");
         getSample.classList.add("disabled");
         inspectPhoto.classList.add("disabled");
         closeInspectButton.classList.add("disabled");
-    
+        
+        // Enable and play forward
+        sampleRoot.setEnabled(true);
+
+        fadeSampleMaterial(true, 1.5, sampleMaterial);
+        
+        sampleAnimGroup.reset();
+        sampleAnimGroup.speedRatio = 1.0;
+        sampleAnimGroup.play(false);
         setTimeout(() => {
-            window.inCollectSample = false;
+            sampleRoot.setEnabled(false);
+            window.inSampleCheck = false;
             checkTemp.classList.remove("disabled");
             getSample.classList.remove("disabled");
             inspectPhoto.classList.remove("disabled");
             closeInspectButton.classList.remove("disabled");
-        }, 2000);
+        }, 4000);
         setTimeout(() => {
             const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
             // Log into the correct input field
@@ -1402,7 +1463,8 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (product) {
                 giveHint(tabletButton, true, `Sample collected for <strong>${product.name}</strong> ✅`, true, 3000);
             }
-        }, 1000);
+            fadeSampleMaterial(false, 1, sampleMaterial);
+        }, 3000);
     });
     
     tabletButton.addEventListener("click", () => {
