@@ -6,6 +6,7 @@ let tabletAnimGroup = null;
 let firstTabletOpen = true;
 
 let ground = null;
+let grabbedApple = null;
 
 let idleTimer = 0;
 let lastMoveTime = performance.now();
@@ -439,6 +440,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
     }
     
+
     async function enableVR(scene, ground) {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({
@@ -482,18 +484,42 @@ window.addEventListener("DOMContentLoaded", async () => {
                     enablePointerSelectionOnAllControllers: true
                 }
             );
-    
-            // (Optional double enabling, remove if unnecessary)
-            // const featuresManager = xrHelper.baseExperience.featuresManager;
-            // featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
-            //     xrInput: xrHelper.input,
-            //     enablePointerSelectionOnAllControllers: true
-            // });
+
+            xrHelper.input.onControllerAddedObservable.add((controller) => {
+                controller.onMotionControllerInitObservable.add((motionController) => {
+                    const triggerComponent = motionController.getComponent("trigger");
+
+                    if (triggerComponent) {
+                        triggerComponent.onButtonStateChangedObservable.add(() => {
+                            // Detect press
+                            if (triggerComponent.changes.pressed && triggerComponent.pressed) {
+                                const pick = scene.pickWithRay(controller.getForwardRay(1.0));
+
+                                if (pick.hit && pick.pickedMesh) {
+                                    const name = pick.pickedMesh.name;
+
+                                    if (name === "mk_apples_01" || name === "mk_apples_02") {
+                                        const appleRoot = pick.pickedMesh.parent;
+                                        if (appleRoot) {
+                                            console.log("🍎 Grabbed", name);
+                                            grabbedApple = appleRoot;
+                                            appleRoot.setParent(controller.grip || controller.pointer); // Attach to hand
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
         }
     }
+    
+
 
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
@@ -1919,7 +1945,11 @@ window.addEventListener("DOMContentLoaded", async () => {
         return y;
     }
     
+    
     submitReportButton.addEventListener("click", generateFinalPDF);
+
+    
+    
 
     engine.runRenderLoop(() => {
         scene.render();
@@ -1931,7 +1961,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (navigator.xr) {
         navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
             if (supported) {
-                enableVR(scene, ground);
+                enableVR(scene, ground); // Optional: pass ground if needed
             } else {
                 console.log("🧯 XR not supported on this device");
             }
