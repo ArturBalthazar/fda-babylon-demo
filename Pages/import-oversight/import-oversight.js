@@ -5,6 +5,8 @@ let tabletSkeleton = null;
 let tabletAnimGroup = null;
 let firstTabletOpen = true;
 
+let ground = null;
+
 let idleTimer = 0;
 let lastMoveTime = performance.now();
 let walkTime = 0;
@@ -14,7 +16,7 @@ const inputMap = {};
 
 const foodMeshes = {}; // Store root containers by name
 const foodContainers = {};
-const foodList = ["apple", "banana", "fish", "petfood", "medicaldevice"];
+const foodList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
 
 let currentOverlayPhotoId = null;
 
@@ -130,6 +132,56 @@ const flaggedProducts = [
             "Consumer reports indicating potential harmful adulteration",
             "Other regulatory agencies have conducted tests due to safety concerns"
         ]
+    },
+    {
+        name: "Metaretail Cosmetics",
+        id: "cosmetics",
+        temperature: null,
+        image: "../../Assets/Images/cosmetics.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
+    },
+    {
+        name: "Packed Food 1",
+        id: "packedfood1",
+        temperature: null,
+        image: "../../Assets/Images/packedfood1.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
+    },
+    {
+        name: "Packed Food 2",
+        id: "packedfood2",
+        temperature: null,
+        image: "../../Assets/Images/packedfood2.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
+    },
+    {
+        name: "Packed Food 3",
+        id: "packedfood3",
+        temperature: null,
+        image: "../../Assets/Images/packedfood3.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
+    },
+    {
+        name: "Drugs",
+        id: "drugs",
+        temperature: null,
+        image: "../../Assets/Images/drugs.png",
+        reasons: [
+            "Consumer reports indicating potential harmful adulteration",
+            "Other regulatory agencies have conducted tests due to safety concerns"
+        ]
     }
 ];
 
@@ -217,7 +269,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const ammoWorld = plugin.world;
     console.log("✅ AmmoJS plugin enabled");
 
-    showRandomFlaggedProducts(5);
+    showRandomFlaggedProducts(10);
 
     // ✅ Load GLTF Scene
     BABYLON.SceneLoader.ImportMesh("", "./Assets/Models/", "warehouse.gltf", scene, (meshes) => {
@@ -255,7 +307,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
 
         // ✅ Apply raw Ammo collision to mk_collider
-        const ground = meshes.find(m => m.name === "mk_collider");
+        ground = meshes.find(m => m.name === "mk_collider");
         if (ground) {
             console.log("✅ mk_collider found, creating raw Ammo body");
 
@@ -366,6 +418,82 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysDown = [];
     camera.keysLeft = [];
     camera.keysRight = [];
+
+    function enableVR(scene, groundMesh = null) {
+        scene.createDefaultXRExperienceAsync({
+            floorMeshes: groundMesh ? [groundMesh] : []
+        }).then((xrHelper) => {
+            console.log("✅ XR experience created");
+    
+            xrHelper.baseExperience.onStateChangedObservable.add((state) => {
+                if (state === BABYLON.WebXRState.IN_XR) {
+                    console.log("🎯 Entered XR");
+                    // Optional: hide desktop UI, change lighting, etc.
+                } else if (state === BABYLON.WebXRState.EXITING_XR) {
+                    console.log("👋 Exited XR");
+                    // Optional: restore desktop state
+                }
+            });
+        }).catch(err => {
+            console.error("❌ Failed to create XR experience", err);
+        });
+    }
+    
+    async function enableVR(scene, ground) {
+        try {
+            const xrHelper = await scene.createDefaultXRExperienceAsync({
+                floorMeshes: [ground],
+                uiOptions: {
+                    sessionMode: "immersive-vr"
+                }
+            });
+    
+            console.log("✅ XR experience initialized");
+    
+            // Handle entering and exiting VR
+            xrHelper.baseExperience.onStateChangedObservable.add((state) => {
+                if (state === BABYLON.WebXRState.IN_XR) {
+                    console.log("🎯 Entered XR");
+                    camera.detachControl();
+                    // Hide or adjust UI here if needed
+                } else if (state === BABYLON.WebXRState.EXITING_XR) {
+                    console.log("👋 Exiting XR");
+                    camera.attachControl(canvas);
+                    // Restore UI
+                }
+            });
+    
+            // Enable teleportation
+            xrHelper.baseExperience.featuresManager.enableFeature(
+                BABYLON.WebXRTeleportation,
+                "latest",
+                {
+                    floorMeshes: [ground],
+                    xrInput: xrHelper.input
+                }
+            );
+    
+            // Enable pointer selection
+            xrHelper.baseExperience.featuresManager.enableFeature(
+                BABYLON.WebXRPointerSelection,
+                "latest",
+                {
+                    xrInput: xrHelper.input,
+                    enablePointerSelectionOnAllControllers: true
+                }
+            );
+    
+            // (Optional double enabling, remove if unnecessary)
+            // const featuresManager = xrHelper.baseExperience.featuresManager;
+            // featuresManager.enableFeature(BABYLON.WebXRFeatureName.POINTER_SELECTION, "stable", {
+            //     xrInput: xrHelper.input,
+            //     enablePointerSelectionOnAllControllers: true
+            // });
+    
+        } catch (err) {
+            console.error("❌ Error initializing XR experience", err);
+        }
+    }
 
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
@@ -660,6 +788,9 @@ window.addEventListener("DOMContentLoaded", async () => {
         if (currentInspectedProduct === "medicaldevice") {
             getSample.classList.add("disabled");
             checkTemp.classList.add("disabled");
+        } else {
+            getSample.classList.remove("disabled");
+            checkTemp.classList.remove("disabled");
         }
 
         window.inInspectMode = true;
@@ -1788,11 +1919,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         return y;
     }
     
-    
     submitReportButton.addEventListener("click", generateFinalPDF);
-
-    
-    
 
     engine.runRenderLoop(() => {
         scene.render();
@@ -1800,4 +1927,16 @@ window.addEventListener("DOMContentLoaded", async () => {
         fpsCounter.textContent = `FPS: ${engine.getFps().toFixed(0)}`;
     });
     window.addEventListener("resize", () => engine.resize());
+
+    if (navigator.xr) {
+        navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
+            if (supported) {
+                enableVR(scene, ground);
+            } else {
+                console.log("🧯 XR not supported on this device");
+            }
+        }).catch(err => {
+            console.error("🔌 XR check failed", err);
+        });
+    }
 });
