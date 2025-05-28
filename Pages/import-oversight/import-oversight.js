@@ -425,11 +425,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    const cube = BABYLON.MeshBuilder.CreateBox("grabbableCube", { size: 0.2 }, scene);
+    // ====== Create test cube ======
+    const cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 0.2 }, scene);
     cube.position = new BABYLON.Vector3(0, 1.5, 1);
-    cube.material = new BABYLON.StandardMaterial("cubeMat", scene);
-    cube.material.diffuseColor = new BABYLON.Color3(0.2, 0.8, 1);
     cube.isPickable = true;
+    cube.material = new BABYLON.StandardMaterial("mat", scene);
+    cube.material.diffuseColor = new BABYLON.Color3(1, 0, 0); // red
 
     async function enableVR(scene, ground) {
         try {
@@ -473,25 +474,39 @@ window.addEventListener("DOMContentLoaded", async () => {
                 }
             );
     
-            // Grabbing logic using Babylon's pointer system
-            let grabbedItem = null;
-    
-            pointerSelection.onButtonDownObservable.add((eventData) => {
-                const pickedMesh = eventData.pickedMesh;
-    
-                if (pickedMesh && pickedMesh.name === "grabbableCube") {
-                    console.log("🟦 Grabbed via pointerSelection");
-                    grabbedItem = pickedMesh;
-                    pickedMesh.setParent(eventData.inputSource.grip || eventData.inputSource.pointer);
-                }
-            });
-    
-            pointerSelection.onButtonUpObservable.add((eventData) => {
-                if (grabbedItem) {
-                    console.log("👐 Released via pointerSelection");
-                    grabbedItem.setParent(null);
-                    grabbedItem = null;
-                }
+            xrHelper.input.onControllerAddedObservable.add((controller) => {
+                controller.onMotionControllerInitObservable.add((motionController) => {
+                    const trigger = motionController.getComponent("xr-standard-trigger");
+            
+                    if (trigger) {
+                        let heldMesh = null;
+            
+                        trigger.onButtonStateChangedObservable.add(() => {
+                            if (trigger.changes.pressed) {
+                                if (trigger.pressed) {
+                                    let mesh = scene.meshUnderPointer;
+            
+                                    // If pointerSelection is active, get more precise pointer
+                                    if (xrHelper.pointerSelection?.getMeshUnderPointer) {
+                                        mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                                    }
+            
+                                    if (mesh && mesh.name !== "ground") {
+                                        heldMesh = mesh;
+                                        heldMesh.setParent(motionController.rootMesh);
+                                        console.log("✅ Grabbed:", mesh.name);
+                                    }
+                                } else {
+                                    if (heldMesh) {
+                                        heldMesh.setParent(null);
+                                        heldMesh = null;
+                                        console.log("👐 Released");
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
             });
     
         } catch (err) {
