@@ -4,7 +4,8 @@
 		"version":"2.0"
 	},
 	"extensionsUsed":[
-		"KHR_materials_specular"
+		"KHR_materials_specular",
+		"KHR_materials_ior"
 	],
 	"scene":0,
 	"scenes":[
@@ -18,12 +19,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana",
+			"name":"mk_packedfood1",
 			"rotation":[
-				0,
-				0.3798302412033081,
-				0,
-				0.9250563383102417
+				-0.1073039099574089,
+				0.7958675622940063,
+				-0.09445805847644806,
+				0.5883523225784302
+			],
+			"scale":[
+				0.47606247663497925,
+				0.47606247663497925,
+				0.476062536239624
 			]
 		}
 	],
@@ -31,9 +37,9 @@
 		{
 			"doubleSided":true,
 			"emissiveFactor":[
-				1,
-				1,
-				1
+				0.30000001192092896,
+				0.30000001192092896,
+				0.30000001192092896
 			],
 			"emissiveTexture":{
 				"index":0
@@ -41,13 +47,16 @@
 			"extensions":{
 				"KHR_materials_specular":{
 					"specularColorFactor":[
-						2.0,
-						2.0,
-						2.0
+						0.017323477193713188,
+						0.017323477193713188,
+						0.017323477193713188
 					]
+				},
+				"KHR_materials_ior":{
+					"ior":1000
 				}
 			},
-			"name":"mk_banana",
+			"name":"material_0",
 			"normalTexture":{
 				"index":1
 			},
@@ -64,7 +73,7 @@
 	],
 	"meshes":[
 		{
-			"name":"Aset_edible_fruits_S_tklkaixiw_LOD2",
+			"name":"Object_0.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -99,79 +108,79 @@
 	"images":[
 		{
 			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_BaseColor",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
+			"name":"Image_0",
+			"uri":"packedfood1/Image_0.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_Normal",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Normal.jpg"
+			"name":"Image_2",
+			"uri":"packedfood1/Image_2.jpg"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"Banana_tklkaixiw_Mid_2K_Roughness",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Roughness.png"
+			"name":"Image_1",
+			"uri":"packedfood1/Image_1.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":815,
+			"count":11513,
 			"max":[
-				0.029172198846936226,
-				0.04055989533662796,
-				0.02483215741813183
+				0.06221569702029228,
+				0.034933120012283325,
+				0.08033047616481781
 			],
 			"min":[
-				-0.01960996724665165,
-				-0.02907721884548664,
-				-0.02458926849067211
+				-0.06221569702029228,
+				-0.034933120012283325,
+				-0.08033047616481781
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":815,
+			"count":11513,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":815,
+			"count":11513,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":3573,
+			"count":35409,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":9780,
+			"byteLength":138156,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":9780,
-			"byteOffset":9780,
+			"byteLength":138156,
+			"byteOffset":138156,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6520,
-			"byteOffset":19560,
+			"byteLength":92104,
+			"byteOffset":276312,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7146,
-			"byteOffset":26080,
+			"byteLength":70818,
+			"byteOffset":368416,
 			"target":34963
 		}
 	],
@@ -183,8 +192,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":33228,
-			"uri":"banana.bin"
+			"byteLength":439236,
+			"uri":"packedfood1.bin"
 		}
 	]
 }

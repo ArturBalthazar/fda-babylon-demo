@@ -3,9 +3,6 @@
 		"generator":"Khronos glTF Blender I/O v4.4.55",
 		"version":"2.0"
 	},
-	"extensionsUsed":[
-		"KHR_materials_specular"
-	],
 	"scene":0,
 	"scenes":[
 		{
@@ -18,12 +15,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana",
+			"name":"mk_packedfood3",
 			"rotation":[
-				0,
-				0.3798302412033081,
-				0,
-				0.9250563383102417
+				-0.06196296960115433,
+				0.9482790231704712,
+				-0.013860698789358139,
+				0.31102341413497925
+			],
+			"scale":[
+				0.24033497273921967,
+				0.24033498764038086,
+				0.24033498764038086
 			]
 		}
 	],
@@ -38,33 +40,17 @@
 			"emissiveTexture":{
 				"index":0
 			},
-			"extensions":{
-				"KHR_materials_specular":{
-					"specularColorFactor":[
-						2.0,
-						2.0,
-						2.0
-					]
-				}
-			},
-			"name":"mk_banana",
-			"normalTexture":{
-				"index":1
-			},
+			"name":"Caixa",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
-				},
-				"metallicFactor":0,
-				"metallicRoughnessTexture":{
-					"index":3
+					"index":1
 				}
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Aset_edible_fruits_S_tklkaixiw_LOD2",
+			"name":"Cube_Material_0.001",
 			"primitives":[
 				{
 					"attributes":{
@@ -85,93 +71,75 @@
 		},
 		{
 			"sampler":0,
-			"source":1
-		},
-		{
-			"sampler":0,
 			"source":0
-		},
-		{
-			"sampler":0,
-			"source":2
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_BaseColor",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
-		},
-		{
-			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_Normal",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Normal.jpg"
-		},
-		{
-			"mimeType":"image/png",
-			"name":"Banana_tklkaixiw_Mid_2K_Roughness",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Roughness.png"
+			"name":"Image_0",
+			"uri":"packedfood3/Image_0.jpg"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":815,
+			"count":77,
 			"max":[
-				0.029172198846936226,
-				0.04055989533662796,
-				0.02483215741813183
+				0.07023793458938599,
+				0.15366365015506744,
+				0.10497689247131348
 			],
 			"min":[
-				-0.01960996724665165,
-				-0.02907721884548664,
-				-0.02458926849067211
+				-0.07023791968822479,
+				-0.15366365015506744,
+				-0.10497686266899109
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":815,
+			"count":77,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":815,
+			"count":77,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":3573,
+			"count":132,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":9780,
+			"byteLength":924,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":9780,
-			"byteOffset":9780,
+			"byteLength":924,
+			"byteOffset":924,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6520,
-			"byteOffset":19560,
+			"byteLength":616,
+			"byteOffset":1848,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7146,
-			"byteOffset":26080,
+			"byteLength":264,
+			"byteOffset":2464,
 			"target":34963
 		}
 	],
@@ -183,8 +151,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":33228,
-			"uri":"banana.bin"
+			"byteLength":2728,
+			"uri":"packedfood3.bin"
 		}
 	]
 }

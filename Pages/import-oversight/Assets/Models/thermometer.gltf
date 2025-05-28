@@ -294,12 +294,12 @@
 		{
 			"mimeType":"image/png",
 			"name":"AtlasColorTexture",
-			"uri":"thermometerTextures/AtlasColorTexture.png"
+			"uri":"thermometer/AtlasColorTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasGrayTexture",
-			"uri":"thermometerTextures/AtlasGrayTexture.png"
+			"uri":"thermometer/AtlasGrayTexture.png"
 		}
 	],
 	"skins":[

@@ -15,7 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_petFood",
+			"name":"mk_petfood",
 			"rotation":[
 				-0.01808224990963936,
 				0.980095386505127,
@@ -173,42 +173,42 @@
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_1",
-			"uri":"petfoodTextures/Image_1.jpg"
+			"uri":"petfood/Image_1.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"petfoodTextures/Image_1.png"
+			"uri":"petfood/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasColorTexture",
-			"uri":"petfoodTextures/AtlasColorTexture.png"
+			"uri":"petfood/AtlasColorTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasGrayTexture",
-			"uri":"petfoodTextures/AtlasGrayTexture.png"
+			"uri":"petfood/AtlasGrayTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_metallic",
-			"uri":"petfoodTextures/gingerbread_cookie_metallic.png"
+			"uri":"petfood/gingerbread_cookie_metallic.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_Gingerbread_Cookie_normal",
-			"uri":"petfoodTextures/gingerbread_cookie_Gingerbread_Cookie_normal.png"
+			"uri":"petfood/gingerbread_cookie_Gingerbread_Cookie_normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_baseColor",
-			"uri":"petfoodTextures/gingerbread_cookie_baseColor.png"
+			"uri":"petfood/gingerbread_cookie_baseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_metallic-gingerbread_cookie_roughness",
-			"uri":"petfoodTextures/gingerbread_cookie_metallic-gingerbread_cookie_roughness.png"
+			"uri":"petfood/gingerbread_cookie_metallic-gingerbread_cookie_roughness.png"
 		}
 	],
 	"accessors":[

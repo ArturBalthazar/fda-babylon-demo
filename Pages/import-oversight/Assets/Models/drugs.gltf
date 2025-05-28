@@ -4,7 +4,8 @@
 		"version":"2.0"
 	},
 	"extensionsUsed":[
-		"KHR_materials_specular"
+		"KHR_materials_specular",
+		"KHR_materials_ior"
 	],
 	"scene":0,
 	"scenes":[
@@ -18,12 +19,17 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana",
+			"name":"mk_drugs",
 			"rotation":[
-				0,
-				0.3798302412033081,
-				0,
-				0.9250563383102417
+				-0.7294132709503174,
+				0.17107516527175903,
+				0.15302546322345734,
+				0.6444166302680969
+			],
+			"scale":[
+				0.07943587750196457,
+				0.07943588495254517,
+				0.07943588495254517
 			]
 		}
 	],
@@ -31,9 +37,9 @@
 		{
 			"doubleSided":true,
 			"emissiveFactor":[
-				1,
-				1,
-				1
+				0.15000000596046448,
+				0.15000000596046448,
+				0.15000000596046448
 			],
 			"emissiveTexture":{
 				"index":0
@@ -41,30 +47,36 @@
 			"extensions":{
 				"KHR_materials_specular":{
 					"specularColorFactor":[
-						2.0,
-						2.0,
-						2.0
-					]
+						0,
+						0,
+						0
+					],
+					"specularColorTexture":{
+						"index":1
+					}
+				},
+				"KHR_materials_ior":{
+					"ior":1000
 				}
 			},
-			"name":"mk_banana",
+			"name":"mk_drugs",
 			"normalTexture":{
-				"index":1
+				"index":2
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":4
 				}
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Aset_edible_fruits_S_tklkaixiw_LOD2",
+			"name":"Object_0.003",
 			"primitives":[
 				{
 					"attributes":{
@@ -89,89 +101,98 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":3
 		}
 	],
 	"images":[
 		{
-			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_BaseColor",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
-		},
-		{
-			"mimeType":"image/jpeg",
-			"name":"Banana_tklkaixiw_Mid_2K_Normal",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Normal.jpg"
+			"mimeType":"image/png",
+			"name":"Image_0",
+			"uri":"drugs/Image_0.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"Banana_tklkaixiw_Mid_2K_Roughness",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Roughness.png"
+			"name":"Image_1",
+			"uri":"drugs/Image_1.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"Image_2",
+			"uri":"drugs/Image_2.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"Image_1",
+			"uri":"drugs/Image_1-1.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":815,
+			"count":66,
 			"max":[
-				0.029172198846936226,
-				0.04055989533662796,
-				0.02483215741813183
+				0.5691698789596558,
+				0.1073455810546875,
+				0.3176143765449524
 			],
 			"min":[
-				-0.01960996724665165,
-				-0.02907721884548664,
-				-0.02458926849067211
+				-0.5691699981689453,
+				-0.1073455810546875,
+				-0.31761443614959717
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":815,
+			"count":66,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":815,
+			"count":66,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5123,
-			"count":3573,
+			"count":132,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":9780,
+			"byteLength":792,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":9780,
-			"byteOffset":9780,
+			"byteLength":792,
+			"byteOffset":792,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":6520,
-			"byteOffset":19560,
+			"byteLength":528,
+			"byteOffset":1584,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7146,
-			"byteOffset":26080,
+			"byteLength":264,
+			"byteOffset":2112,
 			"target":34963
 		}
 	],
@@ -183,8 +204,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":33228,
-			"uri":"banana.bin"
+			"byteLength":2376,
+			"uri":"drugs.bin"
 		}
 	]
 }
