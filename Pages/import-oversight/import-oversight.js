@@ -430,7 +430,16 @@ window.addEventListener("DOMContentLoaded", async () => {
     cube.position = new BABYLON.Vector3(0, 1.5, 1);
     cube.isPickable = true;
     cube.material = new BABYLON.StandardMaterial("mat", scene);
-    cube.material.diffuseColor = new BABYLON.Color3(1, 0, 0); // red
+    cube.material.diffuseColor = new BABYLON.Color3(1, 1, 0); // red
+
+    // Add fullscreen GUI
+    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    const debugText = new BABYLON.GUI.TextBlock();
+    debugText.color = "white";
+    debugText.fontSize = 24;
+    debugText.top = "-40px";
+    debugText.text = "🔍 Ready";
+    advancedTexture.addControl(debugText);
 
     async function enableVR(scene, ground) {
         try {
@@ -475,39 +484,62 @@ window.addEventListener("DOMContentLoaded", async () => {
             );
     
             xrHelper.input.onControllerAddedObservable.add((controller) => {
+                debugText.text = "🎮 Controller added: " + controller.uniqueId;
+            
                 controller.onMotionControllerInitObservable.add((motionController) => {
+                    debugText.text = "🤖 Motion controller initialized (" + motionController.handness + ")";
+            
                     const trigger = motionController.getComponent("xr-standard-trigger");
             
-                    if (trigger) {
-                        let heldMesh = null;
+                    if (!trigger) {
+                        debugText.text = "⚠️ No trigger component found.";
+                        return;
+                    }
             
-                        trigger.onButtonStateChangedObservable.add(() => {
-                            if (trigger.changes.pressed) {
-                                if (trigger.pressed) {
-                                    let mesh = scene.meshUnderPointer;
+                    debugText.text = "🎯 Trigger component ready.";
             
-                                    // If pointerSelection is active, get more precise pointer
-                                    if (xrHelper.pointerSelection?.getMeshUnderPointer) {
-                                        mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                                    }
+                    let heldMesh = null;
             
-                                    if (mesh && mesh.name !== "ground") {
-                                        heldMesh = mesh;
-                                        heldMesh.setParent(motionController.rootMesh);
-                                        console.log("✅ Grabbed:", mesh.name);
-                                    }
+                    trigger.onButtonStateChangedObservable.add(() => {
+                        debugText.text = "⏳ Trigger state changed";
+            
+                        if (trigger.changes.pressed) {
+                            if (trigger.pressed) {
+                                debugText.text = "🎮 Trigger pressed";
+            
+                                let mesh = scene.meshUnderPointer;
+                                debugText.text = "🔎 Checking meshUnderPointer: " + (mesh ? mesh.name : "null");
+            
+                                // Use more precise controller-based pointer if available
+                                if (xrHelper.pointerSelection?.getMeshUnderPointer) {
+                                    const preciseMesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                                    debugText.text = "🎯 PointerSelection hit: " + (preciseMesh ? preciseMesh.name : "null");
+                                    mesh = preciseMesh;
+                                }
+            
+                                if (mesh && mesh.name !== "ground") {
+                                    heldMesh = mesh;
+                                    heldMesh.setParent(motionController.rootMesh);
+                                    debugText.text = "✅ Grabbed: " + mesh.name;
                                 } else {
-                                    if (heldMesh) {
-                                        heldMesh.setParent(null);
-                                        heldMesh = null;
-                                        console.log("👐 Released");
-                                    }
+                                    debugText.text = "❌ No valid mesh to grab";
+                                }
+                            } else {
+                                debugText.text = "🎮 Trigger released";
+            
+                                if (heldMesh) {
+                                    heldMesh.setParent(null);
+                                    debugText.text = "👐 Released: " + heldMesh.name;
+                                    heldMesh = null;
+                                } else {
+                                    debugText.text = "🛑 Nothing was held";
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 });
             });
+            
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
