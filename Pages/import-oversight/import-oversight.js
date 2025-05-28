@@ -447,11 +447,9 @@ window.addEventListener("DOMContentLoaded", async () => {
                 if (state === BABYLON.WebXRState.IN_XR) {
                     console.log("🎯 Entered XR");
                     camera.detachControl();
-                    // Hide or adjust UI here if needed
                 } else if (state === BABYLON.WebXRState.EXITING_XR) {
                     console.log("👋 Exiting XR");
                     camera.attachControl(canvas);
-                    // Restore UI
                 }
             });
     
@@ -466,7 +464,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             );
     
             // Enable pointer selection
-            xrHelper.baseExperience.featuresManager.enableFeature(
+            const pointerSelection = xrHelper.baseExperience.featuresManager.enableFeature(
                 BABYLON.WebXRPointerSelection,
                 "latest",
                 {
@@ -474,37 +472,27 @@ window.addEventListener("DOMContentLoaded", async () => {
                     enablePointerSelectionOnAllControllers: true
                 }
             );
-
-            // Create a simple cube to test grabbing
-            const cube = BABYLON.MeshBuilder.CreateBox("grabbableCube", { size: 0.2 }, scene);
-            cube.position = new BABYLON.Vector3(0, 1.5, 1);
-            cube.material = new BABYLON.StandardMaterial("cubeMat", scene);
-            cube.material.diffuseColor = new BABYLON.Color3(0.2, 0.8, 1); // Light blue
-            cube.isPickable = true;
-
-            xrHelper.input.onControllerAddedObservable.add((controller) => {
-                controller.onMotionControllerInitObservable.add((motionController) => {
-                    const trigger = motionController.getComponent("trigger");
-            
-                    if (trigger) {
-                        trigger.onButtonStateChangedObservable.add(() => {
-                            if (trigger.changes.pressed && trigger.pressed) {
-                                const pick = scene.pickWithRay(controller.getForwardRay(1.0));
-                                if (pick.hit && pick.pickedMesh && pick.pickedMesh.name === "grabbableCube") {
-                                    grabbedItem = cube;
-                                    cube.setParent(controller.grip || controller.pointer);
-                                }
-                            }
-            
-                            if (trigger.changes.pressed && !trigger.pressed && grabbedItem) {
-                                grabbedItem.setParent(null);
-                                grabbedItem = null;
-                            }
-                        });
-                    }
-                });
+    
+            // Grabbing logic using Babylon's pointer system
+            let grabbedItem = null;
+    
+            pointerSelection.onButtonDownObservable.add((eventData) => {
+                const pickedMesh = eventData.pickedMesh;
+    
+                if (pickedMesh && pickedMesh.name === "grabbableCube") {
+                    console.log("🟦 Grabbed via pointerSelection");
+                    grabbedItem = pickedMesh;
+                    pickedMesh.setParent(eventData.inputSource.grip || eventData.inputSource.pointer);
+                }
             });
-
+    
+            pointerSelection.onButtonUpObservable.add((eventData) => {
+                if (grabbedItem) {
+                    console.log("👐 Released via pointerSelection");
+                    grabbedItem.setParent(null);
+                    grabbedItem = null;
+                }
+            });
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
