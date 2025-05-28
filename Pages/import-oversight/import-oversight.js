@@ -6,7 +6,7 @@ let tabletAnimGroup = null;
 let firstTabletOpen = true;
 
 let ground = null;
-let grabbedApple = null;
+let grabbedItem = null;
 
 let idleTimer = 0;
 let lastMoveTime = performance.now();
