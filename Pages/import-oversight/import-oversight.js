@@ -430,7 +430,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     cube.position = new BABYLON.Vector3(0, 1.5, 1);
     cube.isPickable = true;
     cube.material = new BABYLON.StandardMaterial("mat", scene);
-    cube.material.diffuseColor = new BABYLON.Color3(1, 1, 0); // red
+    cube.material.diffuseColor = new BABYLON.Color3(0, 1, 0); // red
 
     // Add fullscreen GUI
     const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -482,62 +482,27 @@ window.addEventListener("DOMContentLoaded", async () => {
                     enablePointerSelectionOnAllControllers: true
                 }
             );
-    
-            xrHelper.input.onControllerAddedObservable.add((controller) => {
-                debugText.text = "🎮 Controller added: " + controller.uniqueId;
             
-                controller.onMotionControllerInitObservable.add((motionController) => {
-                    debugText.text = "🤖 Motion controller initialized (" + motionController.handness + ")";
+            let heldMesh = null;
+
+            pointerSelection.onButtonDownObservable.add((eventData) => {
+                const mesh = eventData.pickedMesh;
             
-                    const trigger = motionController.getComponent("xr-standard-trigger");
+                if (mesh && mesh.name !== "ground") {
+                    debugText.text = "✅ Grabbed: " + mesh.name;
+                    mesh.setParent(eventData.inputSource.grip || eventData.inputSource.pointer);
+                    heldMesh = mesh;
+                } else {
+                    debugText.text = "❌ Nothing to grab";
+                }
+            });
             
-                    if (!trigger) {
-                        debugText.text = "⚠️ No trigger component found.";
-                        return;
-                    }
-            
-                    debugText.text = "🎯 Trigger component ready.";
-            
-                    let heldMesh = null;
-            
-                    trigger.onButtonStateChangedObservable.add(() => {
-                        debugText.text = "⏳ Trigger state changed";
-            
-                        if (trigger.changes.pressed) {
-                            if (trigger.pressed) {
-                                debugText.text = "🎮 Trigger pressed";
-            
-                                let mesh = scene.meshUnderPointer;
-                                debugText.text = "🔎 Checking meshUnderPointer: " + (mesh ? mesh.name : "null");
-            
-                                // Use more precise controller-based pointer if available
-                                if (xrHelper.pointerSelection?.getMeshUnderPointer) {
-                                    const preciseMesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                                    debugText.text = "🎯 PointerSelection hit: " + (preciseMesh ? preciseMesh.name : "null");
-                                    mesh = preciseMesh;
-                                }
-            
-                                if (mesh && mesh.name !== "ground") {
-                                    heldMesh = mesh;
-                                    heldMesh.setParent(motionController.rootMesh);
-                                    debugText.text = "✅ Grabbed: " + mesh.name;
-                                } else {
-                                    debugText.text = "❌ No valid mesh to grab";
-                                }
-                            } else {
-                                debugText.text = "🎮 Trigger released";
-            
-                                if (heldMesh) {
-                                    heldMesh.setParent(null);
-                                    debugText.text = "👐 Released: " + heldMesh.name;
-                                    heldMesh = null;
-                                } else {
-                                    debugText.text = "🛑 Nothing was held";
-                                }
-                            }
-                        }
-                    });
-                });
+            pointerSelection.onButtonUpObservable.add((eventData) => {
+                if (heldMesh) {
+                    heldMesh.setParent(null);
+                    debugText.text = "👐 Released: " + heldMesh.name;
+                    heldMesh = null;
+                }
             });
             
     
