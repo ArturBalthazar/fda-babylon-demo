@@ -457,36 +457,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     async function enableVR(scene, ground) {
         try {
+            // XR
             const xrHelper = await scene.createDefaultXRExperienceAsync({
-                floorMeshes: [ground],
-                uiOptions: {
-                    sessionMode: "immersive-vr"
-                }
+                floorMeshes: [ground]
             });
-    
-            console.log("✅ XR experience initialized");
-    
-            // Handle entering and exiting VR
-            xrHelper.baseExperience.onStateChangedObservable.add((state) => {
-                if (state === BABYLON.WebXRState.IN_XR) {
-                    debugText.text = "🎯 Entered XR";
-                    camera.detachControl();
-                } else if (state === BABYLON.WebXRState.EXITING_XR) {
-                    debugText.text = "👋 Exiting XR";
-                    camera.attachControl(canvas);
-                }
-            });
-    
-            // Enable teleportation
-            xrHelper.baseExperience.featuresManager.enableFeature(
-                BABYLON.WebXRTeleportation,
-                "latest",
-                {
-                    floorMeshes: [ground],
-                    xrInput: xrHelper.input
-                }
-            );
-            
+
             let mesh;
 
             xrHelper.input.onControllerAddedObservable.add((controller) => {
@@ -494,26 +469,21 @@ window.addEventListener("DOMContentLoaded", async () => {
                     const xr_ids = motionController.getComponentIds();
                     let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
                     triggerComponent.onButtonStateChangedObservable.add(() => {
-                        debugText.text = "onButtonStateChangedObservable";
                         if (triggerComponent.changes.pressed) {
                             // is it pressed?
                             if (triggerComponent.pressed) {
-                                debugText.text = "triggerComponent.pressed";
                                 mesh = scene.meshUnderPointer;
                                 console.log(mesh && mesh.name);
                                 if (xrHelper.pointerSelection.getMeshUnderPointer) {
                                     mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                                    debugText.text = "mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId)";
                                 }
                                 console.log(mesh && mesh.name);
                                 if (mesh === ground) {
                                     return;
                                 }
                                 mesh && mesh.setParent(motionController.rootMesh);
-                                debugText.text = "mesh && mesh.setParent(motionController.rootMesh)";
                             } else {
                                 mesh && mesh.setParent(null);
-                                debugText.text = "mesh && mesh.setParent(null)";
                             }
                         }
                     });
