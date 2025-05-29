@@ -441,6 +441,20 @@ window.addEventListener("DOMContentLoaded", async () => {
     debugText.text = "🔍 Ready";
     advancedTexture.addControl(debugText);
 
+    var box = BABYLON.Mesh.CreateBox("box", .4, scene);
+    box.position.y = 2;
+    var matBox = new BABYLON.StandardMaterial("matBox", scene);
+    matBox.diffuseColor = new BABYLON.Color3(1.0, 0.1, 0.1);
+    box.material = matBox;
+    box.isPickable = true;
+    console.log(box.position);
+
+    var box2 = BABYLON.Mesh.CreateBox("box2", .8, scene);
+    box2.position = new BABYLON.Vector3(-1, 2, 0);
+    var matBox2 = new BABYLON.StandardMaterial("matBox2", scene);
+    matBox2.diffuseColor = new BABYLON.Color3(0.1, 0.1, 1);
+    box2.material = matBox2;
+
     async function enableVR(scene, ground) {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({
@@ -455,10 +469,10 @@ window.addEventListener("DOMContentLoaded", async () => {
             // Handle entering and exiting VR
             xrHelper.baseExperience.onStateChangedObservable.add((state) => {
                 if (state === BABYLON.WebXRState.IN_XR) {
-                    console.log("🎯 Entered XR");
+                    debugText.text = "🎯 Entered XR";
                     camera.detachControl();
                 } else if (state === BABYLON.WebXRState.EXITING_XR) {
-                    console.log("👋 Exiting XR");
+                    debugText.text = "👋 Exiting XR";
                     camera.attachControl(canvas);
                 }
             });
@@ -483,26 +497,34 @@ window.addEventListener("DOMContentLoaded", async () => {
                 }
             );
             
-            let heldMesh = null;
+            let mesh;
 
-            pointerSelection.onButtonDownObservable.add((eventData) => {
-                const mesh = eventData.pickedMesh;
-            
-                if (mesh && mesh.name !== "ground") {
-                    debugText.text = "✅ Grabbed: " + mesh.name;
-                    mesh.setParent(eventData.inputSource.grip || eventData.inputSource.pointer);
-                    heldMesh = mesh;
-                } else {
-                    debugText.text = "❌ Nothing to grab";
-                }
-            });
-            
-            pointerSelection.onButtonUpObservable.add((eventData) => {
-                if (heldMesh) {
-                    heldMesh.setParent(null);
-                    debugText.text = "👐 Released: " + heldMesh.name;
-                    heldMesh = null;
-                }
+            xrHelper.input.onControllerAddedObservable.add((controller) => {
+                controller.onMotionControllerInitObservable.add((motionController) => {
+                    if (motionController.handness === 'left') {
+                        const xr_ids = motionController.getComponentIds();
+                        let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
+                        triggerComponent.onButtonStateChangedObservable.add(() => {
+                            if (triggerComponent.changes.pressed) {
+                                // is it pressed?
+                                if (triggerComponent.pressed) {
+                                    mesh = scene.meshUnderPointer;
+                                    console.log(mesh && mesh.name);
+                                    if (xrHelper.pointerSelection.getMeshUnderPointer) {
+                                        mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                                    }
+                                    console.log(mesh && mesh.name);
+                                    if (mesh === ground) {
+                                        return;
+                                    }
+                                    mesh && mesh.setParent(motionController.rootMesh);
+                                } else {
+                                    mesh && mesh.setParent(null);
+                                }
+                            }
+                        });
+                    }
+                })
             });
             
     
