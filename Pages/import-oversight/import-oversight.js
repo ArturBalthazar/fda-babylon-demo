@@ -42,6 +42,11 @@ let sampleRoot = null;
 let sampleAnimGroup = null;
 let sampleMaterial = null;
 
+let ratMesh = null;
+let ratAnimGroup = null;
+let currentRatIndex = 0;
+let ratMaterial = null;
+
 const tabletButton = document.getElementById("tabletButton");
 const tabletWrapper = document.getElementById("tabletWrapper");
 const topRightButtonGroup = document.getElementById("topRightButtonGroup");
@@ -425,35 +430,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    // ====== Create test cube ======
-    const cube = BABYLON.MeshBuilder.CreateBox("cube", { size: 0.2 }, scene);
-    cube.position = new BABYLON.Vector3(0, 1.5, 1);
-    cube.isPickable = true;
-    cube.material = new BABYLON.StandardMaterial("mat", scene);
-    cube.material.diffuseColor = new BABYLON.Color3(0, 1, 0); // red
-
     // Add fullscreen GUI
     const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
     const debugText = new BABYLON.GUI.TextBlock();
     debugText.color = "white";
     debugText.fontSize = 24;
     debugText.top = "-40px";
-    debugText.text = "🔍 Ready";
+    debugText.text = "";
     advancedTexture.addControl(debugText);
-
-    var box = BABYLON.Mesh.CreateBox("box", .4, scene);
-    box.position.y = 2;
-    var matBox = new BABYLON.StandardMaterial("matBox", scene);
-    matBox.diffuseColor = new BABYLON.Color3(1.0, 0.1, 0.1);
-    box.material = matBox;
-    box.isPickable = true;
-    console.log(box.position);
-
-    var box2 = BABYLON.Mesh.CreateBox("box2", .8, scene);
-    box2.position = new BABYLON.Vector3(-1, 2, 0);
-    var matBox2 = new BABYLON.StandardMaterial("matBox2", scene);
-    matBox2.diffuseColor = new BABYLON.Color3(0.1, 0.1, 1);
-    box2.material = matBox2;
 
     async function enableVR(scene, ground) {
         try {
@@ -496,8 +480,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
     }
     
-
-
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
         const angVel = capsule.physicsImpostor.getAngularVelocity();
@@ -682,6 +664,98 @@ window.addEventListener("DOMContentLoaded", async () => {
         tabletRoot.setEnabled(false); // Hide initially
         console.log("✅ Tablet loaded and set up");
     }); */
+
+    const ratSpots = [
+        {
+            position: new BABYLON.Vector3(7.5, 0, -9),
+            rotation: BABYLON.Quaternion.RotationYawPitchRoll(Math.PI/4.5, 0, 0)
+        },
+        {
+            position: new BABYLON.Vector3(-2.75, 0, -6),
+            rotation: BABYLON.Quaternion.RotationYawPitchRoll(Math.PI*1.06, 0, 0)
+        },
+        {
+            position: new BABYLON.Vector3(3.1, 0, -6),
+            rotation: BABYLON.Quaternion.RotationYawPitchRoll(Math.PI*1.2, 0, 0)
+        },
+        {
+            position: new BABYLON.Vector3(-2.90, 0, -4),
+            rotation: BABYLON.Quaternion.RotationYawPitchRoll(-Math.PI/4, 0, 0)
+        },
+        {
+            position: new BABYLON.Vector3(2.75, 0, -3),
+            rotation: BABYLON.Quaternion.RotationYawPitchRoll(-Math.PI/9, 0, 0)
+        }
+    ];
+
+    // Now load the rat
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "rat.gltf", scene, (ratContainer) => {
+        ratContainer.addAllToScene();
+        ratMesh = ratContainer.meshes.find(m => m.name !== "__root__");
+        ratAnimGroup = ratContainer.animationGroups.find(g => g.name === "ratAnim");
+
+        ratMesh.alwaysSelectAsActiveMesh = true;
+        ratMaterial = ratMesh.material;
+
+
+        if (ratMesh && ratAnimGroup) {
+            //ratMesh.setEnabled(false);
+            startRatCycle();
+            console.log("✅ Rat loaded and cycle started");
+        } else {
+            console.warn("⚠️ Rat mesh or animation not found.");
+        }
+    });
+
+    function startRatCycle() {
+        if (!ratMesh || !ratAnimGroup || ratSpots.length === 0) {
+            console.warn("⏳ Rat setup incomplete. Waiting...");
+            return;
+        }
+    
+        console.log("🚀 Rat cycle started. Spots:", ratSpots.length);
+    
+        function loop() {
+            const spot = ratSpots[currentRatIndex];
+            if (!spot) {
+                console.warn("❌ Missing spot at index", currentRatIndex);
+                return;
+            }
+    
+            ratMesh.position.copyFrom(spot.position);
+            ratMesh.rotation = spot.rotation.toEulerAngles();
+            ratMesh.rotationQuaternion = null; // Force use of .rotation
+
+
+            //ratMesh.setEnabled(true);
+            fadeSampleMaterial(true, 0.8, ratMaterial);
+    
+            ratAnimGroup.reset();
+            ratAnimGroup.play(false);
+    
+            const duration = (ratAnimGroup.to - ratAnimGroup.from) * 1000 / ratAnimGroup.framePerSecond;
+            console.log(`🎬 Rat at spot #${currentRatIndex} for ${duration.toFixed(0)}ms`, spot.position);
+    
+            setTimeout(() => {
+                setTimeout(() => {
+                    fadeSampleMaterial(false, 0.8, ratMaterial);
+                }, 3200);
+                //fadeSampleMaterial(false, 0.8, ratMaterial);
+                //ratMesh.setEnabled(false);
+                console.log("🕳️ Rat hidden");
+    
+                setTimeout(() => {
+                    currentRatIndex = (currentRatIndex + 1) % ratSpots.length;
+                    loop();
+                }, 15000); // Wait before next appearance
+            }, duration);
+
+
+
+        }
+    
+        loop();
+    }
 
     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "thermometer.gltf", scene, (container) => {
         container.addAllToScene();
@@ -1314,14 +1388,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         requestAnimationFrame(animate);
     }
 
-    function fadeSampleMaterial(show = true, durationInSeconds = 0.5, material = sampleMaterial) {
+    function fadeSampleMaterial(show, durationInSeconds, material) {
         if (!material) return;
     
         const fps = 30;
         const totalFrames = durationInSeconds * fps;
     
         // Setup for blending
-        material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLENDANDTEST;
+        material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
         material.needDepthPrePass = true;
         material.backFaceCulling = true;
     
