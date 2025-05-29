@@ -486,16 +486,6 @@ window.addEventListener("DOMContentLoaded", async () => {
                     xrInput: xrHelper.input
                 }
             );
-    
-            // Enable pointer selection
-            const pointerSelection = xrHelper.baseExperience.featuresManager.enableFeature(
-                BABYLON.WebXRPointerSelection,
-                "latest",
-                {
-                    xrInput: xrHelper.input,
-                    enablePointerSelectionOnAllControllers: true
-                }
-            );
             
             let mesh;
 
