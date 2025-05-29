@@ -457,73 +457,37 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     async function enableVR(scene, ground) {
         try {
+            // XR
             const xrHelper = await scene.createDefaultXRExperienceAsync({
-                floorMeshes: [ground],
-                uiOptions: {
-                    sessionMode: "immersive-vr"
-                }
+                floorMeshes: [ground]
             });
-    
-            console.log("✅ XR experience initialized");
-    
-            // Handle entering and exiting VR
-            xrHelper.baseExperience.onStateChangedObservable.add((state) => {
-                if (state === BABYLON.WebXRState.IN_XR) {
-                    debugText.text = "🎯 Entered XR";
-                    camera.detachControl();
-                } else if (state === BABYLON.WebXRState.EXITING_XR) {
-                    debugText.text = "👋 Exiting XR";
-                    camera.attachControl(canvas);
-                }
-            });
-    
-            // Enable teleportation
-            xrHelper.baseExperience.featuresManager.enableFeature(
-                BABYLON.WebXRTeleportation,
-                "latest",
-                {
-                    floorMeshes: [ground],
-                    xrInput: xrHelper.input
-                }
-            );
-    
-            // 1) Enable pointer-selection correctly, and keep the plugin instance:
-            const pointerSelection = xrHelper.baseExperience.featuresManager.enableFeature(
-                BABYLON.WebXRFeatureName.POINTER_SELECTION, // ✅ correct feature name
-                "latest",
-                {
-                xrInput: xrHelper.input,
-                enablePointerSelectionOnAllControllers: true
-                }
-            );
-            
-            // 2) Hook controllers (no handedness filter needed if you want both hands):
-            xrHelper.input.onControllerAddedObservable.add(controller => {
-                controller.onMotionControllerInitObservable.add(motionController => {
-                // pick out the real trigger component
-                const triggerId = motionController.getComponentIds()
-                    .find(id => id.includes("xr-standard-trigger"));
-                const triggerComp = motionController.getComponent(triggerId);
-                
-                let grabbedMesh = null;
-                triggerComp.onButtonStateChangedObservable.add(() => {
-                    if (triggerComp.changes.pressed && triggerComp.pressed) {
-                    // first try your XR-ray pick:
-                    grabbedMesh = pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                    // fallback to scene.meshUnderPointer if you want—but only works outside XR:
-                    // grabbedMesh = grabbedMesh || scene.meshUnderPointer;
-                    
-                    if (grabbedMesh && grabbedMesh !== ground) {
-                        debugText.text = `🤏 Grabbing ${grabbedMesh.name}`;
-                        grabbedMesh.setParent(motionController.rootMesh);
-                    }
-                    } else if (grabbedMesh) {
-                    debugText.text = `✋ Releasing ${grabbedMesh.name}`;
-                    grabbedMesh.setParent(null);
-                    grabbedMesh = null;
-                    }
-                });
-                });
+
+            let mesh;
+
+            xrHelper.input.onControllerAddedObservable.add((controller) => {
+                controller.onMotionControllerInitObservable.add((motionController) => {
+                    const xr_ids = motionController.getComponentIds();
+                    let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
+                    triggerComponent.onButtonStateChangedObservable.add(() => {
+                        if (triggerComponent.changes.pressed) {
+                            // is it pressed?
+                            if (triggerComponent.pressed) {
+                                mesh = scene.meshUnderPointer;
+                                console.log(mesh && mesh.name);
+                                if (xrHelper.pointerSelection.getMeshUnderPointer) {
+                                    mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                                }
+                                console.log(mesh && mesh.name);
+                                if (mesh === ground) {
+                                    return;
+                                }
+                                mesh && mesh.setParent(motionController.rootMesh);
+                            } else {
+                                mesh && mesh.setParent(null);
+                            }
+                        }
+                    });
+                })
             });
             
     
