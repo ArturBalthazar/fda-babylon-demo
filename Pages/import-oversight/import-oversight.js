@@ -501,29 +501,32 @@ window.addEventListener("DOMContentLoaded", async () => {
 
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
-                    if (motionController.handness === 'left') {
-                        const xr_ids = motionController.getComponentIds();
-                        let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
-                        triggerComponent.onButtonStateChangedObservable.add(() => {
-                            if (triggerComponent.changes.pressed) {
-                                // is it pressed?
-                                if (triggerComponent.pressed) {
-                                    mesh = scene.meshUnderPointer;
-                                    console.log(mesh && mesh.name);
-                                    if (xrHelper.pointerSelection.getMeshUnderPointer) {
-                                        mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                                    }
-                                    console.log(mesh && mesh.name);
-                                    if (mesh === ground) {
-                                        return;
-                                    }
-                                    mesh && mesh.setParent(motionController.rootMesh);
-                                } else {
-                                    mesh && mesh.setParent(null);
+                    const xr_ids = motionController.getComponentIds();
+                    let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
+                    triggerComponent.onButtonStateChangedObservable.add(() => {
+                        debugText.text = "onButtonStateChangedObservable";
+                        if (triggerComponent.changes.pressed) {
+                            // is it pressed?
+                            if (triggerComponent.pressed) {
+                                debugText.text = "triggerComponent.pressed";
+                                mesh = scene.meshUnderPointer;
+                                console.log(mesh && mesh.name);
+                                if (xrHelper.pointerSelection.getMeshUnderPointer) {
+                                    mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                                    debugText.text = "mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId)";
                                 }
+                                console.log(mesh && mesh.name);
+                                if (mesh === ground) {
+                                    return;
+                                }
+                                mesh && mesh.setParent(motionController.rootMesh);
+                                debugText.text = "mesh && mesh.setParent(motionController.rootMesh)";
+                            } else {
+                                mesh && mesh.setParent(null);
+                                debugText.text = "mesh && mesh.setParent(null)";
                             }
-                        });
-                    }
+                        }
+                    });
                 })
             });
             
