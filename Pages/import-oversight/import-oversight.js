@@ -18,6 +18,7 @@ const inputMap = {};
 const productMeshes = {}; // Store root containers by name
 const productContainers = {};
 const productList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
+const originalEmissions = {}; // Maps productName => { color, texture }
 
 let currentOverlayPhotoId = null;
 
@@ -59,17 +60,17 @@ let tempF = null;
 let hum = null;
 
 const grabSettings = {
-    "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(-3000, 3000, 3000) },
-    "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(-3000, 3000, 3000) }
+    "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(-2000, 2000, 2000) },
+    "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(-3500, 3500, 3500) },
+    "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(-4500, 4500, 4500) },
+    "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(-1500, 1500, 1500) },
+    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(-4200, 4200, 4200) },
+    "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(-4200, 4200, 4200) }
 };
 
 
@@ -435,23 +436,22 @@ window.addEventListener("DOMContentLoaded", async () => {
         }, 2000);
     });
 
-    async function loadFoodModels(productList, scene) {
+    async function loadProductModels(productList, scene) {
         const badCandidates = [];
         const normalCandidates = [];
     
-        // First, separate which items have a bad version available
+        // Detect bad versions
         for (const name of productList) {
             const response = await fetch(`./Assets/Models/${name}-bad.gltf`);
             if (response.ok) {
                 badCandidates.push(name);
             } else {
-                normalCandidates.push(name); // fallback if no bad version
+                normalCandidates.push(name);
             }
         }
     
-        // Randomly pick 3 to load as bad items
         const selectedBad = shuffleArray(badCandidates).slice(0, 3);
-        
+    
         for (const name of productList) {
             const useBad = selectedBad.includes(name);
             const fileName = useBad ? `${name}-bad.gltf` : `${name}.gltf`;
@@ -461,17 +461,35 @@ window.addEventListener("DOMContentLoaded", async () => {
                 container.addAllToScene();
     
                 const root = container.rootNodes[0];
-                root.setEnabled(false); // Start hidden
+                root.setEnabled(false);
     
                 productContainers[name] = container;
                 productMeshes[name] = root;
     
-                console.log(`✅ ${fileName} loaded`);
+                // 🔁 Save and strip emission for all materials in the product
+                originalEmissions[name] = [];
+    
+                container.meshes.forEach(mesh => {
+                    const mat = mesh.material;
+                    if (!mat) return;
+    
+                    originalEmissions[name].push({
+                        meshName: mesh.name,
+                        color: mat.emissiveColor?.clone() || new BABYLON.Color3(0, 0, 0),
+                        texture: mat.emissiveTexture || null
+                    });
+    
+                    mat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                    mat.emissiveTexture = null;
+                });
+    
+                console.log(`✅ ${fileName} loaded (emission stripped)`);
             } catch (e) {
                 console.error(`❌ Failed to load ${fileName}`, e);
             }
         }
     }
+    
     
     // Utility to shuffle array in-place
     function shuffleArray(array) {
@@ -482,7 +500,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         return array;
     }
 
-    await loadFoodModels(productList, scene);
+    await loadProductModels(productList, scene);
 
     // ✅ Capsule (player)
     const capsule = BABYLON.MeshBuilder.CreateBox("playerCapsule", { height: 3.2, width: .5, depth: .5 }, scene);
@@ -503,7 +521,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.minZ = 0.01;
     camera.radius = 0;
 
-    camera.lowerRadiusLimit = camera.radius;
+    camera.lowerRadiusLimit = -2;
     camera.upperRadiusLimit = camera.radius;
     camera.alpha = Math.PI*2.75;
     camera.fov = 1.2;
@@ -1134,70 +1152,85 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     function enterInspectMode(productName) {
         currentInspectedProduct = productName;
-
-        if (currentInspectedProduct === "medicaldevice") {
+    
+        if (productName === "medicaldevice") {
             getSample.classList.add("disabled");
             checkTemp.classList.add("disabled");
         } else {
             getSample.classList.remove("disabled");
             checkTemp.classList.remove("disabled");
         }
-
+    
         window.inInspectMode = true;
-        animateCameraFOV(camera, camera.fov, .8, 300);
+        animateCameraFOV(camera, camera.fov, 0.8, 300);
         scene.environmentIntensity = 0.2;
-        // Disable movement and camera control
         camera.detachControl(canvas);
         capsule.physicsImpostor.sleep();
-
+    
         closeInspect.style.opacity = "1";
         closeInspect.style.pointerEvents = "auto";
-
+    
         checkTemp.style.display = "flex";
         getSample.style.display = "flex";
         inspectPhoto.style.display = "flex";
         globalPhoto.style.display = "none";
         topCenterButtonGroup.style.opacity = "1";
-
-
+    
         tabletButton.style.opacity = "0";
         tabletButton.style.pointerEvents = "none";
-        
-        // Hide all previously shown foods
+    
         Object.values(productContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
             const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
             if (wrapper) wrapper.setEnabled(false);
         });
-
-        // Show selected and rotate the wrapper
+    
         const container = productContainers[productName];
         const rootNode = container.rootNodes[0];
-
-        // ✅ Create a wrapper node if it doesn't exist
+    
         let wrapper = scene.getNodeByName(`inspectWrapper-${productName}`);
         if (!wrapper) {
             wrapper = new BABYLON.TransformNode(`inspectWrapper-${productName}`, scene);
             wrapper.setParent(camera);
-            wrapper.position = new BABYLON.Vector3(0, -.005, 0.16);
+            wrapper.position = new BABYLON.Vector3(0, -0.005, 0.16);
             rootNode.setParent(wrapper);
             rootNode.position.set(0, 0, 0);
             setupObjectRotation(wrapper);
-            
         }
-
-        // ✅ Show it and rotate the wrapper
+    
+        // ✅ Restore emission during inspect
+        const emissionData = originalEmissions[productName];
+        if (emissionData) {
+            emissionData.forEach(({ meshName, color, texture }) => {
+                const mesh = scene.getMeshByName(meshName);
+                if (mesh && mesh.material) {
+                    mesh.material.emissiveColor = color.clone();
+                    mesh.material.emissiveTexture = texture || null;
+                }
+            });
+        }
+    
         wrapper.setEnabled(true);
         wrapper.rotationQuaternion = BABYLON.Quaternion.Identity();
         rootNode.setEnabled(true);
-
     
         console.log(`🔍 Inspecting ${productName}`);
-
         return productName;
     }
-
+    
     function exitInspectMode() {
+        if (currentInspectedProduct) {
+            const container = productContainers[currentInspectedProduct];
+    
+            // 🔇 Disable emission again
+            container.meshes.forEach(mesh => {
+                if (mesh.material) {
+                    mesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                    mesh.material.emissiveTexture = null;
+                }
+            });
+        }
+    
         currentInspectedProduct = null;
         window.inInspectMode = false;
         animateCameraFOV(camera, camera.fov, 1.2, 200);
@@ -1205,31 +1238,29 @@ window.addEventListener("DOMContentLoaded", async () => {
         camera.attachControl(canvas, true);
         capsule.physicsImpostor.wakeUp();
     
-        // Hide all food + wrappers
         Object.values(productContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
             const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
             if (wrapper) wrapper.setEnabled(false);
         });
     
-        // Restore UI
         tabletButton.style.opacity = "1";
         tabletButton.style.pointerEvents = "auto";
-
+    
         topCenterButtonGroup.style.opacity = "0";
         globalPhoto.style.display = "flex";
+    
         setTimeout(() => {
             checkTemp.style.display = "none";
             getSample.style.display = "none";
             inspectPhoto.style.display = "none";
-            
         }, 300);
-
-        // Hide close button
+    
         closeInspect.style.opacity = "0";
         closeInspect.style.pointerEvents = "none";
-        
     }
+    
+    
 
     function setupObjectRotation(targetNode) {
         let isDragging = false;
