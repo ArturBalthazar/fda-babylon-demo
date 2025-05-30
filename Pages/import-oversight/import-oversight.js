@@ -55,26 +55,27 @@ let tempF = null;
 let hum = null;
 
 const grabSettings = {
-    "mk_apples_01":       { name: "apple",        scale: 3 },
-    "mk_apples_02":       { name: "apple",        scale: 3 },
-    "mk_Banana":          { name: "banana",       scale: 3 },
-    "mk_Fishes":          { name: "fish",         scale: 3 },
-    "mk_thermometers":    { name: "medicaldevice",scale: 3 },
-    "mk_drugsBoxes":      { name: "drugs",        scale: 3 },
-    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: 3 },
-    "mk_petFoodGroup":    { name: "petfood",      scale: 3 },
-    "mk_packagedProducts1": { name: "packedfood1", scale: 3 },
-    "mk_packagedProducts2": { name: "packedfood2", scale: 3 },
-    "mk_packagedProducts3": { name: "packedfood3", scale: 3 }
+    "mk_apples_01":       { name: "apple",        scale: 3000 },
+    "mk_apples_02":       { name: "apple",        scale: 3000 },
+    "mk_Banana":          { name: "banana",       scale: 3000 },
+    "mk_Fishes":          { name: "fish",         scale: 3000 },
+    "mk_thermometers":    { name: "medicaldevice",scale: 3000 },
+    "mk_drugsBoxes":      { name: "drugs",        scale: 3000 },
+    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: 3000 },
+    "mk_petFoodGroup":    { name: "petfood",      scale: 3000 },
+    "mk_packagedProducts1": { name: "packedfood1", scale: 3000 },
+    "mk_packagedProducts2": { name: "packedfood2", scale: 3000 },
+    "mk_packagedProducts3": { name: "packedfood3", scale: 3000 }
 };
-
 
 const heldState = {
     mesh: null,
     originalParent: null,
     originalPos: null,
-    originalEmissive: null
+    originalEmissive: null,
+    originalAmbient: null
 };
+
 let emissiveText;
 
 const tabletButton = document.getElementById("tabletButton");
@@ -504,15 +505,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    // Add fullscreen GUI
-    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-    const debugText = new BABYLON.GUI.TextBlock();
-    debugText.color = "white";
-    debugText.fontSize = 24;
-    debugText.top = "-40px";
-    debugText.text = "";
-    advancedTexture.addControl(debugText);
-
     // === Main VR logic ===
     async function enableVR(scene, ground) {
         try {
@@ -601,6 +593,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             console.error("❌ Error initializing XR experience", err);
         }
     }
+
     
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
