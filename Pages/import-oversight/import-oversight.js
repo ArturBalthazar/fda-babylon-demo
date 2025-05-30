@@ -550,12 +550,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                             productMesh.setEnabled(true);
                             productMesh.scaling.setAll(scale);
 
-                            if (productMesh.material?.emissiveColor) {
-                                productMesh.material.emissiveColor.set(0, 0, 0);
-                            }
-                            if (productMesh.material?.ambientColor) {
-                                productMesh.material.ambientColor.set(0, 0, 0);
-                            }
+                            productMesh.material.emissiveColor.set(0, 0, 0);
+                            scene.environmentIntensity = 0.2;
 
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
@@ -574,13 +570,9 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.scaling.setAll(1 / scale);
 
                             motionController.rootMesh.scaling.setAll(1);
+                            scene.environmentIntensity = 1;
 
-                            if (mesh.material?.emissiveColor && originalEmissive) {
-                                mesh.material.emissiveColor.copyFrom(originalEmissive);
-                            }
-                            if (mesh.material?.ambientColor && originalAmbient) {
-                                mesh.material.ambientColor.copyFrom(originalAmbient);
-                            }
+                            mesh.material.emissiveColor.copyFrom(originalEmissive);
 
                             heldState.mesh = null;
                             emissiveText.text = "👐 Released object";
@@ -1186,7 +1178,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         currentInspectedProduct = null;
         window.inInspectMode = false;
         animateCameraFOV(camera, camera.fov, 1.2, 200);
-        scene.environmentIntensity = 1.5;
+        scene.environmentIntensity = 1;
         camera.attachControl(canvas, true);
         capsule.physicsImpostor.wakeUp();
     
