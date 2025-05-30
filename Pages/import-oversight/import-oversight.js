@@ -78,6 +78,7 @@ const heldState = {
     controllerId: null,
     originalParent: null,
     originalPos: null,
+    originalMat: null,
     originalEmissiveColor: null,
     originalEmissiveTexture: null,
     originalEmissiveIntensity: null
@@ -515,11 +516,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     async function enableVR(scene, ground) {
         const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
-        const heldState = {
-            mesh: null,
-            controllerId: null
-        };
-    
         xrHelper.input.onControllerAddedObservable.add((controller) => {
             controller.onMotionControllerInitObservable.add((motionController) => {
                 const triggerComponent = motionController.getComponent("xr-standard-trigger");
@@ -549,9 +545,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                         productMesh.setEnabled(true);
                         productMesh.scaling.set(scale.x, scale.y, scale.z);
-                        if (productMesh.scaling.x > 0) {
-                            productMesh.scaling.x *= -1;
-                        }
     
                         const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
                         const mat = targetMesh.material;
@@ -569,8 +562,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                         productMesh.setParent(motionController.rootMesh);
                         productMesh.position = BABYLON.Vector3.Zero();
                         motionController.rootMesh.scaling.setAll(0.001);
-    
-                        buttonPanel.isVisible = true;
+
                     } else {
                         if (heldState.mesh && heldState.controllerId === controller.uniqueId) {
                             const mesh = heldState.mesh;
@@ -590,7 +582,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                             heldState.mesh = null;
                             heldState.controllerId = null;
-                            buttonPanel.isVisible = false;
                         }
                     }
                 });
