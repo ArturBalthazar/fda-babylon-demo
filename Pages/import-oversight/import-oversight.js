@@ -548,22 +548,25 @@ window.addEventListener("DOMContentLoaded", async () => {
             
                             foodMesh.setEnabled(true);
             
+                            heldState.originalEmissive = foodMesh.material?.emissiveColor?.clone();
                             if (foodMesh.material?.emissiveColor) {
-                                foodMesh.material.emissiveColor = BABYLON.Color3.Black();
+                                foodMesh.material.emissiveColor.set(0, 0, 0); // set emission to 0
                             }
             
                             // Apply scale factor
-                            const scaleFactor = 4;
+                            const scaleFactor = 3;
                             foodMesh.scaling.setAll(scaleFactor);
             
                             // Offset position slightly in front of hand
-                            const forward = new BABYLON.Vector3(0, 0, 1);
+                            const forward = new BABYLON.Vector3(0, 0, 0);
                             const handMatrix = motionController.rootMesh.getWorldMatrix();
                             const forwardWorld = BABYLON.Vector3.TransformNormal(forward, handMatrix).normalize();
                             const offset = forwardWorld.scale(0.2); // adjust if needed
             
                             foodMesh.setParent(motionController.rootMesh);
                             foodMesh.position = offset;
+                            controller.motionController.rootMesh.setEnabled(false);
+
             
                         } else if (heldState.mesh) {
                             const { mesh, originalParent, originalPos, originalEmissive } = heldState;
@@ -571,11 +574,12 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
-            
+                            controller.motionController.rootMesh.setEnabled(true);
+
                             if (mesh.material?.emissiveColor && originalEmissive) {
-                                mesh.material.emissiveColor = originalEmissive;
+                                mesh.material.emissiveColor.copyFrom(originalEmissive);
                             }
-            
+                            
                             heldState.mesh = null;
                         }
                     });
