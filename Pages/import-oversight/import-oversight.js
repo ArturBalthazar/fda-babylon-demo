@@ -539,27 +539,31 @@ window.addEventListener("DOMContentLoaded", async () => {
                             const productMesh = productMeshes[productName];
                             if (!productMesh) return;
     
+                            // Get the mesh that actually holds the material
+                            const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
+                            const originalMaterial = targetMesh.material;
+    
+                            if (!originalMaterial) {
+                                console.warn("⛔ No material on target mesh");
+                                return;
+                            }
+    
                             heldState.mesh = productMesh;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
-                            heldState.originalMaterial = productMesh.material;
+                            heldState.originalMaterial = originalMaterial;
     
-                            // Clone and strip emissive properties
-                            const strippedMat = heldState.originalMaterial.clone("noEmissive");
-                            if (strippedMat instanceof BABYLON.PBRMaterial) {
-                                strippedMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                                strippedMat.emissiveTexture = null;
-                            }
-                            productMesh.material = strippedMat;
+                            const strippedMat = originalMaterial.clone("noEmissive");
+                            strippedMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                            strippedMat.emissiveTexture = null;
+                            targetMesh.material = strippedMat;
     
                             productMesh.setEnabled(true);
                             productMesh.scaling.setAll(scale);
+                            productMesh.scaling.x *= -1;
     
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
-                            if (productMesh.scaling.x > 0) {
-                                productMesh.scaling.x *= -1;
-                            }
                             motionController.rootMesh.scaling.setAll(0.001);
     
                             emissiveText.text = `🔍 Holding: ${productName}`;
@@ -574,11 +578,12 @@ window.addEventListener("DOMContentLoaded", async () => {
                                 grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3 };
     
                             mesh.scaling.setAll(1 / scale);
+                            mesh.scaling.x *= -1;
                             motionController.rootMesh.scaling.setAll(1);
     
-                            if (originalMaterial) {
-                                mesh.material = originalMaterial;
-                            }
+                            // Restore original material
+                            const targetMesh = mesh.getChildMeshes?.()[0] || mesh;
+                            targetMesh.material = originalMaterial;
     
                             heldState.mesh = null;
                             emissiveText.text = "👐 Released object";
@@ -605,7 +610,6 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (emissiveText) emissiveText.text = `❌ XR Init Failed: ${err.message}`;
         }
     }
-    
 
     
     // ✅ Lock rotation on X/Z every frame
