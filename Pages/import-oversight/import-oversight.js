@@ -55,24 +55,28 @@ let tempF = null;
 let hum = null;
 
 const grabSettings = {
-    "mk_apples_01":       { name: "apple",        scale: 3000 },
-    "mk_apples_02":       { name: "apple",        scale: 3000 },
-    "mk_Banana":          { name: "banana",       scale: 3000 },
-    "mk_Fishes":          { name: "fish",         scale: 3000 },
-    "mk_thermometers":    { name: "medicaldevice",scale: 3000 },
-    "mk_drugsBoxes":      { name: "drugs",        scale: 3000 },
-    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: 3000 },
-    "mk_petFoodGroup":    { name: "petfood",      scale: 3000 },
-    "mk_packagedProducts1": { name: "packedfood1", scale: 3000 },
-    "mk_packagedProducts2": { name: "packedfood2", scale: 3000 },
-    "mk_packagedProducts3": { name: "packedfood3", scale: 3000 }
+    "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(3000, 3000, 3000) },
+    "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(3000, 3000, 3000) }
 };
+
 
 const heldState = {
     mesh: null,
+    controllerId: null,
     originalParent: null,
     originalPos: null,
-    originalMaterial: null
+    originalEmissiveColor: null,
+    originalEmissiveTexture: null,
+    originalEmissiveIntensity: null
 };
 
 let emissiveText;
@@ -508,61 +512,46 @@ window.addEventListener("DOMContentLoaded", async () => {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
-            // GUI setup
-            const uiPlane = BABYLON.MeshBuilder.CreatePlane("uiPlane", { width: 1.5, height: 0.4 }, scene);
-            uiPlane.parent = xrHelper.baseExperience.camera;
-            uiPlane.position = new BABYLON.Vector3(0, -0.2, 1.2); // adjust to sit below view
-
-            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(uiPlane);
-            emissiveText = new BABYLON.GUI.TextBlock();
+            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("VR_UI", true, scene);
+    
+            const emissiveText = new BABYLON.GUI.TextBlock();
             emissiveText.color = "white";
-            emissiveText.fontSize = 20;
+            emissiveText.fontSize = 24;
+            emissiveText.height = "60px";
             emissiveText.top = "-40px";
+            emissiveText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
             emissiveText.text = "🔍 Not holding anything";
             advancedTexture.addControl(emissiveText);
-
-            // === Action Buttons Setup ===
-            const buttonContainer = new BABYLON.GUI.Rectangle();
-            buttonContainer.width = "600px";
-            buttonContainer.height = "100px";
-            buttonContainer.thickness = 0;
-            buttonContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-            buttonContainer.top = "-140px";
-            buttonContainer.isVisible = false;
-            advancedTexture.addControl(buttonContainer);
-
-            // Helper function to create icon buttons
-            function createIconButton(imagePath, tooltipText, onClick) {
-                const button = BABYLON.GUI.Button.CreateImageOnlyButton("btn", imagePath);
-                button.width = "100px";
-                button.height = "100px";
+    
+            // Button icons
+            const buttonNames = ["photo", "temp", "sample"];
+            const buttonIcons = {
+                photo: "Assets/Icons/photo.png",
+                temp: "Assets/Icons/temperature.png",
+                sample: "Assets/Icons/sample.png"
+            };
+    
+            const buttonPanel = new BABYLON.GUI.StackPanel();
+            buttonPanel.isVertical = false;
+            buttonPanel.height = "80px";
+            buttonPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            buttonPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+            buttonPanel.paddingBottom = "80px";
+            advancedTexture.addControl(buttonPanel);
+    
+            buttonNames.forEach(name => {
+                const button = BABYLON.GUI.Button.CreateImageOnlyButton(name, buttonIcons[name]);
+                button.width = "60px";
+                button.height = "60px";
                 button.thickness = 2;
+                button.cornerRadius = 30;
                 button.color = "white";
-                button.cornerRadius = 10;
                 button.background = "transparent";
-                button.onPointerClickObservable.add(onClick);
-                button.pointerEnterAnimation = () => button.thickness = 4;
-                button.pointerOutAnimation = () => button.thickness = 2;
-                return button;
-            }
-
-            // Create and add buttons
-            const photoButton = createIconButton("Assets/Icons/photo.png", "Take Photo", () => {
-                console.log("📸 Take Photo triggered!");
+                button.onPointerClickObservable.add(() => {
+                    console.log(`Clicked ${name}`);
+                });
+                buttonPanel.addControl(button);
             });
-            const sampleButton = createIconButton("Assets/Icons/sample.png", "Get Sample", () => {
-                console.log("🧪 Sample triggered!");
-            });
-            const tempButton = createIconButton("Assets/Icons/thermo.png", "Check Temp", () => {
-                console.log("🌡️ Temperature Check triggered!");
-            });
-
-            buttonContainer.addControl(photoButton);
-            buttonContainer.addControl(sampleButton);
-            buttonContainer.addControl(tempButton);
-            photoButton.left = "-170px";
-            sampleButton.left = "0px";
-            tempButton.left = "170px";
     
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
@@ -571,13 +560,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                     triggerComponent.onButtonStateChangedObservable.add(() => {
                         if (!triggerComponent.changes.pressed) return;
-    
                         const isPressed = triggerComponent.pressed;
     
                         if (isPressed) {
-
-                            buttonContainer.isVisible = true;
-
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
@@ -589,16 +574,12 @@ window.addEventListener("DOMContentLoaded", async () => {
                             const productMesh = productMeshes[productName];
                             if (!productMesh) return;
     
-                            // Get the mesh that actually holds the material
                             const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
                             const originalMaterial = targetMesh.material;
-    
-                            if (!originalMaterial) {
-                                console.warn("⛔ No material on target mesh");
-                                return;
-                            }
+                            if (!originalMaterial) return;
     
                             heldState.mesh = productMesh;
+                            heldState.controllerId = controller.uniqueId;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
                             heldState.originalEmissiveColor = originalMaterial.emissiveColor;
@@ -608,23 +589,16 @@ window.addEventListener("DOMContentLoaded", async () => {
                             targetMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
                             targetMesh.material.emissiveTexture = null;
                             targetMesh.material.emissiveIntensity = 0;
-                            
-                            
     
                             productMesh.setEnabled(true);
-                            productMesh.scaling.setAll(scale);
-                            if (productMesh.scaling.x > 0) {
-                                productMesh.scaling.x *= -1;
-                            }
+                            productMesh.scaling = new BABYLON.Vector3(scale.x, scale.y, scale.z);
     
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
                             motionController.rootMesh.scaling.setAll(0.001);
     
                             emissiveText.text = `🔍 Holding: ${productName}`;
-                        } else if (heldState.mesh) {
-                            buttonContainer.isVisible = false;
-
+                        } else if (heldState.mesh && controller.uniqueId === heldState.controllerId) {
                             const { mesh, originalParent, originalPos, originalEmissiveColor, originalEmissiveTexture, originalEmissiveIntensity } = heldState;
     
                             mesh.setParent(originalParent);
@@ -632,40 +606,40 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.setEnabled(false);
     
                             const { name: productName, scale } =
-                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3000 };
+                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: { x: 3000, y: 3000, z: 3000 } };
     
-                            mesh.scaling.setAll(1 / scale);
+                            mesh.scaling = new BABYLON.Vector3(1 / scale.x, 1 / scale.y, 1 / scale.z);
                             motionController.rootMesh.scaling.setAll(1);
     
-                            // Restore original material
                             const targetMesh = mesh.getChildMeshes?.()[0] || mesh;
                             targetMesh.material.emissiveColor = originalEmissiveColor;
                             targetMesh.material.emissiveTexture = originalEmissiveTexture;
                             targetMesh.material.emissiveIntensity = originalEmissiveIntensity;
     
                             heldState.mesh = null;
+                            heldState.controllerId = null;
                             emissiveText.text = "👐 Released object";
                         }
                     });
                 });
             });
     
-            // GLOBAL ERROR DISPLAY IN VR
+            // Show errors in headset
             window.addEventListener("error", function (event) {
                 const errorMsg = `❌ ${event.message} @ ${event.filename}:${event.lineno}`;
                 console.error(errorMsg);
-                if (emissiveText) emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
+                emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
             });
     
             window.addEventListener("unhandledrejection", function (event) {
                 const errorMsg = `🚨 Unhandled Promise: ${event.reason}`;
                 console.error(errorMsg);
-                if (emissiveText) emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
+                emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
             });
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
-            if (emissiveText) emissiveText.text = `❌ XR Init Failed: ${err.message}`;
+            emissiveText.text = `❌ XR Init Failed: ${err.message}`;
         }
     }
 
