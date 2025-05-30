@@ -54,19 +54,20 @@ let ratMaterial = null;
 let tempF = null;
 let hum = null;
 
-const grabTargets = {
-    "mk_apples_01": "apple",
-    "mk_apples_02": "apple",
-    "mk_Banana": "banana",
-    "mk_Fishes": "fish",
-    "mk_thermometers": "medicaldevice",
-    "mk_drugsBoxes": "drugs",
-    "mk_cosmeticBoxes": "cosmetics",
-    "mk_petFoodGroup": "petfood",
-    "mk_packagedProducts1": "packedfood1",
-    "mk_packagedProducts2": "packedfood2",
-    "mk_packagedProducts3": "packedfood3"
+const grabSettings = {
+    "mk_apples_01":       { name: "apple",        scale: 3 },
+    "mk_apples_02":       { name: "apple",        scale: 3 },
+    "mk_Banana":          { name: "banana",       scale: 3 },
+    "mk_Fishes":          { name: "fish",         scale: 3 },
+    "mk_thermometers":    { name: "medicaldevice",scale: 3 },
+    "mk_drugsBoxes":      { name: "drugs",        scale: 3 },
+    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: 3 },
+    "mk_petFoodGroup":    { name: "petfood",      scale: 3 },
+    "mk_packagedProducts1": { name: "packedfood1", scale: 3 },
+    "mk_packagedProducts2": { name: "packedfood2", scale: 3 },
+    "mk_packagedProducts3": { name: "packedfood3", scale: 3 }
 };
+
 
 const heldState = {
     mesh: null,
@@ -74,6 +75,7 @@ const heldState = {
     originalPos: null,
     originalEmissive: null
 };
+let emissiveText;
 
 const tabletButton = document.getElementById("tabletButton");
 const tabletWrapper = document.getElementById("tabletWrapper");
@@ -511,76 +513,90 @@ window.addEventListener("DOMContentLoaded", async () => {
     debugText.text = "";
     advancedTexture.addControl(debugText);
 
+    // === Main VR logic ===
     async function enableVR(scene, ground) {
         try {
-            // XR
-            const xrHelper = await scene.createDefaultXRExperienceAsync({
-                floorMeshes: [ground]
-            });
+            const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
+
+            // Add GUI to show emissive info
+            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            emissiveText = new BABYLON.GUI.TextBlock();
+            emissiveText.color = "white";
+            emissiveText.fontSize = 20;
+            emissiveText.top = "-40px";
+            emissiveText.text = "🔍 Not holding anything";
+            advancedTexture.addControl(emissiveText);
 
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("xr-standard-trigger");
-            
                     if (!triggerComponent) return;
-            
+
                     triggerComponent.onButtonStateChangedObservable.add(() => {
                         if (!triggerComponent.changes.pressed) return;
-            
+
                         const isPressed = triggerComponent.pressed;
-            
+
                         if (isPressed) {
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
                             }
-            
-                            if (!picked || !grabTargets[picked.name]) return;
-            
-                            const productName = grabTargets[picked.name];
+
+                            if (!picked || !grabSettings[picked.name]) return;
+
+                            const { name: productName, scale } = grabSettings[picked.name];
                             const productMesh = productMeshes[productName];
                             if (!productMesh) return;
-            
+
                             heldState.mesh = productMesh;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
                             heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
-            
-                            productMesh.setEnabled(true);                   
-                            productMesh.scaling.setAll(3000);
-            
-                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
+                            heldState.originalAmbient = productMesh.material?.ambientColor?.clone();
+
+                            productMesh.setEnabled(true);
+                            productMesh.scaling.setAll(scale);
+
                             if (productMesh.material?.emissiveColor) {
-                                productMesh.material.emissiveColor.set(0, 0, 0); // set emission to 0
+                                productMesh.material.emissiveColor.set(0, 0, 0);
                             }
-            
-                            // Replace controller mesh
+                            if (productMesh.material?.ambientColor) {
+                                productMesh.material.ambientColor.set(0, 0, 0);
+                            }
+
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
+
                             motionController.rootMesh.scaling.setAll(0.001);
 
-            
+                            emissiveText.text = `🔍 Holding: ${productName}\nEmissive: ${heldState.originalEmissive?.toHexString() || "none"}`;
                         } else if (heldState.mesh) {
-                            const { mesh, originalParent, originalPos, originalEmissive } = heldState;
-            
+                            const { mesh, originalParent, originalPos, originalEmissive, originalAmbient } = heldState;
+
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
+
+                            const { name: productName, scale } = grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3 };
+                            mesh.scaling.setAll(1 / scale);
+
                             motionController.rootMesh.scaling.setAll(1);
 
-            
                             if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor.copyFrom(originalEmissive);
                             }
-                            mesh.scaling.setAll(1/3000);      
-            
+                            if (mesh.material?.ambientColor && originalAmbient) {
+                                mesh.material.ambientColor.copyFrom(originalAmbient);
+                            }
+
                             heldState.mesh = null;
+                            emissiveText.text = "👐 Released object";
                         }
                     });
                 });
             });
-            
-    
+
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
         }
