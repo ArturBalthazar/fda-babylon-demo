@@ -557,7 +557,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                             // Replace controller mesh
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
-                            controller.motionController.rootMesh.setEnabled(false);
+                            motionController.rootMesh.getChildMeshes().forEach(mesh => mesh.setEnabled(false));
+
             
                         } else if (heldState.mesh) {
                             const { mesh, originalParent, originalPos, originalEmissive } = heldState;
@@ -565,7 +566,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
-                            controller.motionController.rootMesh.setEnabled(true);
+                            motionController.rootMesh.getChildMeshes().forEach(mesh => mesh.setEnabled(true));
+
             
                             if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor.copyFrom(originalEmissive);
