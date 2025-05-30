@@ -515,40 +515,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     async function enableVR(scene, ground) {
         const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
-        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
-        emissiveText = new BABYLON.GUI.TextBlock("statusText");
-        emissiveText.color = "white";
-        emissiveText.fontSize = 24;
-        emissiveText.top = "-100px";
-        emissiveText.text = "🔍 Not holding anything";
-        advancedTexture.addControl(emissiveText);
-    
-        const buttonPanel = new BABYLON.GUI.StackPanel("actionButtons");
-        buttonPanel.isVertical = false;
-        buttonPanel.height = "100px";
-        buttonPanel.top = "40px";
-        buttonPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-        buttonPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-        buttonPanel.isVisible = false;
-        advancedTexture.addControl(buttonPanel);
-    
-        function createCircleButton(iconURL, tooltip) {
-            const button = BABYLON.GUI.Button.CreateImageOnlyButton(tooltip, iconURL);
-            button.width = "80px";
-            button.height = "80px";
-            button.cornerRadius = 40;
-            button.thickness = 2;
-            button.color = "white";
-            button.background = "#00000088";
-            return button;
-        }
-    
-        const photoBtn = createCircleButton("Assets/Images/photo.png", "Take Photo");
-        const sampleBtn = createCircleButton("Assets/Images/sample.png", "Get Sample");
-        const tempBtn = createCircleButton("Assets/Images/temp.png", "Check Temp");
-    
-        [photoBtn, sampleBtn, tempBtn].forEach(btn => buttonPanel.addControl(btn));
-    
         const heldState = {
             mesh: null,
             controllerId: null
@@ -605,7 +571,6 @@ window.addEventListener("DOMContentLoaded", async () => {
                         motionController.rootMesh.scaling.setAll(0.001);
     
                         buttonPanel.isVisible = true;
-                        emissiveText.text = `🔍 Holding: ${productName}`;
                     } else {
                         if (heldState.mesh && heldState.controllerId === controller.uniqueId) {
                             const mesh = heldState.mesh;
@@ -626,23 +591,10 @@ window.addEventListener("DOMContentLoaded", async () => {
                             heldState.mesh = null;
                             heldState.controllerId = null;
                             buttonPanel.isVisible = false;
-                            emissiveText.text = "👐 Released object";
                         }
                     }
                 });
             });
-        });
-    
-        window.addEventListener("error", function (event) {
-            const msg = `❌ ${event.message} @ ${event.filename}:${event.lineno}`;
-            console.error(msg);
-            if (emissiveText) emissiveText.text = msg.slice(0, 200);
-        });
-    
-        window.addEventListener("unhandledrejection", function (event) {
-            const msg = `🚨 Unhandled Promise: ${event.reason}`;
-            console.error(msg);
-            if (emissiveText) emissiveText.text = msg.slice(0, 200);
         });
     }
     
