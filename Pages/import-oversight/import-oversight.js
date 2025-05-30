@@ -58,7 +58,7 @@ const grabTargets = {
     "mk_apples_01": "apple",
     "mk_apples_02": "apple",
     "mk_Banana": "banana",
-    "mk_fishes": "fish",
+    "mk_Fishes": "fish",
     "mk_thermometers": "medicaldevice",
     "mk_drugsBoxes": "drugs",
     "mk_cosmeticBoxes": "cosmetics",
@@ -518,12 +518,9 @@ window.addEventListener("DOMContentLoaded", async () => {
                 floorMeshes: [ground]
             });
 
-            let mesh;
-
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("xr-standard-trigger");
-            
                     if (!triggerComponent) return;
             
                     triggerComponent.onButtonStateChangedObservable.add(() => {
@@ -543,6 +540,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                             const foodMesh = foodMeshes[foodName];
                             if (!foodMesh) return;
             
+                            // Store state before grabbing
                             heldState.mesh = foodMesh;
                             heldState.originalParent = foodMesh.parent;
                             heldState.originalPos = foodMesh.position.clone();
@@ -550,14 +548,22 @@ window.addEventListener("DOMContentLoaded", async () => {
             
                             foodMesh.setEnabled(true);
             
-                            // Optional: turn off emission
-                            if (foodMesh.material && foodMesh.material.emissiveColor) {
+                            if (foodMesh.material?.emissiveColor) {
                                 foodMesh.material.emissiveColor = BABYLON.Color3.Black();
                             }
             
-                            // Replace controller mesh
+                            // Apply scale factor
+                            const scaleFactor = 4;
+                            foodMesh.scaling.setAll(scaleFactor);
+            
+                            // Offset position slightly in front of hand
+                            const forward = new BABYLON.Vector3(0, 0, 1);
+                            const handMatrix = motionController.rootMesh.getWorldMatrix();
+                            const forwardWorld = BABYLON.Vector3.TransformNormal(forward, handMatrix).normalize();
+                            const offset = forwardWorld.scale(0.2); // adjust if needed
+            
                             foodMesh.setParent(motionController.rootMesh);
-                            foodMesh.position = BABYLON.Vector3.Zero();
+                            foodMesh.position = offset;
             
                         } else if (heldState.mesh) {
                             const { mesh, originalParent, originalPos, originalEmissive } = heldState;
@@ -566,7 +572,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
             
-                            if (mesh.material && mesh.material.emissiveColor && originalEmissive) {
+                            if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor = originalEmissive;
                             }
             
