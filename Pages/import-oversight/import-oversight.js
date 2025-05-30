@@ -42,9 +42,13 @@ let thermScreenMat = null;
 let thermScreenDT, thermScreenCtx, thermScreenSize;
 let thermCurrentTemp = null;
 
-let sampleRoot = null;
-let sampleAnimGroup = null;
-let sampleMaterial = null;
+let sample1Root = null;
+let sample1AnimGroup = null;
+let sample1Material = null;
+
+let sample2Root = null;
+let sample2AnimGroup = null;
+let sample2Material = null;
 
 let ratMesh = null;
 let ratAnimGroup = null;
@@ -133,9 +137,9 @@ const flaggedProducts = [
         temperature: +(Math.random() * (86 - 55) + 55).toFixed(1), // 55.0–86.0°F
         image: "../../Assets/Images/apples.png",
         reasons: [
-            "Shipment origin from a high-risk region for pesticide residue",
-            "Missing certificate of analysis in submitted documents",
-            "Previous history of violations by the same exporter"
+            "Originates from a region flagged for elevated pesticide use",
+            "Lacks certificate of analysis in import documentation",
+            "Prior import violations from the same grower/exporter"
         ]
     },
     {
@@ -144,38 +148,38 @@ const flaggedProducts = [
         temperature: +(Math.random() * (86 - 58) + 58).toFixed(1), // 58.0–86.0°F
         image: "../../Assets/Images/bananas.png",
         reasons: [
-            "Barcode mismatch between manifest and product labels",
-            "Randomized hold based on FDA predictive risk model"
+            "Discrepancy between product label and shipping manifest",
+            "Selected for randomized inspection by FDA's risk algorithm"
         ]
     },
     {
         name: "Nemo Nuggets Fishes",
         id: "fish",
-        temperature: +(Math.random() * (45 - 32) + 32).toFixed(1), // 32.0–45.0°F (cold storage)
+        temperature: +(Math.random() * (45 - 32) + 32).toFixed(1), // 32.0–45.0°F
         image: "../../Assets/Images/fishes.png",
         reasons: [
-            "Temperature irregularities during shipping",
-            "Unusual visual discoloration reported by customs"
+            "Cold chain interruption detected during transit",
+            "Signs of spoilage or discoloration reported at port of entry"
         ]
     },
     {
         name: "Pawsome Premium Pet Food",
         id: "petfood",
-        temperature: +(Math.random() * (86 - 58) + 58).toFixed(1), // 58.0–86.0°F (dry storage)
+        temperature: +(Math.random() * (86 - 58) + 58).toFixed(1), // 58.0–86.0°F
         image: "../../Assets/Images/petfood.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Reported cases of animal illness potentially linked to product",
+            "Selected for follow-up testing after adverse incident report"
         ]
     },
     {
-        name: "Glucose Reading Device",
+        name: "Fitlife Underarm Thermometer",
         id: "medicaldevice",
-        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F (room temp storage)
+        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F
         image: "../../Assets/Images/medicaldevice.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Batch under investigation for inaccurate readings",
+            "Storage temperature outside manufacturer guidelines"
         ]
     },
     {
@@ -184,48 +188,48 @@ const flaggedProducts = [
         temperature: +(Math.random() * (80 - 60) + 60).toFixed(1), // 60.0–80.0°F
         image: "../../Assets/Images/cosmetics.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Ingredients not in compliance with FDA cosmetic regulations",
+            "Potential microbial contamination identified in prior shipments"
         ]
     },
     {
-        name: "Packed Food 1",
+        name: "Pure Protein Eggs",
         id: "packedfood1",
         temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood1.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Improper refrigeration recorded during shipping",
+            "Outer packaging damaged on arrival, exposing product"
         ]
     },
     {
-        name: "Packed Food 2",
+        name: "Crunchy Crackers",
         id: "packedfood2",
         temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood2.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Imported from facility with recent sanitation violations",
+            "Label claims do not match contents based on lab testing"
         ]
     },
     {
-        name: "Packed Food 3",
+        name: "Choco Maxi Cereal",
         id: "packedfood3",
         temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood3.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "High sugar content flagged for review in children's products",
+            "Packaging did not list all allergen warnings as required"
         ]
     },
     {
-        name: "Drugs",
+        name: "Mexilocan ION",
         id: "drugs",
-        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F (room temp)
+        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F
         image: "../../Assets/Images/drugs.png",
         reasons: [
-            "Consumer reports indicating potential harmful adulteration",
-            "Other regulatory agencies have conducted tests due to safety concerns"
+            "Storage temperature exceeded limits for pharmaceutical integrity",
+            "Reported side effects under FDA post-market surveillance"
         ]
     }
 ];
@@ -1033,25 +1037,46 @@ window.addEventListener("DOMContentLoaded", async () => {
       }
     
 
-    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "sample.gltf", scene, (container) => {
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "sample1.gltf", scene, (container) => {
         container.addAllToScene();
         camera.alpha = Math.PI/2;
     
-        sampleRoot = container.rootNodes[0]; // root node of thermometer
-        sampleRoot.setParent(camera);
-        sampleRoot.position.set(-.17, -.05, 0.35); // 🔧 adjust position as needed
-        sampleRoot.setEnabled(false);
+        sample1Root = container.rootNodes[0]; // root node of thermometer
+        sample1Root.setParent(camera);
+        sample1Root.position.set(-.17, -.05, 0.35); // 🔧 adjust position as needed
+        sample1Root.setEnabled(false);
         camera.alpha = Math.PI*2.75;
     
-        sampleAnimGroup = container.animationGroups.find(g => g.name === "Samples");
-        if (sampleAnimGroup) {
-            sampleAnimGroup.stop();
-            sampleAnimGroup.goToFrame(0);
+        sample1AnimGroup = container.animationGroups.find(g => g.name === "sample1");
+        if (sample1AnimGroup) {
+            sample1AnimGroup.stop();
+            sample1AnimGroup.goToFrame(0);
         }
 
-        sampleMaterial = container.materials[0];
+        sample1Material = container.materials[0];
     
-        console.log("✅ Sample loaded and parented to camera");
+        console.log("✅ Sample 1 loaded and parented to camera");
+    });
+
+    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "sample2.gltf", scene, (container) => {
+        container.addAllToScene();
+        camera.alpha = Math.PI/2;
+    
+        sample2Root = container.rootNodes[0]; // root node of thermometer
+        sample2Root.setParent(camera);
+        sample2Root.position.set(-.04, -.01, 0.12); // 🔧 adjust position as needed
+        sample2Root.setEnabled(false);
+        camera.alpha = Math.PI*2.75;
+    
+        sample2AnimGroup = container.animationGroups.find(g => g.name === "sample2");
+        if (sample2AnimGroup) {
+            sample2AnimGroup.stop();
+            sample2AnimGroup.goToFrame(0);
+        }
+
+        sample2Material = container.materials[0];
+    
+        console.log("✅ Sample 2 loaded and parented to camera");
     });
 
 
@@ -1743,7 +1768,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             drawTemp(actual, 1500, 30);
             setTimeout(() => {
                 drawTemp(tempF, 1000, 20);
-            }, 3200);
+            }, 2400);
         }, 1000);
       
         // hide & cleanup after animation
@@ -1752,7 +1777,7 @@ window.addEventListener("DOMContentLoaded", async () => {
           window.inTempCheck = false;
           [checkTemp, getSample, inspectPhoto, closeInspectButton]
             .forEach(btn => btn.classList.remove("disabled"));
-        }, 5500);
+        }, 4700);
       
         // finally log it back into your form/UI
         setTimeout(() => {
@@ -1771,13 +1796,13 @@ window.addEventListener("DOMContentLoaded", async () => {
           }
           fadeMaterial(false, 1, thermMaterial);
           fadeMaterial(false, 1, thermScreenMat);
-        }, 4500);
+        }, 3700);
       });
       
 
     getSample.addEventListener("click", () => {
         playClickSound(false)
-        if (!sampleRoot || !sampleAnimGroup) return;
+        if (!sample1Root || !sample1AnimGroup || !sample2Root || !sample2AnimGroup) return;
     
         window.inSampleCheck = true;
 
@@ -1786,8 +1811,24 @@ window.addEventListener("DOMContentLoaded", async () => {
         getSample.classList.add("disabled");
         inspectPhoto.classList.add("disabled");
         closeInspectButton.classList.add("disabled");
-        
-        // Enable and play forward
+
+        let sampleRoot = null;
+        let sampleMaterial = null;
+        let sampleAnimGroup = null;
+        let baseDuration = null;
+
+        if (currentInspectedProduct === "apple" || currentInspectedProduct === "banana" || currentInspectedProduct === "fish") {
+            sampleRoot = sample2Root;
+            sampleMaterial = sample2Material;
+            sampleAnimGroup = sample2AnimGroup;
+            baseDuration = 2500;
+        } else {
+            sampleRoot = sample1Root;
+            sampleMaterial = sample1Material;
+            sampleAnimGroup = sample1AnimGroup;
+            baseDuration = 2000;
+        }
+
         sampleRoot.setEnabled(true);
 
         fadeMaterial(true, 1.5, sampleMaterial);
@@ -1802,7 +1843,10 @@ window.addEventListener("DOMContentLoaded", async () => {
             getSample.classList.remove("disabled");
             inspectPhoto.classList.remove("disabled");
             closeInspectButton.classList.remove("disabled");
-        }, 4000);
+        }, baseDuration+1000);
+        setTimeout(() => {
+            fadeMaterial(false, 1, sampleMaterial);
+        }, baseDuration);
         setTimeout(() => {
             const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
             // Log into the correct input field
@@ -1818,8 +1862,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (product) {
                 giveHint(tabletButton, true, `Sample collected for <strong>${product.name}</strong> ✅`, true, 3000);
             }
-            fadeMaterial(false, 1, sampleMaterial);
-        }, 3000);
+        }, baseDuration+1000);
     });
     
     tabletButton.addEventListener("click", () => {
