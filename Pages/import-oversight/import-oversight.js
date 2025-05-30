@@ -547,7 +547,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                             heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
             
                             productMesh.setEnabled(true);                   
-                            productMesh.scaling.setAll(3);
+                            productMesh.scaling.setAll(3000);
             
                             heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
                             if (productMesh.material?.emissiveColor) {
@@ -557,7 +557,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                             // Replace controller mesh
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
-                            motionController.rootMesh.getChildMeshes().forEach(mesh => mesh.setEnabled(false));
+                            motionController.rootMesh.scaling.setAll(0.001);
 
             
                         } else if (heldState.mesh) {
@@ -566,13 +566,13 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
-                            motionController.rootMesh.getChildMeshes().forEach(mesh => mesh.setEnabled(true));
+                            motionController.rootMesh.scaling.setAll(1);
 
             
                             if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor.copyFrom(originalEmissive);
                             }
-                            mesh.scaling.setAll(1/3);      
+                            mesh.scaling.setAll(1/3000);      
             
                             heldState.mesh = null;
                         }
