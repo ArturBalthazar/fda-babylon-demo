@@ -551,16 +551,21 @@ window.addEventListener("DOMContentLoaded", async () => {
                             heldState.mesh = productMesh;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
-                            heldState.originalMaterial = originalMaterial;
+                            heldState.originalEmissiveColor = originalMaterial.emissiveColor;
+                            heldState.originalEmissiveTexture = originalMaterial.emissiveTexture;
+                            heldState.originalEmissiveIntensity = originalMaterial.emissiveIntensity;
     
-                            const strippedMat = originalMaterial.clone("noEmissive");
-                            strippedMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                            strippedMat.emissiveTexture = null;
-                            targetMesh.material = strippedMat;
+                            targetMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                            targetMesh.material.emissiveTexture = null;
+                            targetMesh.material.emissiveIntensity = 0;
+                            
+                            
     
                             productMesh.setEnabled(true);
                             productMesh.scaling.setAll(scale);
-                            productMesh.scaling.x *= -1;
+                            if (productMesh.scaling.x > 0) {
+                                productMesh.scaling.x *= -1;
+                            }
     
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
@@ -568,22 +573,23 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                             emissiveText.text = `🔍 Holding: ${productName}`;
                         } else if (heldState.mesh) {
-                            const { mesh, originalParent, originalPos, originalMaterial } = heldState;
+                            const { mesh, originalParent, originalPos, originalEmissiveColor, originalEmissiveTexture, originalEmissiveIntensity } = heldState;
     
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
     
                             const { name: productName, scale } =
-                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3 };
+                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3000 };
     
                             mesh.scaling.setAll(1 / scale);
-                            mesh.scaling.x *= -1;
                             motionController.rootMesh.scaling.setAll(1);
     
                             // Restore original material
                             const targetMesh = mesh.getChildMeshes?.()[0] || mesh;
-                            targetMesh.material = originalMaterial;
+                            targetMesh.material.emissiveColor = originalEmissiveColor;
+                            targetMesh.material.emissiveTexture = originalEmissiveTexture;
+                            targetMesh.material.emissiveIntensity = originalEmissiveIntensity;
     
                             heldState.mesh = null;
                             emissiveText.text = "👐 Released object";
