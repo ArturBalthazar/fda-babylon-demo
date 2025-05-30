@@ -16,8 +16,8 @@ let isWalking = false;
 const inputMap = {};
 
 const foodMeshes = {}; // Store root containers by name
-const foodContainers = {};
-const foodList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
+const productContainers = {};
+const productList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
 
 let currentOverlayPhotoId = null;
 
@@ -35,8 +35,12 @@ let anchorWrapper = null;
 let currentInspectedProduct = null;
 
 let thermRoot = null;
+let thermMesh = null;
 let thermAnimGroup = null;
 let thermMaterial = null;
+let thermScreenMat = null;
+let thermScreenDT, thermScreenCtx, thermScreenSize;
+let thermCurrentTemp = null;
 
 let sampleRoot = null;
 let sampleAnimGroup = null;
@@ -46,6 +50,30 @@ let ratMesh = null;
 let ratAnimGroup = null;
 let currentRatIndex = 0;
 let ratMaterial = null;
+
+let tempF = null;
+let hum = null;
+
+const grabTargets = {
+    "mk_apples_01": "apple",
+    "mk_apples_02": "apple",
+    "mk_Banana": "banana",
+    "mk_fishes": "fish",
+    "mk_thermometers": "medicaldevice",
+    "mk_drugsBoxes": "drugs",
+    "mk_cosmeticBoxes": "cosmetics",
+    "mk_petFoodGroup": "petfood",
+    "mk_packagedProducts1": "packedfood1",
+    "mk_packagedProducts2": "packedfood2",
+    "mk_packagedProducts3": "packedfood3"
+};
+
+const heldState = {
+    mesh: null,
+    originalParent: null,
+    originalPos: null,
+    originalEmissive: null
+};
 
 const tabletButton = document.getElementById("tabletButton");
 const tabletWrapper = document.getElementById("tabletWrapper");
@@ -96,7 +124,7 @@ const flaggedProducts = [
     {
         name: "Brazilian Fuji Apples",
         id: "apple",
-        temperature: Math.floor(Math.random() * (86 - 55 + 1)) + 55,
+        temperature: +(Math.random() * (86 - 55) + 55).toFixed(1), // 55.0–86.0°F
         image: "../../Assets/Images/apples.png",
         reasons: [
             "Shipment origin from a high-risk region for pesticide residue",
@@ -107,7 +135,7 @@ const flaggedProducts = [
     {
         name: "Donkey Kong Bananas",
         id: "banana",
-        temperature: Math.floor(Math.random() * (86 - 58 + 1)) + 58,
+        temperature: +(Math.random() * (86 - 58) + 58).toFixed(1), // 58.0–86.0°F
         image: "../../Assets/Images/bananas.png",
         reasons: [
             "Barcode mismatch between manifest and product labels",
@@ -117,7 +145,7 @@ const flaggedProducts = [
     {
         name: "Nemo Nuggets Fishes",
         id: "fish",
-        temperature: Math.floor(Math.random() * (45 - 0 + 1)) + 0,
+        temperature: +(Math.random() * (45 - 32) + 32).toFixed(1), // 32.0–45.0°F (cold storage)
         image: "../../Assets/Images/fishes.png",
         reasons: [
             "Temperature irregularities during shipping",
@@ -127,7 +155,7 @@ const flaggedProducts = [
     {
         name: "Pawsome Premium Pet Food",
         id: "petfood",
-        temperature: Math.floor(Math.random() * (86 - 58 + 1)) + 58,
+        temperature: +(Math.random() * (86 - 58) + 58).toFixed(1), // 58.0–86.0°F (dry storage)
         image: "../../Assets/Images/petfood.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -137,7 +165,7 @@ const flaggedProducts = [
     {
         name: "Glucose Reading Device",
         id: "medicaldevice",
-        temperature: null,
+        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F (room temp storage)
         image: "../../Assets/Images/medicaldevice.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -147,7 +175,7 @@ const flaggedProducts = [
     {
         name: "Metaretail Cosmetics",
         id: "cosmetics",
-        temperature: null,
+        temperature: +(Math.random() * (80 - 60) + 60).toFixed(1), // 60.0–80.0°F
         image: "../../Assets/Images/cosmetics.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -157,7 +185,7 @@ const flaggedProducts = [
     {
         name: "Packed Food 1",
         id: "packedfood1",
-        temperature: null,
+        temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood1.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -167,7 +195,7 @@ const flaggedProducts = [
     {
         name: "Packed Food 2",
         id: "packedfood2",
-        temperature: null,
+        temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood2.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -177,7 +205,7 @@ const flaggedProducts = [
     {
         name: "Packed Food 3",
         id: "packedfood3",
-        temperature: null,
+        temperature: +(Math.random() * (86 - 50) + 50).toFixed(1), // 50.0–86.0°F
         image: "../../Assets/Images/packedfood3.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -187,7 +215,7 @@ const flaggedProducts = [
     {
         name: "Drugs",
         id: "drugs",
-        temperature: null,
+        temperature: +(Math.random() * (77 - 59) + 59).toFixed(1), // 59.0–77.0°F (room temp)
         image: "../../Assets/Images/drugs.png",
         reasons: [
             "Consumer reports indicating potential harmful adulteration",
@@ -195,6 +223,7 @@ const flaggedProducts = [
         ]
     }
 ];
+
 
 // 🌀 Shuffle helper
 function shuffle(array) {
@@ -222,37 +251,6 @@ function showRandomFlaggedProducts(limit = 2) {
         
         flaggedProductsContainer.appendChild(item);
     });
-}
-
-function createProductInspectionBlock(product) {
-    const div = document.createElement("div");
-    div.className = "product-inspection";
-
-    div.innerHTML = `
-        <div class="product-entry">
-            <img src="${product.image}" style="width:90px; height:auto; border-radius:6px;">
-            <div style="flex:1">
-                <!-- existing content -->
-            </div>
-            <div class="details">
-                <h4>${product.name}</h4>
-                <label>Checked Temperature: 
-                    <input type="number" step="0.01" placeholder="°F" onchange="formatTemp(this)">
-                </label>
-                <label>Sample Collected: 
-                    <button class="sample-toggle" onclick="toggleSample(this)">No</button>
-                </label>
-                <label>Inspection Details: 
-                    <input type="text" placeholder="Describe relevant details about your inspection...">
-                </label>
-            </div>
-        </div>
-        <span>Captured Photos</span>
-        <div class="photo-placeholder">
-            <div class="photo-grid"></div>
-        </div>
-    `;
-    return div;
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -288,6 +286,44 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         meshes.forEach(mesh => {
             if (!(mesh instanceof BABYLON.Mesh) || mesh.name === "__root__") return;
+
+            // ——— mk_tempScreen: create & apply dynamic temp/humidity texture ———
+            if (mesh.name === "mk_tempScreen") {
+                // 1) create a 512×256 dynamic canvas
+                const size = { width: 512, height: 256 };
+                const dynTex = new BABYLON.DynamicTexture("tempHumDT", size, scene, false);
+                dynTex.vScale = -1;
+                dynTex.vOffset = 1;
+                dynTex.hasAlpha = false;
+                const ctx = dynTex.getContext();
+  
+                ctx.fillRect(0, 0, dynTex.getSize().width, dynTex.getSize().height);
+                dynTex.clear();
+
+                // 2) pick random values
+                tempF = +(60 + Math.random() * 20).toFixed(1);  // 60.0–80.0°F
+                hum   = +(30 + Math.random() * 40).toFixed(1);  // 30.0–70.0% RH                
+
+                // 3) draw them on the canvas
+                const { width, height } = dynTex.getSize();
+                ctx.font      = "bold 90px Arial";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(`${tempF}°F`, width / 2, height / 2 - 20);
+                ctx.font      = "bold 90px Arial";
+                ctx.fillText(`${hum}% RH`, width / 2, height / 2 + 100);
+                dynTex.update();
+
+                // 4) build a fresh material and assign
+                const mat = new BABYLON.StandardMaterial("mkTempMat", scene);
+                mat.diffuseTexture  = dynTex;
+                mat.emissiveTexture = dynTex;   // so it lights up even without a light
+                mat.backFaceCulling = false;
+                mesh.material       = mat;
+
+                console.log(`🧪 mk_tempScreen → ${tempF}°F, ${hum}% RH`);
+                return; // skip your other per-mesh logic
+            }
 
             if (mesh.material) {
                 const mat = mesh.material;
@@ -388,18 +424,54 @@ window.addEventListener("DOMContentLoaded", async () => {
         }, 2000);
     });
 
-    for (let name of foodList) {
-        const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("./Assets/Models/", `${name}.gltf`, scene);
-        container.addAllToScene();
+    async function loadFoodModels(productList, scene) {
+        const badCandidates = [];
+        const normalCandidates = [];
     
-        const root = container.rootNodes[0];
-        root.setEnabled(false); // Start hidden
+        // First, separate which items have a bad version available
+        for (const name of productList) {
+            const response = await fetch(`./Assets/Models/${name}-bad.gltf`);
+            if (response.ok) {
+                badCandidates.push(name);
+            } else {
+                normalCandidates.push(name); // fallback if no bad version
+            }
+        }
     
-        foodContainers[name] = container;
-        foodMeshes[name] = root;
+        // Randomly pick 3 to load as bad items
+        const selectedBad = shuffleArray(badCandidates).slice(0, 3);
+        
+        for (const name of productList) {
+            const useBad = selectedBad.includes(name);
+            const fileName = useBad ? `${name}-bad.gltf` : `${name}.gltf`;
     
-        console.log(`✅ ${name}.gltf loaded`);
+            try {
+                const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("./Assets/Models/", fileName, scene);
+                container.addAllToScene();
+    
+                const root = container.rootNodes[0];
+                root.setEnabled(false); // Start hidden
+    
+                productContainers[name] = container;
+                foodMeshes[name] = root;
+    
+                console.log(`✅ ${fileName} loaded`);
+            } catch (e) {
+                console.error(`❌ Failed to load ${fileName}`, e);
+            }
+        }
     }
+    
+    // Utility to shuffle array in-place
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    await loadFoodModels(productList, scene);
 
     // ✅ Capsule (player)
     const capsule = BABYLON.MeshBuilder.CreateBox("playerCapsule", { height: 3.2, width: .5, depth: .5 }, scene);
@@ -450,28 +522,58 @@ window.addEventListener("DOMContentLoaded", async () => {
 
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
-                    const xr_ids = motionController.getComponentIds();
-                    let triggerComponent = motionController.getComponent(xr_ids[0]);//xr-standard-trigger
+                    const triggerComponent = motionController.getComponent("xr-standard-trigger");
+            
+                    if (!triggerComponent) return;
+            
                     triggerComponent.onButtonStateChangedObservable.add(() => {
-                        if (triggerComponent.changes.pressed) {
-                            // is it pressed?
-                            if (triggerComponent.pressed) {
-                                mesh = scene.meshUnderPointer;
-                                console.log(mesh && mesh.name);
-                                if (xrHelper.pointerSelection.getMeshUnderPointer) {
-                                    mesh = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                                }
-                                console.log(mesh && mesh.name);
-                                if (mesh === ground) {
-                                    return;
-                                }
-                                mesh && mesh.setParent(motionController.rootMesh);
-                            } else {
-                                mesh && mesh.setParent(null);
+                        if (!triggerComponent.changes.pressed) return;
+            
+                        const isPressed = triggerComponent.pressed;
+            
+                        if (isPressed) {
+                            let picked = scene.meshUnderPointer;
+                            if (xrHelper.pointerSelection?.getMeshUnderPointer) {
+                                picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
                             }
+            
+                            if (!picked || !grabTargets[picked.name]) return;
+            
+                            const foodName = grabTargets[picked.name];
+                            const foodMesh = foodMeshes[foodName];
+                            if (!foodMesh) return;
+            
+                            heldState.mesh = foodMesh;
+                            heldState.originalParent = foodMesh.parent;
+                            heldState.originalPos = foodMesh.position.clone();
+                            heldState.originalEmissive = foodMesh.material?.emissiveColor?.clone();
+            
+                            foodMesh.setEnabled(true);
+            
+                            // Optional: turn off emission
+                            if (foodMesh.material && foodMesh.material.emissiveColor) {
+                                foodMesh.material.emissiveColor = BABYLON.Color3.Black();
+                            }
+            
+                            // Replace controller mesh
+                            foodMesh.setParent(motionController.rootMesh);
+                            foodMesh.position = BABYLON.Vector3.Zero();
+            
+                        } else if (heldState.mesh) {
+                            const { mesh, originalParent, originalPos, originalEmissive } = heldState;
+            
+                            mesh.setParent(originalParent);
+                            mesh.position = originalPos;
+                            mesh.setEnabled(false);
+            
+                            if (mesh.material && mesh.material.emissiveColor && originalEmissive) {
+                                mesh.material.emissiveColor = originalEmissive;
+                            }
+            
+                            heldState.mesh = null;
                         }
                     });
-                })
+                });
             });
             
     
@@ -652,7 +754,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         tabletRoot.position.set(0, -.145, 0.33);
 
         // Position and parent each loaded food container
-        Object.entries(foodContainers).forEach(([name, container]) => {
+        Object.entries(productContainers).forEach(([name, container]) => {
             const root = container.rootNodes[0];
 
             root.setParent(camera); // parent to camera
@@ -728,7 +830,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
             //ratMesh.setEnabled(true);
-            fadeSampleMaterial(true, 0.8, ratMaterial);
+            fadeMaterial(true, 0.8, ratMaterial);
     
             ratAnimGroup.reset();
             ratAnimGroup.play(false);
@@ -738,9 +840,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     
             setTimeout(() => {
                 setTimeout(() => {
-                    fadeSampleMaterial(false, 0.8, ratMaterial);
+                    fadeMaterial(false, 0.8, ratMaterial);
                 }, 3200);
-                //fadeSampleMaterial(false, 0.8, ratMaterial);
+                //fadeMaterial(false, 0.8, ratMaterial);
                 //ratMesh.setEnabled(false);
                 console.log("🕳️ Rat hidden");
     
@@ -757,26 +859,119 @@ window.addEventListener("DOMContentLoaded", async () => {
         loop();
     }
 
-    BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "thermometer.gltf", scene, (container) => {
-        container.addAllToScene();
-        camera.alpha = Math.PI/2;
-    
-        thermRoot = container.rootNodes[0]; // root node of thermometer
-        thermRoot.setParent(camera);
-        thermRoot.position.set(0, -.01, 0.17); // 🔧 adjust position as needed
-        thermRoot.setEnabled(false);
-        camera.alpha = Math.PI*2.75;
-    
-        thermAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
-        if (thermAnimGroup) {
+    BABYLON.SceneLoader.LoadAssetContainer(
+        "./Assets/Models/",
+        "thermometer.gltf",
+        scene,
+        (container) => {
+          container.addAllToScene();
+      
+          // — your camera setup & parenting —
+          camera.alpha = Math.PI/2;
+          thermRoot = container.rootNodes[0];        // root node of thermometer
+          thermRoot.setParent(camera);
+          thermRoot.position.set(0, -.01, 0.17);
+          thermRoot.setEnabled(false);
+
+          thermMesh = container.meshes.find(m => m.name !== "__root__");
+          thermMesh.alwaysSelectAsActiveMesh = true;
+          
+          camera.alpha = Math.PI * 2.75;
+      
+          // — your animation prep —
+          thermAnimGroup = container.animationGroups.find(g => g.name === "tempAnim");
+          if (thermAnimGroup) {
             thermAnimGroup.stop();
             thermAnimGroup.goToFrame(0);
+          }
+      
+          // — your base material (for fading) —
+          thermMaterial = container.materials[1];
+      
+          // ─── NEW: mk_thermometerScreen DynamicTexture ────────────────────────────
+          const screenMesh = container.meshes.find(m => m.name === "mk_thermometerScreen");
+          if (screenMesh) {
+            // 1) create a 256×128 texture
+            const size = { width: 256, height: 128 };
+            const dt = new BABYLON.DynamicTexture("thermScreenDT", size, scene, false);
+            dt.hasAlpha = false; // solid black background
+            const ctx = dt.getContext();
+      
+            // 2) initial clear to black
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, size.width, size.height);
+            dt.update();
+      
+            // 3) assign emissive + diffuse so it "glows"
+            thermScreenMat = new BABYLON.StandardMaterial("thermScreenMat", scene);
+            thermScreenMat.emissiveTexture  = dt;
+            thermScreenMat.diffuseTexture   = dt;
+            thermScreenMat.backFaceCulling  = false;
+            screenMesh.material  = thermScreenMat;
+      
+            // store for later updates
+            thermScreenDT  = dt;
+            thermScreenCtx = ctx;
+            thermScreenSize= size;
+
+            drawTemp(tempF, 1, 1);
+          }
+      
+          console.log("✅ Thermometer loaded and parented to camera");
         }
+    );
     
-        thermMaterial = container.materials[0];
-        
-        console.log("✅ Thermometer loaded and parented to camera");
-    });
+    function drawTemp(target, duration, steps) {
+        const { width, height } = thermScreenSize;
+        const ctx = thermScreenCtx;
+        const dt  = thermScreenDT;
+      
+        // if this is our very first draw, just paint it
+        if (thermCurrentTemp === null) {
+          thermCurrentTemp = target;
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0, 0, width, height);
+          ctx.font      = "bold 48px Arial";
+          ctx.fillStyle = "#fff";
+          ctx.textAlign = "center";
+          ctx.fillText(`${target.toFixed(1)}°F`, width/2, height/2 + 16);
+          dt.update();
+          return;
+        }
+      
+        const start = thermCurrentTemp;
+        const min   = Math.min(start, target);
+        const max   = Math.max(start, target);
+        const interval    = duration / steps;
+        const randomSteps = steps - 1;  // last step is the actual target
+      
+        // schedule random “flicker” frames
+        for (let i = 1; i <= randomSteps; i++) {
+          setTimeout(() => {
+            const val = min + Math.random() * (max - min);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, width, height);
+            ctx.font      = "bold 48px Arial";
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText(`${val.toFixed(1)}°F`, width/2, height/2 + 16);
+            dt.update();
+          }, i * interval);
+        }
+      
+        // final frame: lock onto the true value
+        setTimeout(() => {
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0, 0, width, height);
+          ctx.font      = "bold 48px Arial";
+          ctx.fillStyle = "#fff";
+          ctx.textAlign = "center";
+          ctx.fillText(`${target.toFixed(1)}°F`, width/2, height/2 + 16);
+          dt.update();
+          thermCurrentTemp = target;
+        }, duration);
+      }
+    
 
     BABYLON.SceneLoader.LoadAssetContainer("./Assets/Models/", "sample.gltf", scene, (container) => {
         container.addAllToScene();
@@ -798,7 +993,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     
         console.log("✅ Sample loaded and parented to camera");
     });
-    
+
+
     await BABYLON.SceneLoader.ImportMeshAsync("", "./Assets/Models/", "anchors.glb", scene).then(result => {
         result.meshes.forEach(mesh => {
             if (mesh.name !== "__root__") {
@@ -810,22 +1006,49 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         anchorPoints.forEach((anchor, index) => {
             const anchorButton = document.createElement("div");
-            anchorButton.style.zIndex = "-999";
-            anchorButton.className = "inspect-button";
-            anchorButton.id = `inspectButton-${index}`; // ensure unique IDs
-            anchorButton.innerHTML = `<img src="../../Assets/Images/inspect.png" alt="Inspect">`;
-            anchorButton.style.position = "absolute";
-            anchorButton.style.pointerEvents = "auto";
-        
+            anchorButton.style.zIndex         = "-999";
+            anchorButton.className            = "inspect-button";
+            anchorButton.id                   = `inspectButton-${index}`;
+            anchorButton.style.position       = "absolute";
+            anchorButton.style.pointerEvents  = "auto";
+          
+            if (anchor.name === "roomtemp_anchor") {
+              // —–– room-temp button uses temperature.png & logs T+H
+              anchorButton.innerHTML = `<img src="../../Assets/Images/temperature.png" alt="Room Temp">`;
+              anchorButton.addEventListener("click", () => {
+                playClickSound(false);
+
+                const tempInput = document.getElementById("facilityTemperature");
+                const humInput  = document.getElementById("facilityHumidity");
+              
+                if (tempInput) {
+                    tempInput.value = `${tempF}°F ✅`;
+                }
+                if (humInput) {
+                    humInput.value = `${hum}% RH ✅`;
+                }
+                // tempF & hum should be your current room readings
+                giveHint(
+                  tabletButton,
+                  true,
+                  `Temperature of <strong>${tempF}°F</strong> and humidity of <strong>${hum}% RH</strong> logged for this facility ✅`,
+                  true,
+                  5000
+                );
+              });
+            } else {
+              // —–– all other anchors get the standard inspect button
+              anchorButton.innerHTML = `<img src="../../Assets/Images/inspect.png" alt="Inspect">`;
+              const foodType = anchor.name.split("_")[0];
+              anchorButton.addEventListener("click", () => {
+                playClickSound(false);
+                enterInspectMode(foodType);
+              });
+            }
+          
             inspectButtons.appendChild(anchorButton);
             anchorButtons.push({ anchor, anchorButton });
-        });
-
-        anchorButtons.forEach(({ anchor, anchorButton }) => {
-            const foodType = anchor.name.split("-")[1];
-            anchorButton.addEventListener("click", () => {enterInspectMode(foodType); playClickSound(false);});
-        });
-        
+          }); 
     });
 
     scene.onBeforeRenderObservable.add(() => {
@@ -913,14 +1136,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         tabletButton.style.pointerEvents = "none";
         
         // Hide all previously shown foods
-        Object.values(foodContainers).forEach(container => {
+        Object.values(productContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
             const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
             if (wrapper) wrapper.setEnabled(false);
         });
 
         // Show selected and rotate the wrapper
-        const container = foodContainers[productName];
+        const container = productContainers[productName];
         const rootNode = container.rootNodes[0];
 
         // ✅ Create a wrapper node if it doesn't exist
@@ -955,7 +1178,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         capsule.physicsImpostor.wakeUp();
     
         // Hide all food + wrappers
-        Object.values(foodContainers).forEach(container => {
+        Object.values(productContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
             const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
             if (wrapper) wrapper.setEnabled(false);
@@ -1119,7 +1342,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
         } else {
             const facilityGrid = document.querySelector(".facility-section .photo-grid");
-            if (facilityGrid && facilityGrid.children.length < 5) {
+            if (facilityGrid && facilityGrid.children.length < 8) {
                 targetGrid = facilityGrid;
                 setTimeout(() => {  
                     giveHint(tabletButton, true, "Photo added to inspection report", true, 3000);
@@ -1231,11 +1454,11 @@ window.addEventListener("DOMContentLoaded", async () => {
                     <img src="../../Assets/Images/warehouse.png" class="facility-photo" />
                     <div class="facility-fields">
                         <h3>Pacific Port Depot</h3>
-                        <label>Room Humidity:
-                            <input type="text" id="facilityHumidity" readonly value="Not measured ❌" />
-                        </label>
                         <label>Room Temperature:
                             <input type="text" id="facilityTemperature" readonly value="Not measured ❌" />
+                        </label>
+                        <label>Room Humidity:
+                            <input type="text" id="facilityHumidity" readonly value="Not measured ❌" />
                         </label>
                         <label>Structural Condition:
                             <textarea id="facilityStructure" placeholder="Describe physical condition..."></textarea>
@@ -1388,7 +1611,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         requestAnimationFrame(animate);
     }
 
-    function fadeSampleMaterial(show, durationInSeconds, material) {
+    function fadeMaterial(show, durationInSeconds, material) {
         if (!material) return;
     
         const fps = 30;
@@ -1435,51 +1658,62 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     checkTemp.addEventListener("click", () => {
-        playClickSound(false)
+        playClickSound(false);
         if (!thermRoot || !thermAnimGroup) return;
-    
         window.inTempCheck = true;
-
-        // 🔒 Disable and dim the button
-        checkTemp.classList.add("disabled");
-        getSample.classList.add("disabled");
-        inspectPhoto.classList.add("disabled");
-        closeInspectButton.classList.add("disabled");
-    
-        // Enable and play forward
+      
+        // disable buttons
+        [checkTemp, getSample, inspectPhoto, closeInspectButton]
+          .forEach(btn => btn.classList.add("disabled"));
+      
+        // show & animate thermometer
         thermRoot.setEnabled(true);
-
-        fadeSampleMaterial(true, 3, thermMaterial);
-    
+        fadeMaterial(true, 3, thermMaterial);
+        fadeMaterial(true, 3, thermScreenMat);
         thermAnimGroup.reset();
-        thermAnimGroup.speedRatio = 1.0;
+        thermAnimGroup.speedRatio = 1;
         thermAnimGroup.play(false);
+      
+        // grab the real product temp
+        const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
+        const actual = product.temperature;      // e.g. 70.2°F
+      
+        // after 6s, lock onto the real reading
         setTimeout(() => {
-            thermRoot.setEnabled(false);
-            window.inTempCheck = false;
-            checkTemp.classList.remove("disabled");
-            getSample.classList.remove("disabled");
-            inspectPhoto.classList.remove("disabled");
-            closeInspectButton.classList.remove("disabled");
-        }, 7800);
+            drawTemp(actual, 1500, 30);
+            setTimeout(() => {
+                drawTemp(tempF, 1000, 20);
+            }, 3200);
+        }, 1000);
+      
+        // hide & cleanup after animation
         setTimeout(() => {
-            const product = flaggedProducts.find(p => p.id === currentInspectedProduct);
-            // Log into the correct input field
+          thermRoot.setEnabled(false);
+          window.inTempCheck = false;
+          [checkTemp, getSample, inspectPhoto, closeInspectButton]
+            .forEach(btn => btn.classList.remove("disabled"));
+        }, 5500);
+      
+        // finally log it back into your form/UI
+        setTimeout(() => {
+          if (product) {
             document.querySelectorAll(".product-inspection").forEach(section => {
-                const title = section.querySelector("h3")?.textContent?.trim();
-                if (title === product.name) {
-                    const tempInput = section.querySelector(".temperature-input");
-                    if (tempInput) {
-                        tempInput.value = `${product.temperature}°F ✅`;
-                    }
-                }
+              const title = section.querySelector("h3")?.textContent?.trim();
+              if (title === product.name) {
+                const tempInput = section.querySelector(".temperature-input");
+                if (tempInput) tempInput.value = `${actual}°F ✅`;
+              }
             });
-            if (product) {
-                giveHint(tabletButton, true, `Temperature of <strong>${product.temperature}°F</strong> logged for <strong>${product.name}</strong> ✅`, true, 3000);
-            }
-            fadeSampleMaterial(false, 1, thermMaterial);
-        }, 6000);
-    });
+            giveHint(tabletButton, true,
+              `Temperature of <strong>${actual}°F</strong> logged for <strong>${product.name}</strong> ✅`,
+              true, 3000
+            );
+          }
+          fadeMaterial(false, 1, thermMaterial);
+          fadeMaterial(false, 1, thermScreenMat);
+        }, 4500);
+      });
+      
 
     getSample.addEventListener("click", () => {
         playClickSound(false)
@@ -1496,7 +1730,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         // Enable and play forward
         sampleRoot.setEnabled(true);
 
-        fadeSampleMaterial(true, 1.5, sampleMaterial);
+        fadeMaterial(true, 1.5, sampleMaterial);
         
         sampleAnimGroup.reset();
         sampleAnimGroup.speedRatio = 1.0;
@@ -1524,7 +1758,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (product) {
                 giveHint(tabletButton, true, `Sample collected for <strong>${product.name}</strong> ✅`, true, 3000);
             }
-            fadeSampleMaterial(false, 1, sampleMaterial);
+            fadeMaterial(false, 1, sampleMaterial);
         }, 3000);
     });
     
