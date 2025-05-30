@@ -55,17 +55,17 @@ let tempF = null;
 let hum = null;
 
 const grabSettings = {
-    "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(3000, 3000, 3000) },
-    "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(3000, 3000, 3000) }
+    "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(-3000, 3000, 3000) },
+    "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(-3000, 3000, 3000) }
 };
 
 
@@ -509,140 +509,138 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysRight = [];
 
     async function enableVR(scene, ground) {
-        try {
-            const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
+        const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
-            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("VR_UI", true, scene);
+        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene);
+        emissiveText = new BABYLON.GUI.TextBlock("statusText");
+        emissiveText.color = "white";
+        emissiveText.fontSize = 24;
+        emissiveText.top = "-100px";
+        emissiveText.text = "🔍 Not holding anything";
+        advancedTexture.addControl(emissiveText);
     
-            const emissiveText = new BABYLON.GUI.TextBlock();
-            emissiveText.color = "white";
-            emissiveText.fontSize = 24;
-            emissiveText.height = "60px";
-            emissiveText.top = "-40px";
-            emissiveText.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-            emissiveText.text = "🔍 Not holding anything";
-            advancedTexture.addControl(emissiveText);
+        const buttonPanel = new BABYLON.GUI.StackPanel("actionButtons");
+        buttonPanel.isVertical = false;
+        buttonPanel.height = "100px";
+        buttonPanel.top = "40px";
+        buttonPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        buttonPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+        buttonPanel.isVisible = false;
+        advancedTexture.addControl(buttonPanel);
     
-            // Button icons
-            const buttonNames = ["photo", "temp", "sample"];
-            const buttonIcons = {
-                photo: "Assets/Icons/photo.png",
-                temp: "Assets/Icons/temperature.png",
-                sample: "Assets/Icons/sample.png"
-            };
+        function createCircleButton(iconURL, tooltip) {
+            const button = BABYLON.GUI.Button.CreateImageOnlyButton(tooltip, iconURL);
+            button.width = "80px";
+            button.height = "80px";
+            button.cornerRadius = 40;
+            button.thickness = 2;
+            button.color = "white";
+            button.background = "#00000088";
+            return button;
+        }
     
-            const buttonPanel = new BABYLON.GUI.StackPanel();
-            buttonPanel.isVertical = false;
-            buttonPanel.height = "80px";
-            buttonPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-            buttonPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-            buttonPanel.paddingBottom = "80px";
-            advancedTexture.addControl(buttonPanel);
+        const photoBtn = createCircleButton("Assets/Images/photo.png", "Take Photo");
+        const sampleBtn = createCircleButton("Assets/Images/sample.png", "Get Sample");
+        const tempBtn = createCircleButton("Assets/Images/temp.png", "Check Temp");
     
-            buttonNames.forEach(name => {
-                const button = BABYLON.GUI.Button.CreateImageOnlyButton(name, buttonIcons[name]);
-                button.width = "60px";
-                button.height = "60px";
-                button.thickness = 2;
-                button.cornerRadius = 30;
-                button.color = "white";
-                button.background = "transparent";
-                button.onPointerClickObservable.add(() => {
-                    console.log(`Clicked ${name}`);
-                });
-                buttonPanel.addControl(button);
-            });
+        [photoBtn, sampleBtn, tempBtn].forEach(btn => buttonPanel.addControl(btn));
     
-            xrHelper.input.onControllerAddedObservable.add((controller) => {
-                controller.onMotionControllerInitObservable.add((motionController) => {
-                    const triggerComponent = motionController.getComponent("xr-standard-trigger");
-                    if (!triggerComponent) return;
+        const heldState = {
+            mesh: null,
+            controllerId: null
+        };
     
-                    triggerComponent.onButtonStateChangedObservable.add(() => {
-                        if (!triggerComponent.changes.pressed) return;
-                        const isPressed = triggerComponent.pressed;
+        xrHelper.input.onControllerAddedObservable.add((controller) => {
+            controller.onMotionControllerInitObservable.add((motionController) => {
+                const triggerComponent = motionController.getComponent("xr-standard-trigger");
+                if (!triggerComponent) return;
     
-                        if (isPressed) {
-                            let picked = scene.meshUnderPointer;
-                            if (xrHelper.pointerSelection?.getMeshUnderPointer) {
-                                picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
-                            }
+                triggerComponent.onButtonStateChangedObservable.add(() => {
+                    if (!triggerComponent.changes.pressed) return;
     
-                            if (!picked || !grabSettings[picked.name]) return;
+                    const isPressed = triggerComponent.pressed;
     
-                            const { name: productName, scale } = grabSettings[picked.name];
-                            const productMesh = productMeshes[productName];
-                            if (!productMesh) return;
+                    if (isPressed) {
+                        if (heldState.mesh) return; // Prevent second grab
     
-                            const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
-                            const originalMaterial = targetMesh.material;
-                            if (!originalMaterial) return;
+                        let picked = scene.meshUnderPointer;
+                        if (xrHelper.pointerSelection?.getMeshUnderPointer) {
+                            picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
+                        }
     
-                            heldState.mesh = productMesh;
-                            heldState.controllerId = controller.uniqueId;
-                            heldState.originalParent = productMesh.parent;
-                            heldState.originalPos = productMesh.position.clone();
-                            heldState.originalEmissiveColor = originalMaterial.emissiveColor;
-                            heldState.originalEmissiveTexture = originalMaterial.emissiveTexture;
-                            heldState.originalEmissiveIntensity = originalMaterial.emissiveIntensity;
+                        if (!picked || !grabSettings[picked.name]) return;
     
-                            targetMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                            targetMesh.material.emissiveTexture = null;
-                            targetMesh.material.emissiveIntensity = 0;
+                        const { name: productName, scale } = grabSettings[picked.name];
+                        const productMesh = productMeshes[productName];
+                        if (!productMesh) return;
     
-                            productMesh.setEnabled(true);
-                            productMesh.scaling = new BABYLON.Vector3(scale.x, scale.y, scale.z);
+                        heldState.mesh = productMesh;
+                        heldState.controllerId = controller.uniqueId;
     
-                            productMesh.setParent(motionController.rootMesh);
-                            productMesh.position = BABYLON.Vector3.Zero();
-                            motionController.rootMesh.scaling.setAll(0.001);
+                        productMesh.setEnabled(true);
+                        productMesh.scaling.set(scale.x, scale.y, scale.z);
+                        if (productMesh.scaling.x > 0) {
+                            productMesh.scaling.x *= -1;
+                        }
     
-                            emissiveText.text = `🔍 Holding: ${productName}`;
-                        } else if (heldState.mesh && controller.uniqueId === heldState.controllerId) {
-                            const { mesh, originalParent, originalPos, originalEmissiveColor, originalEmissiveTexture, originalEmissiveIntensity } = heldState;
+                        const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
+                        const mat = targetMesh.material;
+                        if (mat) {
+                            heldState.originalMat = {
+                                color: mat.emissiveColor?.clone(),
+                                texture: mat.emissiveTexture,
+                                intensity: mat.emissiveIntensity ?? 1
+                            };
+                            mat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                            mat.emissiveTexture = null;
+                            mat.emissiveIntensity = 0;
+                        }
     
-                            mesh.setParent(originalParent);
-                            mesh.position = originalPos;
-                            mesh.setEnabled(false);
+                        productMesh.setParent(motionController.rootMesh);
+                        productMesh.position = BABYLON.Vector3.Zero();
+                        motionController.rootMesh.scaling.setAll(0.001);
     
-                            const { name: productName, scale } =
-                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: { x: 3000, y: 3000, z: 3000 } };
-    
-                            mesh.scaling = new BABYLON.Vector3(1 / scale.x, 1 / scale.y, 1 / scale.z);
-                            motionController.rootMesh.scaling.setAll(1);
-    
+                        buttonPanel.isVisible = true;
+                        emissiveText.text = `🔍 Holding: ${productName}`;
+                    } else {
+                        if (heldState.mesh && heldState.controllerId === controller.uniqueId) {
+                            const mesh = heldState.mesh;
+                            const scale = grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)]?.scale || { x: 3000, y: 3000, z: 3000 };
                             const targetMesh = mesh.getChildMeshes?.()[0] || mesh;
-                            targetMesh.material.emissiveColor = originalEmissiveColor;
-                            targetMesh.material.emissiveTexture = originalEmissiveTexture;
-                            targetMesh.material.emissiveIntensity = originalEmissiveIntensity;
+    
+                            mesh.setParent(null);
+                            mesh.setEnabled(false);
+                            mesh.scaling.set(1 / scale.x, 1 / scale.y, 1 / scale.z);
+                            controller.motionController.rootMesh.scaling.setAll(1);
+    
+                            if (targetMesh.material && heldState.originalMat) {
+                                targetMesh.material.emissiveColor = heldState.originalMat.color;
+                                targetMesh.material.emissiveTexture = heldState.originalMat.texture;
+                                targetMesh.material.emissiveIntensity = heldState.originalMat.intensity;
+                            }
     
                             heldState.mesh = null;
                             heldState.controllerId = null;
+                            buttonPanel.isVisible = false;
                             emissiveText.text = "👐 Released object";
                         }
-                    });
+                    }
                 });
             });
+        });
     
-            // Show errors in headset
-            window.addEventListener("error", function (event) {
-                const errorMsg = `❌ ${event.message} @ ${event.filename}:${event.lineno}`;
-                console.error(errorMsg);
-                emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
-            });
+        window.addEventListener("error", function (event) {
+            const msg = `❌ ${event.message} @ ${event.filename}:${event.lineno}`;
+            console.error(msg);
+            if (emissiveText) emissiveText.text = msg.slice(0, 200);
+        });
     
-            window.addEventListener("unhandledrejection", function (event) {
-                const errorMsg = `🚨 Unhandled Promise: ${event.reason}`;
-                console.error(errorMsg);
-                emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
-            });
-    
-        } catch (err) {
-            console.error("❌ Error initializing XR experience", err);
-            emissiveText.text = `❌ XR Init Failed: ${err.message}`;
-        }
+        window.addEventListener("unhandledrejection", function (event) {
+            const msg = `🚨 Unhandled Promise: ${event.reason}`;
+            console.error(msg);
+            if (emissiveText) emissiveText.text = msg.slice(0, 200);
+        });
     }
-
     
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
