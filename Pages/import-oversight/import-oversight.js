@@ -18,7 +18,21 @@ const inputMap = {};
 const productMeshes = {}; // Store root containers by name
 const productContainers = {};
 const productList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
-const originalEmissions = {}; // Maps productName => { color, texture }
+const emissionStrengths = {
+    apple: 1,
+    banana: 1,
+    cosmetics: 0.3,
+    drugs: 0.15,
+    fish: 1,
+    medicaldevice: 0.2,
+    packedfood1: 0.3,
+    packedfood2: 0.05,
+    packedfood3: 0.05,
+    petfood: 0.4
+};
+
+const originalEmissions = {}; // productName => [ { meshName, texture, color } ]
+
 
 let currentOverlayPhotoId = null;
 
@@ -438,15 +452,12 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     async function loadProductModels(productList, scene) {
         const badCandidates = [];
-        const normalCandidates = [];
     
         // Detect bad versions
         for (const name of productList) {
             const response = await fetch(`./Assets/Models/${name}-bad.gltf`);
             if (response.ok) {
                 badCandidates.push(name);
-            } else {
-                normalCandidates.push(name);
             }
         }
     
@@ -466,24 +477,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                 productContainers[name] = container;
                 productMeshes[name] = root;
     
-                // 🔁 Save and strip emission for all materials in the product
-                originalEmissions[name] = [];
-    
-                container.meshes.forEach(mesh => {
-                    const mat = mesh.material;
-                    if (!mat) return;
-    
-                    originalEmissions[name].push({
-                        meshName: mesh.name,
-                        color: mat.emissiveColor?.clone() || new BABYLON.Color3(0, 0, 0),
-                        texture: mat.emissiveTexture || null
-                    });
-    
-                    mat.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                    mat.emissiveTexture = null;
-                });
-    
-                console.log(`✅ ${fileName} loaded (emission stripped)`);
+                console.log(`✅ ${fileName} loaded`);
             } catch (e) {
                 console.error(`❌ Failed to load ${fileName}`, e);
             }
@@ -534,6 +528,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     async function enableVR(scene, ground) {
         const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
+        // Flip X scale once on entering VR
+        xrHelper.baseExperience.onStateChangedObservable.add((state) => {
+            if (state === BABYLON.WebXRState.IN_XR) {
+                console.log("🕶️ Entered VR: flipping product X scale");
+                Object.values(productMeshes).forEach(mesh => {
+                    mesh.scaling.x *= -1;
+                });
+            } else if (state === BABYLON.WebXRState.NOT_IN_XR) {
+                console.log("👋 Exited VR: restoring product X scale");
+                Object.values(productMeshes).forEach(mesh => {
+                    mesh.scaling.x *= -1;
+                });
+            }
+        });
+    
         xrHelper.input.onControllerAddedObservable.add((controller) => {
             controller.onMotionControllerInitObservable.add((motionController) => {
                 const triggerComponent = motionController.getComponent("xr-standard-trigger");
@@ -545,7 +554,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                     const isPressed = triggerComponent.pressed;
     
                     if (isPressed) {
-                        if (heldState.mesh) return; // Prevent second grab
+                        if (heldState.mesh) return;
     
                         let picked = scene.meshUnderPointer;
                         if (xrHelper.pointerSelection?.getMeshUnderPointer) {
@@ -562,41 +571,22 @@ window.addEventListener("DOMContentLoaded", async () => {
                         heldState.controllerId = controller.uniqueId;
     
                         productMesh.setEnabled(true);
-                        productMesh.scaling.set(scale.x, scale.y, scale.z);
-    
-                        const targetMesh = productMesh.getChildMeshes?.()[0] || productMesh;
-                        const mat = targetMesh.material;
-                        if (mat) {
-                            heldState.originalMat = {
-                                color: mat.emissiveColor?.clone(),
-                                texture: mat.emissiveTexture,
-                                intensity: mat.emissiveIntensity ?? 1
-                            };
-                            mat.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                            mat.emissiveTexture = null;
-                            mat.emissiveIntensity = 0;
-                        }
+                        productMesh.scaling.set(scale.x, scale.y, scale.z); // Keep scale as-is (already flipped once)
     
                         productMesh.setParent(motionController.rootMesh);
                         productMesh.position = BABYLON.Vector3.Zero();
                         motionController.rootMesh.scaling.setAll(0.001);
-
+    
                     } else {
                         if (heldState.mesh && heldState.controllerId === controller.uniqueId) {
                             const mesh = heldState.mesh;
                             const scale = grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)]?.scale || { x: 3000, y: 3000, z: 3000 };
-                            const targetMesh = mesh.getChildMeshes?.()[0] || mesh;
     
                             mesh.setParent(null);
                             mesh.setEnabled(false);
                             mesh.scaling.set(1 / scale.x, 1 / scale.y, 1 / scale.z);
-                            controller.motionController.rootMesh.scaling.setAll(1);
     
-                            if (targetMesh.material && heldState.originalMat) {
-                                targetMesh.material.emissiveColor = heldState.originalMat.color;
-                                targetMesh.material.emissiveTexture = heldState.originalMat.texture;
-                                targetMesh.material.emissiveIntensity = heldState.originalMat.intensity;
-                            }
+                            controller.motionController.rootMesh.scaling.setAll(1);
     
                             heldState.mesh = null;
                             heldState.controllerId = null;
@@ -606,6 +596,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             });
         });
     }
+    
     
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
@@ -1152,7 +1143,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     function enterInspectMode(productName) {
         currentInspectedProduct = productName;
+        window.inInspectMode = true;
     
+        // Disable buttons if needed
         if (productName === "medicaldevice") {
             getSample.classList.add("disabled");
             checkTemp.classList.add("disabled");
@@ -1161,24 +1154,23 @@ window.addEventListener("DOMContentLoaded", async () => {
             checkTemp.classList.remove("disabled");
         }
     
-        window.inInspectMode = true;
         animateCameraFOV(camera, camera.fov, 0.8, 300);
         scene.environmentIntensity = 0.2;
         camera.detachControl(canvas);
         capsule.physicsImpostor.sleep();
     
+        // Show UI
         closeInspect.style.opacity = "1";
         closeInspect.style.pointerEvents = "auto";
-    
         checkTemp.style.display = "flex";
         getSample.style.display = "flex";
         inspectPhoto.style.display = "flex";
         globalPhoto.style.display = "none";
         topCenterButtonGroup.style.opacity = "1";
-    
         tabletButton.style.opacity = "0";
         tabletButton.style.pointerEvents = "none";
     
+        // Hide all products
         Object.values(productContainers).forEach(container => {
             container.rootNodes[0].setEnabled(false);
             const wrapper = scene.getNodeByName(`inspectWrapper-${container.rootNodes[0].name}`);
@@ -1188,27 +1180,35 @@ window.addEventListener("DOMContentLoaded", async () => {
         const container = productContainers[productName];
         const rootNode = container.rootNodes[0];
     
+        // Create wrapper if missing
         let wrapper = scene.getNodeByName(`inspectWrapper-${productName}`);
         if (!wrapper) {
             wrapper = new BABYLON.TransformNode(`inspectWrapper-${productName}`, scene);
             wrapper.setParent(camera);
-            wrapper.position = new BABYLON.Vector3(0, -0.005, 0.16);
+            wrapper.position = new BABYLON.Vector3(0, -0.019, 0.16);
             rootNode.setParent(wrapper);
             rootNode.position.set(0, 0, 0);
             setupObjectRotation(wrapper);
         }
     
-        // ✅ Restore emission during inspect
-        const emissionData = originalEmissions[productName];
-        if (emissionData) {
-            emissionData.forEach(({ meshName, color, texture }) => {
-                const mesh = scene.getMeshByName(meshName);
-                if (mesh && mesh.material) {
-                    mesh.material.emissiveColor = color.clone();
-                    mesh.material.emissiveTexture = texture || null;
-                }
+        // Restore emission using base texture and strength
+        const strength = emissionStrengths[productName] ?? 1;
+        originalEmissions[productName] = [];
+    
+        container.meshes.forEach(mesh => {
+            const mat = mesh.material;
+            if (!mat) return;
+    
+            originalEmissions[productName].push({
+                meshName: mesh.name,
+                emissiveColor: mat.emissiveColor?.clone() || new BABYLON.Color3(0, 0, 0),
+                emissiveTexture: mat.emissiveTexture || null
             });
-        }
+    
+            const baseTex = mat instanceof BABYLON.PBRMaterial ? mat.albedoTexture : mat.diffuseTexture;
+            if (baseTex) mat.emissiveTexture = baseTex;
+            mat.emissiveColor = new BABYLON.Color3(strength, strength, strength);
+        });
     
         wrapper.setEnabled(true);
         wrapper.rotationQuaternion = BABYLON.Quaternion.Identity();
@@ -1220,19 +1220,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     function exitInspectMode() {
         if (currentInspectedProduct) {
-            const container = productContainers[currentInspectedProduct];
-    
-            // 🔇 Disable emission again
-            container.meshes.forEach(mesh => {
-                if (mesh.material) {
-                    mesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                    mesh.material.emissiveTexture = null;
-                }
-            });
+            const emissionData = originalEmissions[currentInspectedProduct];
+            if (emissionData) {
+                emissionData.forEach(({ meshName, emissiveColor, emissiveTexture }) => {
+                    const mesh = scene.getMeshByName(meshName);
+                    if (mesh && mesh.material) {
+                        mesh.material.emissiveColor = emissiveColor.clone();
+                        mesh.material.emissiveTexture = emissiveTexture || null;
+                    }
+                });
+            }
         }
     
         currentInspectedProduct = null;
         window.inInspectMode = false;
+    
         animateCameraFOV(camera, camera.fov, 1.2, 200);
         scene.environmentIntensity = 1;
         camera.attachControl(canvas, true);
@@ -1244,9 +1246,9 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (wrapper) wrapper.setEnabled(false);
         });
     
+        // Restore UI
         tabletButton.style.opacity = "1";
         tabletButton.style.pointerEvents = "auto";
-    
         topCenterButtonGroup.style.opacity = "0";
         globalPhoto.style.display = "flex";
     
@@ -1259,7 +1261,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         closeInspect.style.opacity = "0";
         closeInspect.style.pointerEvents = "none";
     }
-    
     
 
     function setupObjectRotation(targetNode) {
