@@ -546,6 +546,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                             heldState.originalEmissive = productMesh.material?.emissiveColor?.clone() || null;
                             heldState.originalEmissiveTexture = productMesh.material?.emissiveTexture || null;
                             heldState.originalAmbient = productMesh.material?.ambientColor?.clone() || null;
+                            heldState.originalEmissiveColor = productMesh.material?.emissiveColor?.clone() || null;
                             heldState.originalEnvIntensity = scene.environmentIntensity;
     
                             productMesh.setEnabled(true);
@@ -557,9 +558,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                                 productMesh.material.emissiveTexture = null;
                             }
     
-                            if (scene.environmentTexture) {
-                                scene.environmentIntensity = 0.2;
-                            }
+                            productMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
     
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
