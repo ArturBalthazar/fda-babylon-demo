@@ -505,12 +505,11 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    // === Main VR logic ===
     async function enableVR(scene, ground) {
         try {
             const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
-
-            // Add GUI to show emissive info
+    
+            // GUI setup
             const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
             emissiveText = new BABYLON.GUI.TextBlock();
             emissiveText.color = "white";
@@ -518,73 +517,105 @@ window.addEventListener("DOMContentLoaded", async () => {
             emissiveText.top = "-40px";
             emissiveText.text = "🔍 Not holding anything";
             advancedTexture.addControl(emissiveText);
-
+    
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("xr-standard-trigger");
                     if (!triggerComponent) return;
-
+    
                     triggerComponent.onButtonStateChangedObservable.add(() => {
                         if (!triggerComponent.changes.pressed) return;
-
+    
                         const isPressed = triggerComponent.pressed;
-
+    
                         if (isPressed) {
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
                             }
-
+    
                             if (!picked || !grabSettings[picked.name]) return;
-
+    
                             const { name: productName, scale } = grabSettings[picked.name];
                             const productMesh = productMeshes[productName];
                             if (!productMesh) return;
-
+    
                             heldState.mesh = productMesh;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
-                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
-                            heldState.originalAmbient = productMesh.material?.ambientColor?.clone();
-
+                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone() || null;
+                            heldState.originalEmissiveTexture = productMesh.material?.emissiveTexture || null;
+                            heldState.originalAmbient = productMesh.material?.ambientColor?.clone() || null;
+                            heldState.originalEnvIntensity = scene.environmentIntensity;
+    
                             productMesh.setEnabled(true);
                             productMesh.scaling.setAll(scale);
-
-                            productMesh.material.emissiveColor.set(0, 0, 0);
-                            scene.environmentIntensity = 0.2;
-
+                            productMesh.scaling.x *= -1;
+    
+                            if (productMesh.material) {
+                                productMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
+                                productMesh.material.emissiveTexture = null;
+                            }
+    
+                            if (scene.environmentTexture) {
+                                scene.environmentIntensity = 0.2;
+                            }
+    
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
-
                             motionController.rootMesh.scaling.setAll(0.001);
-
+    
                             emissiveText.text = `🔍 Holding: ${productName}\nEmissive: ${heldState.originalEmissive?.toHexString() || "none"}`;
                         } else if (heldState.mesh) {
-                            const { mesh, originalParent, originalPos, originalEmissive, originalAmbient } = heldState;
-
+                            const { mesh, originalParent, originalPos, originalEmissive, originalAmbient, originalEmissiveTexture, originalEnvIntensity } = heldState;
+    
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
                             mesh.setEnabled(false);
-
-                            const { name: productName, scale } = grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3 };
+    
+                            const { name: productName, scale } =
+                                grabSettings[Object.keys(grabSettings).find(key => grabSettings[key].name === mesh.name)] || { scale: 3 };
+    
                             mesh.scaling.setAll(1 / scale);
-
+                            mesh.scaling.x *= -1;
                             motionController.rootMesh.scaling.setAll(1);
-                            scene.environmentIntensity = 1;
-
-                            mesh.material.emissiveColor.copyFrom(originalEmissive);
-
+    
+                            if (mesh.material) {
+                                mesh.material.emissiveColor = originalEmissive ? originalEmissive.clone() : new BABYLON.Color3(0, 0, 0);
+                                mesh.material.emissiveTexture = originalEmissiveTexture || null;
+                                mesh.material.ambientColor = originalAmbient ? originalAmbient.clone() : new BABYLON.Color3(0, 0, 0);
+                            }
+    
+                            if (scene.environmentTexture && originalEnvIntensity !== undefined) {
+                                scene.environmentIntensity = originalEnvIntensity;
+                            }
+    
                             heldState.mesh = null;
                             emissiveText.text = "👐 Released object";
                         }
                     });
                 });
             });
-
+    
+            // GLOBAL ERROR DISPLAY IN VR
+            window.addEventListener("error", function (event) {
+                const errorMsg = `❌ ${event.message} @ ${event.filename}:${event.lineno}`;
+                console.error(errorMsg);
+                if (emissiveText) emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
+            });
+    
+            window.addEventListener("unhandledrejection", function (event) {
+                const errorMsg = `🚨 Unhandled Promise: ${event.reason}`;
+                console.error(errorMsg);
+                if (emissiveText) emissiveText.text = errorMsg.length > 200 ? errorMsg.slice(0, 200) + "..." : errorMsg;
+            });
+    
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
+            if (emissiveText) emissiveText.text = `❌ XR Init Failed: ${err.message}`;
         }
     }
+    
 
     
     // ✅ Lock rotation on X/Z every frame
