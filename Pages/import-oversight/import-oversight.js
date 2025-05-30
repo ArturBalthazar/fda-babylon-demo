@@ -513,84 +513,80 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     async function enableVR(scene, ground) {
         try {
-            // XR
             const xrHelper = await scene.createDefaultXRExperienceAsync({
                 floorMeshes: [ground]
             });
-
+    
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("xr-standard-trigger");
                     if (!triggerComponent) return;
-            
+    
                     triggerComponent.onButtonStateChangedObservable.add(() => {
                         if (!triggerComponent.changes.pressed) return;
-            
+    
                         const isPressed = triggerComponent.pressed;
-            
+    
                         if (isPressed) {
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
                             }
-            
+    
                             if (!picked || !grabTargets[picked.name]) return;
-            
+    
                             const foodName = grabTargets[picked.name];
                             const foodMesh = foodMeshes[foodName];
                             if (!foodMesh) return;
-            
-                            // Store state before grabbing
+    
+                            // Store original state
                             heldState.mesh = foodMesh;
                             heldState.originalParent = foodMesh.parent;
                             heldState.originalPos = foodMesh.position.clone();
                             heldState.originalEmissive = foodMesh.material?.emissiveColor?.clone();
-            
+    
+                            // Activate mesh and reset visuals
                             foodMesh.setEnabled(true);
-            
-                            heldState.originalEmissive = foodMesh.material?.emissiveColor?.clone();
                             if (foodMesh.material?.emissiveColor) {
-                                foodMesh.material.emissiveColor.set(0, 0, 0); // set emission to 0
+                                foodMesh.material.emissiveColor.set(0, 0, 0);
                             }
-            
-                            // Apply scale factor
+    
+                            // Clean transform and scale
                             const scaleFactor = 3;
+                            foodMesh.rotationQuaternion = null;
+                            foodMesh.rotation.set(0, 0, 0);
                             foodMesh.scaling.setAll(scaleFactor);
-            
-                            // Offset position slightly in front of hand
-                            const forward = new BABYLON.Vector3(0, 0, 0);
-                            const handMatrix = motionController.rootMesh.getWorldMatrix();
-                            const forwardWorld = BABYLON.Vector3.TransformNormal(forward, handMatrix).normalize();
-                            const offset = forwardWorld.scale(0.2); // adjust if needed
-            
+    
+                            // Attach to controller at origin
                             foodMesh.setParent(motionController.rootMesh);
-                            foodMesh.position = offset;
+                            foodMesh.position.set(0, 0, 0);
+    
                             controller.motionController.rootMesh.setEnabled(false);
-
-            
+    
                         } else if (heldState.mesh) {
                             const { mesh, originalParent, originalPos, originalEmissive } = heldState;
-            
+    
+                            // Reset mesh to original state
                             mesh.setParent(originalParent);
-                            mesh.position = originalPos;
+                            mesh.position.copyFrom(originalPos);
                             mesh.setEnabled(false);
                             controller.motionController.rootMesh.setEnabled(true);
-
+    
                             if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor.copyFrom(originalEmissive);
                             }
-                            
+    
                             heldState.mesh = null;
                         }
                     });
                 });
             });
-            
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
         }
     }
+    
     
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
