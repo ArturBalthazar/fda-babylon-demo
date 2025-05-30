@@ -321,9 +321,9 @@
 		{
 			"bufferView":15,
 			"componentType":5126,
-			"count":140,
+			"count":120,
 			"max":[
-				5.833333333333333
+				5
 			],
 			"min":[
 				0.041666666666666664
@@ -333,13 +333,13 @@
 		{
 			"bufferView":16,
 			"componentType":5126,
-			"count":140,
+			"count":120,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":17,
 			"componentType":5126,
-			"count":140,
+			"count":120,
 			"type":"VEC4"
 		},
 		{
@@ -347,7 +347,7 @@
 			"componentType":5126,
 			"count":2,
 			"max":[
-				5.833333333333333
+				5
 			],
 			"min":[
 				0.041666666666666664
@@ -453,28 +453,28 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":560,
+			"byteLength":480,
 			"byteOffset":80872
 		},
 		{
 			"buffer":0,
-			"byteLength":1680,
-			"byteOffset":81432
+			"byteLength":1440,
+			"byteOffset":81352
 		},
 		{
 			"buffer":0,
-			"byteLength":2240,
-			"byteOffset":83112
+			"byteLength":1920,
+			"byteOffset":82792
 		},
 		{
 			"buffer":0,
 			"byteLength":8,
-			"byteOffset":85352
+			"byteOffset":84712
 		},
 		{
 			"buffer":0,
 			"byteLength":24,
-			"byteOffset":85360
+			"byteOffset":84720
 		}
 	],
 	"samplers":[
@@ -485,7 +485,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":85384,
+			"byteLength":84744,
 			"uri":"thermometer.bin"
 		}
 	]
