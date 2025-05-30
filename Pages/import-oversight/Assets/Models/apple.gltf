@@ -21,15 +21,15 @@
 			"mesh":0,
 			"name":"mk_apple",
 			"rotation":[
-				-0.4152757525444031,
-				0.8894448280334473,
-				0.18766501545906067,
-				0.034868501126766205
+				-0.15331847965717316,
+				-0.7625617384910583,
+				-0.08916337043046951,
+				0.6221277713775635
 			],
-			"scale":[
-				0.002817197935655713,
-				0.0028171974699944258,
-				0.002817197935655713
+			"translation":[
+				-0.000555387930944562,
+				-2.267211675643921e-05,
+				-0.0009256363846361637
 			]
 		}
 	],
@@ -52,7 +52,7 @@
 					"ior":1.4500000476837158
 				}
 			},
-			"name":"mk_Apples",
+			"name":"Apple1_u1_v1.002",
 			"normalTexture":{
 				"index":1,
 				"scale":0.75
@@ -70,16 +70,15 @@
 	],
 	"meshes":[
 		{
-			"name":"Apples_01.002",
+			"name":"Apple1.002",
 			"primitives":[
 				{
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2,
-						"TEXCOORD_1":3
+						"TEXCOORD_0":2
 					},
-					"indices":4,
+					"indices":3,
 					"material":0
 				}
 			]
@@ -124,73 +123,61 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":603,
+			"count":4233,
 			"max":[
-				9.655391693115234,
-				10.162738800048828,
-				10.279129028320312
+				0.025978319346904755,
+				0.03348774462938309,
+				0.028144946321845055
 			],
 			"min":[
-				-11.106182098388672,
-				-9.846317291259766,
-				-9.529891967773438
+				-0.02770334668457508,
+				-0.025615952908992767,
+				-0.029632670804858208
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":603,
+			"count":4233,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":603,
+			"count":4233,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
-			"componentType":5126,
-			"count":603,
-			"type":"VEC2"
-		},
-		{
-			"bufferView":4,
 			"componentType":5123,
-			"count":1674,
+			"count":19764,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":7236,
+			"byteLength":50796,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":7236,
-			"byteOffset":7236,
+			"byteLength":50796,
+			"byteOffset":50796,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":4824,
-			"byteOffset":14472,
+			"byteLength":33864,
+			"byteOffset":101592,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":4824,
-			"byteOffset":19296,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":3348,
-			"byteOffset":24120,
+			"byteLength":39528,
+			"byteOffset":135456,
 			"target":34963
 		}
 	],
@@ -202,7 +189,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":27468,
+			"byteLength":174984,
 			"uri":"apple.bin"
 		}
 	]

@@ -17,49 +17,49 @@
 			"mesh":0,
 			"name":"mk_packedfood2",
 			"rotation":[
-				-0.08183185011148453,
-				0.22191601991653442,
-				-0.018693575635552406,
-				0.9714460372924805
+				-0.061891548335552216,
+				-0.6951298117637634,
+				0.05889227241277695,
+				0.7137896418571472
 			],
 			"scale":[
-				0.31677111983299255,
-				0.31677114963531494,
-				0.31677114963531494
+				0.3206932544708252,
+				0.3206932544708252,
+				0.3206932544708252
+			],
+			"translation":[
+				0.0009012562222778797,
+				0.0016450168332085013,
+				-0.0004860959597863257
 			]
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				0.20000000298023224,
-				0.20000000298023224,
-				0.20000000298023224
-			],
-			"emissiveTexture":{
-				"index":0
-			},
-			"name":"Material.008",
+			"name":"Crackers box ",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":0
 				},
-				"metallicFactor":0
+				"metallicFactor":0,
+				"roughnessFactor":0.5
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Cube_Material_0.004",
+			"name":"Cube_Material_0.005",
 			"primitives":[
 				{
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2
+						"TEXCOORD_0":2,
+						"TEXCOORD_1":3,
+						"TEXCOORD_2":4
 					},
-					"indices":3,
+					"indices":5,
 					"material":0
 				}
 			]
@@ -69,78 +69,98 @@
 		{
 			"sampler":0,
 			"source":0
-		},
-		{
-			"sampler":0,
-			"source":0
 		}
 	],
 	"images":[
 		{
-			"mimeType":"image/png",
-			"name":"Cheez_It",
-			"uri":"packedfood2/Cheez_It.png"
+			"mimeType":"image/jpeg",
+			"name":"Crackers_color",
+			"uri":"packedfood2/Crackers_color.jpg"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":74,
+			"count":106,
 			"max":[
-				0.09195573627948761,
-				0.11789308488368988,
-				0.10238626599311829
+				0.07621553540229797,
+				0.12188363075256348,
+				0.09859078377485275
 			],
 			"min":[
-				-0.09195573627948761,
-				-0.11789308488368988,
-				-0.10238626599311829
+				-0.07621553540229797,
+				-0.12188363075256348,
+				-0.09859078377485275
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":74,
+			"count":106,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":74,
+			"count":106,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
+			"componentType":5126,
+			"count":106,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":4,
+			"componentType":5126,
+			"count":106,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":5,
 			"componentType":5123,
-			"count":132,
+			"count":324,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":888,
+			"byteLength":1272,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":888,
-			"byteOffset":888,
+			"byteLength":1272,
+			"byteOffset":1272,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":592,
-			"byteOffset":1776,
+			"byteLength":848,
+			"byteOffset":2544,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":264,
-			"byteOffset":2368,
+			"byteLength":848,
+			"byteOffset":3392,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":848,
+			"byteOffset":4240,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":648,
+			"byteOffset":5088,
 			"target":34963
 		}
 	],
@@ -152,7 +172,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":2632,
+			"byteLength":5736,
 			"uri":"packedfood2.bin"
 		}
 	]
