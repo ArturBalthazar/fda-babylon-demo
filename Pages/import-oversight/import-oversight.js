@@ -15,7 +15,7 @@ let isWalking = false;
 
 const inputMap = {};
 
-const foodMeshes = {}; // Store root containers by name
+const productMeshes = {}; // Store root containers by name
 const productContainers = {};
 const productList = ["apple", "banana", "fish", "petfood", "medicaldevice", "packedfood1", "packedfood2", "packedfood3", "drugs", "cosmetics"];
 
@@ -453,7 +453,7 @@ window.addEventListener("DOMContentLoaded", async () => {
                 root.setEnabled(false); // Start hidden
     
                 productContainers[name] = container;
-                foodMeshes[name] = root;
+                productMeshes[name] = root;
     
                 console.log(`✅ ${fileName} loaded`);
             } catch (e) {
@@ -513,80 +513,76 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     async function enableVR(scene, ground) {
         try {
+            // XR
             const xrHelper = await scene.createDefaultXRExperienceAsync({
                 floorMeshes: [ground]
             });
-    
+
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
                     const triggerComponent = motionController.getComponent("xr-standard-trigger");
+            
                     if (!triggerComponent) return;
-    
+            
                     triggerComponent.onButtonStateChangedObservable.add(() => {
                         if (!triggerComponent.changes.pressed) return;
-    
+            
                         const isPressed = triggerComponent.pressed;
-    
+            
                         if (isPressed) {
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
                             }
-    
+            
                             if (!picked || !grabTargets[picked.name]) return;
-    
-                            const foodName = grabTargets[picked.name];
-                            const foodMesh = foodMeshes[foodName];
-                            if (!foodMesh) return;
-    
-                            // Store original state
-                            heldState.mesh = foodMesh;
-                            heldState.originalParent = foodMesh.parent;
-                            heldState.originalPos = foodMesh.position.clone();
-                            heldState.originalEmissive = foodMesh.material?.emissiveColor?.clone();
-    
-                            // Activate mesh and reset visuals
-                            foodMesh.setEnabled(true);
-                            if (foodMesh.material?.emissiveColor) {
-                                foodMesh.material.emissiveColor.set(0, 0, 0);
+            
+                            const productName = grabTargets[picked.name];
+                            const productMesh = productMeshes[productName];
+                            if (!productMesh) return;
+            
+                            heldState.mesh = productMesh;
+                            heldState.originalParent = productMesh.parent;
+                            heldState.originalPos = productMesh.position.clone();
+                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
+            
+                            productMesh.setEnabled(true);                   
+                            productMesh.scaling.setAll(3);
+            
+                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone();
+                            if (productMesh.material?.emissiveColor) {
+                                productMesh.material.emissiveColor.set(0, 0, 0); // set emission to 0
                             }
-    
-                            // Clean transform and scale
-                            const scaleFactor = 3;
-                            foodMesh.rotationQuaternion = null;
-                            foodMesh.rotation.set(0, 0, 0);
-                            foodMesh.scaling.setAll(scaleFactor);
-    
-                            // Attach to controller at origin
-                            foodMesh.setParent(motionController.rootMesh);
-                            foodMesh.position.set(0, 0, 0);
-    
+            
+                            // Replace controller mesh
+                            productMesh.setParent(motionController.rootMesh);
+                            productMesh.position = BABYLON.Vector3.Zero();
                             controller.motionController.rootMesh.setEnabled(false);
-    
+            
                         } else if (heldState.mesh) {
                             const { mesh, originalParent, originalPos, originalEmissive } = heldState;
-    
-                            // Reset mesh to original state
+            
                             mesh.setParent(originalParent);
-                            mesh.position.copyFrom(originalPos);
+                            mesh.position = originalPos;
                             mesh.setEnabled(false);
                             controller.motionController.rootMesh.setEnabled(true);
-    
+            
                             if (mesh.material?.emissiveColor && originalEmissive) {
                                 mesh.material.emissiveColor.copyFrom(originalEmissive);
                             }
-    
+                            mesh.scaling.setAll(1/3);      
+            
                             heldState.mesh = null;
                         }
                     });
                 });
             });
+            
     
         } catch (err) {
             console.error("❌ Error initializing XR experience", err);
         }
     }
-    
     
     // ✅ Lock rotation on X/Z every frame
     scene.onBeforeRenderObservable.add(() => {
