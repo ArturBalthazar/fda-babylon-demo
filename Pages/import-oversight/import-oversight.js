@@ -76,14 +76,14 @@ let hum = null;
 const grabSettings = {
     "mk_apples_01":       { name: "apple",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
     "mk_apples_02":       { name: "apple",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
-    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(-2000, 2000, 2000) },
+    "mk_Banana":          { name: "banana",       scale: new BABYLON.Vector3(-2400, 2400, 2400) },
     "mk_Fishes":          { name: "fish",         scale: new BABYLON.Vector3(-3500, 3500, 3500) },
     "mk_thermometers":    { name: "medicaldevice",scale: new BABYLON.Vector3(-1500, 1500, 1500) },
     "mk_drugsBoxes":      { name: "drugs",        scale: new BABYLON.Vector3(-1500, 1500, 1500) },
     "mk_cosmeticBoxes":   { name: "cosmetics",    scale: new BABYLON.Vector3(-1500, 1500, 1500) },
     "mk_petFoodGroup":    { name: "petfood",      scale: new BABYLON.Vector3(-4500, 4500, 4500) },
     "mk_packagedProducts1": { name: "packedfood1", scale: new BABYLON.Vector3(-1500, 1500, 1500) },
-    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(-4200, 4200, 4200) },
+    "mk_packagedProducts2": { name: "packedfood2", scale: new BABYLON.Vector3(-4000, 4000, 4000) },
     "mk_packagedProducts3": { name: "packedfood3", scale: new BABYLON.Vector3(-4200, 4200, 4200) }
 };
 
