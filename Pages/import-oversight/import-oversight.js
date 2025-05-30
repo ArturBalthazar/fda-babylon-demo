@@ -72,8 +72,7 @@ const heldState = {
     mesh: null,
     originalParent: null,
     originalPos: null,
-    originalEmissive: null,
-    originalAmbient: null
+    originalEmissiveIntensity: null
 };
 
 let emissiveText;
@@ -543,22 +542,15 @@ window.addEventListener("DOMContentLoaded", async () => {
                             heldState.mesh = productMesh;
                             heldState.originalParent = productMesh.parent;
                             heldState.originalPos = productMesh.position.clone();
-                            heldState.originalEmissive = productMesh.material?.emissiveColor?.clone() || null;
-                            heldState.originalEmissiveTexture = productMesh.material?.emissiveTexture || null;
-                            heldState.originalAmbient = productMesh.material?.ambientColor?.clone() || null;
-                            heldState.originalEmissiveColor = productMesh.material?.emissiveColor?.clone() || null;
-                            heldState.originalEnvIntensity = scene.environmentIntensity;
+                            heldState.originalEmissiveIntensity = productMesh.material?.emissiveIntensity ?? 1;
     
                             productMesh.setEnabled(true);
                             productMesh.scaling.setAll(scale);
                             productMesh.scaling.x *= -1;
     
-                            if (productMesh.material) {
-                                productMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
-                                productMesh.material.emissiveTexture = null;
+                            if (productMesh.material instanceof BABYLON.PBRMaterial) {
+                                productMesh.material.emissiveIntensity = 0;
                             }
-    
-                            productMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0);
     
                             productMesh.setParent(motionController.rootMesh);
                             productMesh.position = BABYLON.Vector3.Zero();
@@ -566,7 +558,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                             emissiveText.text = `🔍 Holding: ${productName}\nEmissive: ${heldState.originalEmissive?.toHexString() || "none"}`;
                         } else if (heldState.mesh) {
-                            const { mesh, originalParent, originalPos, originalEmissive, originalAmbient, originalEmissiveTexture, originalEnvIntensity } = heldState;
+                            const { mesh, originalParent, originalPos, originalEmissiveIntensity } = heldState;
     
                             mesh.setParent(originalParent);
                             mesh.position = originalPos;
@@ -579,14 +571,8 @@ window.addEventListener("DOMContentLoaded", async () => {
                             mesh.scaling.x *= -1;
                             motionController.rootMesh.scaling.setAll(1);
     
-                            if (mesh.material) {
-                                mesh.material.emissiveColor = originalEmissive ? originalEmissive.clone() : new BABYLON.Color3(0, 0, 0);
-                                mesh.material.emissiveTexture = originalEmissiveTexture || null;
-                                mesh.material.ambientColor = originalAmbient ? originalAmbient.clone() : new BABYLON.Color3(0, 0, 0);
-                            }
-    
-                            if (scene.environmentTexture && originalEnvIntensity !== undefined) {
-                                scene.environmentIntensity = originalEnvIntensity;
+                            if (mesh.material instanceof BABYLON.PBRMaterial) {
+                                mesh.material.emissiveIntensity = originalEmissiveIntensity ?? 1;
                             }
     
                             heldState.mesh = null;
