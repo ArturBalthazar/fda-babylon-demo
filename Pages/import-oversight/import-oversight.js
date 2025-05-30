@@ -1449,7 +1449,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     
     // ✅ Lighting & Skybox
     scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./Assets/Textures/warehouse.env", scene);
-    scene.environmentIntensity = 2;
+    scene.environmentIntensity = 1;
     scene.imageProcessingConfiguration.exposure = 1.2;
     scene.imageProcessingConfiguration.contrast = 1.3;
     scene.createDefaultLight(true);
