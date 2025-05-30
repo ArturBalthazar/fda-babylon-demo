@@ -509,13 +509,60 @@ window.addEventListener("DOMContentLoaded", async () => {
             const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
             // GUI setup
-            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            const uiPlane = BABYLON.MeshBuilder.CreatePlane("uiPlane", { width: 1.5, height: 0.4 }, scene);
+            uiPlane.parent = xrHelper.baseExperience.camera;
+            uiPlane.position = new BABYLON.Vector3(0, -0.2, 1.2); // adjust to sit below view
+
+            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(uiPlane);
             emissiveText = new BABYLON.GUI.TextBlock();
             emissiveText.color = "white";
             emissiveText.fontSize = 20;
             emissiveText.top = "-40px";
             emissiveText.text = "🔍 Not holding anything";
             advancedTexture.addControl(emissiveText);
+
+            // === Action Buttons Setup ===
+            const buttonContainer = new BABYLON.GUI.Rectangle();
+            buttonContainer.width = "600px";
+            buttonContainer.height = "100px";
+            buttonContainer.thickness = 0;
+            buttonContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+            buttonContainer.top = "-140px";
+            buttonContainer.isVisible = false;
+            advancedTexture.addControl(buttonContainer);
+
+            // Helper function to create icon buttons
+            function createIconButton(imagePath, tooltipText, onClick) {
+                const button = BABYLON.GUI.Button.CreateImageOnlyButton("btn", imagePath);
+                button.width = "100px";
+                button.height = "100px";
+                button.thickness = 2;
+                button.color = "white";
+                button.cornerRadius = 10;
+                button.background = "transparent";
+                button.onPointerClickObservable.add(onClick);
+                button.pointerEnterAnimation = () => button.thickness = 4;
+                button.pointerOutAnimation = () => button.thickness = 2;
+                return button;
+            }
+
+            // Create and add buttons
+            const photoButton = createIconButton("Assets/Icons/photo.png", "Take Photo", () => {
+                console.log("📸 Take Photo triggered!");
+            });
+            const sampleButton = createIconButton("Assets/Icons/sample.png", "Get Sample", () => {
+                console.log("🧪 Sample triggered!");
+            });
+            const tempButton = createIconButton("Assets/Icons/thermo.png", "Check Temp", () => {
+                console.log("🌡️ Temperature Check triggered!");
+            });
+
+            buttonContainer.addControl(photoButton);
+            buttonContainer.addControl(sampleButton);
+            buttonContainer.addControl(tempButton);
+            photoButton.left = "-170px";
+            sampleButton.left = "0px";
+            tempButton.left = "170px";
     
             xrHelper.input.onControllerAddedObservable.add((controller) => {
                 controller.onMotionControllerInitObservable.add((motionController) => {
@@ -528,6 +575,9 @@ window.addEventListener("DOMContentLoaded", async () => {
                         const isPressed = triggerComponent.pressed;
     
                         if (isPressed) {
+
+                            buttonContainer.isVisible = true;
+
                             let picked = scene.meshUnderPointer;
                             if (xrHelper.pointerSelection?.getMeshUnderPointer) {
                                 picked = xrHelper.pointerSelection.getMeshUnderPointer(controller.uniqueId);
@@ -573,6 +623,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     
                             emissiveText.text = `🔍 Holding: ${productName}`;
                         } else if (heldState.mesh) {
+                            buttonContainer.isVisible = false;
+
                             const { mesh, originalParent, originalPos, originalEmissiveColor, originalEmissiveTexture, originalEmissiveIntensity } = heldState;
     
                             mesh.setParent(originalParent);
