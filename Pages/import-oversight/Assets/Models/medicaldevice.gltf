@@ -15,18 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_medicaldevice",
-			"rotation":[
-				-0.2967422306537628,
-				-0.936606228351593,
-				-0.18514205515384674,
-				0.020861998200416565
-			],
-			"scale":[
-				2.000000238418579,
-				2,
-				2.000000238418579
-			]
+			"name":"mk_medicaldevice"
 		}
 	],
 	"materials":[
@@ -44,12 +33,15 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":2
 				}
 			}
 		}
@@ -81,28 +73,28 @@
 		},
 		{
 			"sampler":0,
-			"source":0
+			"source":2
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":0
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
 			"name":"lambert1_Base_Color",
-			"uri":"medicaldevice/lambert1_Base_Color.png"
+			"uri":"inspectable/lambert1_Base_Color.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"lambert1_Normal_OpenGL",
-			"uri":"medicaldevice/lambert1_Normal_OpenGL.png"
+			"uri":"inspectable/lambert1_Normal_OpenGL.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"lambert1_Metallic-lambert1_Roughness",
-			"uri":"medicaldevice/lambert1_Metallic-lambert1_Roughness.png"
+			"name":"mk_cosmetics_lightmap-lambert1_Metallic-lambert1_Roughness",
+			"uri":"inspectable/mk_cosmetics_lightmap-lambert1_Metallic-lambert1_Roughness.png"
 		}
 	],
 	"accessors":[
@@ -111,14 +103,14 @@
 			"componentType":5126,
 			"count":275,
 			"max":[
-				0.003049655584618449,
-				0.023741010576486588,
-				0.0011076054070144892
+				0.030062038451433182,
+				0.03773774206638336,
+				0.017841709777712822
 			],
 			"min":[
-				-0.003049655817449093,
-				-0.02445615455508232,
-				-0.00110760482493788
+				-0.027832966297864914,
+				-0.037153393030166626,
+				-0.016696128994226456
 			],
 			"type":"VEC3"
 		},

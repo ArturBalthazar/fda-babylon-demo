@@ -15,32 +15,19 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_packedfood2",
-			"rotation":[
-				-0.061891548335552216,
-				-0.6951298117637634,
-				0.05889227241277695,
-				0.7137896418571472
-			],
-			"scale":[
-				0.3206932544708252,
-				0.3206932544708252,
-				0.3206932544708252
-			],
-			"translation":[
-				0.0009012562222778797,
-				0.0016450168332085013,
-				-0.0004860959597863257
-			]
+			"name":"mk_packedfood2"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
 			"name":"Crackers box ",
+			"occlusionTexture":{
+				"index":0
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":0
+					"index":1
 				},
 				"metallicFactor":0,
 				"roughnessFactor":0.5
@@ -69,13 +56,22 @@
 		{
 			"sampler":0,
 			"source":0
+		},
+		{
+			"sampler":0,
+			"source":1
 		}
 	],
 	"images":[
 		{
+			"mimeType":"image/png",
+			"name":"mk_packagedProducts_lightmap",
+			"uri":"inspectable/mk_packagedProducts_lightmap.png"
+		},
+		{
 			"mimeType":"image/jpeg",
 			"name":"Crackers_color",
-			"uri":"packedfood2/Crackers_color.jpg"
+			"uri":"inspectable/Crackers_color.jpg"
 		}
 	],
 	"accessors":[
@@ -84,14 +80,14 @@
 			"componentType":5126,
 			"count":106,
 			"max":[
-				0.07621553540229797,
-				0.12188363075256348,
-				0.09859078377485275
+				0.03276681900024414,
+				0.042490698397159576,
+				0.0296176727861166
 			],
 			"min":[
-				-0.07621553540229797,
-				-0.12188363075256348,
-				-0.09859078377485275
+				-0.030964307487010956,
+				-0.04243611916899681,
+				-0.030589861795306206
 			],
 			"type":"VEC3"
 		},

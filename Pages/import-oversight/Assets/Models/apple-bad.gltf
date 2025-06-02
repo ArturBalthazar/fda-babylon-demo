@@ -19,18 +19,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_apple_bad",
-			"rotation":[
-				-0.15156158804893494,
-				-0.7744761109352112,
-				-0.09211813658475876,
-				0.6072314977645874
-			],
-			"translation":[
-				-0.0006357196252793074,
-				0,
-				-0.00101715128403157
-			]
+			"name":"mk_apple_bad"
 		}
 	],
 	"materials":[
@@ -56,13 +45,17 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2,
+				"texCoord":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":4
 				}
 			}
 		}
@@ -75,9 +68,10 @@
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2
+						"TEXCOORD_0":2,
+						"TEXCOORD_1":3
 					},
-					"indices":3,
+					"indices":4,
 					"material":0
 				}
 			]
@@ -94,61 +88,76 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
 			"name":"Apple1_BaseColor",
-			"uri":"apple/Apple1_BaseColor.png"
+			"uri":"inspectable/Apple1_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Apple1_Normal",
-			"uri":"apple/Apple1_Normal.png"
+			"uri":"inspectable/Apple1_Normal.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_apple_bad_lightmap",
+			"uri":"inspectable/mk_apple_bad_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Apple1_Roughness",
-			"uri":"apple/Apple1_Roughness.png"
+			"uri":"inspectable/Apple1_Roughness.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":4233,
+			"count":4239,
 			"max":[
-				0.025978319346904755,
-				0.03348774462938309,
-				0.028144946321845055
+				0.028088444843888283,
+				0.03708603233098984,
+				0.027122192084789276
 			],
 			"min":[
-				-0.02770334668457508,
-				-0.025615952908992767,
-				-0.029632670804858208
+				-0.02773389406502247,
+				-0.024080844596028328,
+				-0.026292365044355392
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":4233,
+			"count":4239,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":4233,
+			"count":4239,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
+			"componentType":5126,
+			"count":4239,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":4,
 			"componentType":5123,
 			"count":19764,
 			"type":"SCALAR"
@@ -157,26 +166,32 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":50796,
+			"byteLength":50868,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":50796,
-			"byteOffset":50796,
+			"byteLength":50868,
+			"byteOffset":50868,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":33864,
-			"byteOffset":101592,
+			"byteLength":33912,
+			"byteOffset":101736,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":33912,
+			"byteOffset":135648,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":39528,
-			"byteOffset":135456,
+			"byteOffset":169560,
 			"target":34963
 		}
 	],
@@ -188,7 +203,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":174984,
+			"byteLength":209088,
 			"uri":"apple-bad.bin"
 		}
 	]

@@ -15,23 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_packedfood2_bad",
-			"rotation":[
-				-0.09628261625766754,
-				-0.21852493286132812,
-				0.012009118683636189,
-				0.9709955453872681
-			],
-			"scale":[
-				0.24081116914749146,
-				0.24081113934516907,
-				0.24081112444400787
-			],
-			"translation":[
-				-3.2604439184069633e-05,
-				-0.03682418540120125,
-				0.003997445572167635
-			]
+			"name":"mk_packedfood2_bad"
 		}
 	],
 	"materials":[
@@ -41,13 +25,16 @@
 			"normalTexture":{
 				"index":0
 			},
+			"occlusionTexture":{
+				"index":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":2
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":2
+					"index":3
 				}
 			}
 		}
@@ -80,52 +67,61 @@
 		{
 			"sampler":0,
 			"source":2
+		},
+		{
+			"sampler":0,
+			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
 			"name":"Crackers box_Normal",
-			"uri":"packedfood2/Crackers%20box_Normal.png"
+			"uri":"inspectable/Crackers%20box_Normal.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_cosmetics_lightmap",
+			"uri":"inspectable/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Crackers box_BaseColor",
-			"uri":"packedfood2/Crackers%20box_BaseColor.png"
+			"uri":"inspectable/Crackers%20box_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Crackers box_Roughness",
-			"uri":"packedfood2/Crackers%20box_Roughness.png"
+			"uri":"inspectable/Crackers%20box_Roughness.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":126,
+			"count":129,
 			"max":[
-				0.1249999925494194,
-				0.3168974220752716,
-				0.05260204151272774
+				0.03203222155570984,
+				0.04039232060313225,
+				0.026489324867725372
 			],
 			"min":[
-				-0.13109490275382996,
-				-1.4901161193847656e-08,
-				-0.03385557979345322
+				-0.031233223155140877,
+				-0.04189224913716316,
+				-0.029767140746116638
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":126,
+			"count":129,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":126,
+			"count":129,
 			"type":"VEC2"
 		},
 		{
@@ -138,26 +134,26 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":1512,
+			"byteLength":1548,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1512,
-			"byteOffset":1512,
+			"byteLength":1548,
+			"byteOffset":1548,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":1008,
-			"byteOffset":3024,
+			"byteLength":1032,
+			"byteOffset":3096,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":708,
-			"byteOffset":4032,
+			"byteOffset":4128,
 			"target":34963
 		}
 	],
@@ -169,7 +165,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":4740,
+			"byteLength":4836,
 			"uri":"packedfood2-bad.bin"
 		}
 	]

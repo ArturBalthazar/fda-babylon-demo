@@ -19,18 +19,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_packedfood1",
-			"rotation":[
-				-0.1073039099574089,
-				0.7958675622940063,
-				-0.09445805847644806,
-				0.5883523225784302
-			],
-			"scale":[
-				0.47606247663497925,
-				0.47606247663497925,
-				0.476062536239624
-			]
+			"name":"mk_packedfood1"
 		}
 	],
 	"materials":[
@@ -60,13 +49,16 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":4
 				}
 			}
 		}
@@ -98,28 +90,37 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_0",
-			"uri":"packedfood1/Image_0.jpg"
+			"uri":"inspectable/Image_0.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_2",
-			"uri":"packedfood1/Image_2.jpg"
+			"uri":"inspectable/Image_2.jpg"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_cosmetics_lightmap",
+			"uri":"inspectable/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"packedfood1/Image_1.png"
+			"uri":"inspectable/Image_1.png"
 		}
 	],
 	"accessors":[
@@ -128,14 +129,14 @@
 			"componentType":5126,
 			"count":11513,
 			"max":[
-				0.06221569702029228,
-				0.034933120012283325,
-				0.08033047616481781
+				0.03909933567047119,
+				0.02080881968140602,
+				0.03361760079860687
 			],
 			"min":[
-				-0.06221569702029228,
-				-0.034933120012283325,
-				-0.08033047616481781
+				-0.037972643971443176,
+				-0.021754451096057892,
+				-0.033898089081048965
 			],
 			"type":"VEC3"
 		},

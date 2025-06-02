@@ -18,13 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana",
-			"rotation":[
-				0,
-				0.3798302412033081,
-				0,
-				0.9250563383102417
-			]
+			"name":"mk_banana"
 		}
 	],
 	"materials":[
@@ -51,13 +45,17 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2,
+				"texCoord":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":4
 				}
 			}
 		}
@@ -70,9 +68,10 @@
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2
+						"TEXCOORD_0":2,
+						"TEXCOORD_1":3
 					},
-					"indices":3,
+					"indices":4,
 					"material":0
 				}
 			]
@@ -89,28 +88,37 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/jpeg",
 			"name":"Banana_tklkaixiw_Mid_2K_BaseColor",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
+			"uri":"inspectable/Banana_tklkaixiw_Mid_2K_BaseColor.jpg"
 		},
 		{
 			"mimeType":"image/jpeg",
 			"name":"Banana_tklkaixiw_Mid_2K_Normal",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Normal.jpg"
+			"uri":"inspectable/Banana_tklkaixiw_Mid_2K_Normal.jpg"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_banana_lightmap",
+			"uri":"inspectable/mk_banana_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Banana_tklkaixiw_Mid_2K_Roughness",
-			"uri":"banana/Banana_tklkaixiw_Mid_2K_Roughness.png"
+			"uri":"inspectable/Banana_tklkaixiw_Mid_2K_Roughness.png"
 		}
 	],
 	"accessors":[
@@ -119,14 +127,14 @@
 			"componentType":5126,
 			"count":815,
 			"max":[
-				0.029172198846936226,
-				0.04055989533662796,
-				0.02483215741813183
+				0.03707467019557953,
+				0.0413777120411396,
+				0.0075074369087815285
 			],
 			"min":[
-				-0.01960996724665165,
-				-0.02907721884548664,
-				-0.02458926849067211
+				-0.026779934763908386,
+				-0.028259402140975,
+				-0.014337616972625256
 			],
 			"type":"VEC3"
 		},
@@ -144,6 +152,12 @@
 		},
 		{
 			"bufferView":3,
+			"componentType":5126,
+			"count":815,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":4,
 			"componentType":5123,
 			"count":3573,
 			"type":"SCALAR"
@@ -170,8 +184,14 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":7146,
+			"byteLength":6520,
 			"byteOffset":26080,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":7146,
+			"byteOffset":32600,
 			"target":34963
 		}
 	],
@@ -183,7 +203,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":33228,
+			"byteLength":39748,
 			"uri":"banana.bin"
 		}
 	]

@@ -18,23 +18,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_banana_bad",
-			"rotation":[
-				-0.2961835563182831,
-				-0.8913756608963013,
-				0.31675487756729126,
-				0.1318754255771637
-			],
-			"scale":[
-				0.5527437925338745,
-				0.5527437329292297,
-				0.5527437925338745
-			],
-			"translation":[
-				0.0028439871966838837,
-				0.005127908196300268,
-				-0.006239847280085087
-			]
+			"name":"mk_banana_bad"
 		}
 	],
 	"materials":[
@@ -61,9 +45,13 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2,
+				"texCoord":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0
 			}
@@ -77,9 +65,10 @@
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
-						"TEXCOORD_0":2
+						"TEXCOORD_0":2,
+						"TEXCOORD_1":3
 					},
-					"indices":3,
+					"indices":4,
 					"material":0
 				}
 			]
@@ -96,6 +85,10 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		}
 	],
@@ -103,12 +96,17 @@
 		{
 			"mimeType":"image/png",
 			"name":"Banana_overipe_BaseColor",
-			"uri":"banana/Banana_overipe_BaseColor.png"
+			"uri":"inspectable/Banana_overipe_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Banana_overipe_Normal",
-			"uri":"banana/Banana_overipe_Normal.png"
+			"uri":"inspectable/Banana_overipe_Normal.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_banana_bad_lightmap",
+			"uri":"inspectable/mk_banana_bad_lightmap.png"
 		}
 	],
 	"accessors":[
@@ -117,14 +115,14 @@
 			"componentType":5126,
 			"count":845,
 			"max":[
-				0.07708258926868439,
-				0.03282763063907623,
-				0.01168394647538662
+				0.03374718129634857,
+				0.0417528860270977,
+				0.0078032370656728745
 			],
 			"min":[
-				-0.07721048593521118,
-				-0.032857395708560944,
-				-0.01168394647538662
+				-0.02830415405333042,
+				-0.027092916890978813,
+				-0.01788058876991272
 			],
 			"type":"VEC3"
 		},
@@ -142,6 +140,12 @@
 		},
 		{
 			"bufferView":3,
+			"componentType":5126,
+			"count":845,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":4,
 			"componentType":5123,
 			"count":4086,
 			"type":"SCALAR"
@@ -168,8 +172,14 @@
 		},
 		{
 			"buffer":0,
-			"byteLength":8172,
+			"byteLength":6760,
 			"byteOffset":27040,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":8172,
+			"byteOffset":33800,
 			"target":34963
 		}
 	],
@@ -181,7 +191,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":35212,
+			"byteLength":41972,
 			"uri":"banana-bad.bin"
 		}
 	]

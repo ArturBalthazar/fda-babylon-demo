@@ -19,18 +19,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_drugs",
-			"rotation":[
-				-0.7294132709503174,
-				0.17107516527175903,
-				0.15302546322345734,
-				0.6444166302680969
-			],
-			"scale":[
-				0.07943587750196457,
-				0.07943588495254517,
-				0.07943588495254517
-			]
+			"name":"mk_drugs"
 		}
 	],
 	"materials":[
@@ -63,13 +52,16 @@
 			"normalTexture":{
 				"index":2
 			},
+			"occlusionTexture":{
+				"index":3
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":3
+					"index":4
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":4
+					"index":5
 				}
 			}
 		}
@@ -105,62 +97,71 @@
 		},
 		{
 			"sampler":0,
+			"source":3
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":3
+			"source":4
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
 			"name":"Image_0",
-			"uri":"drugs/Image_0.png"
+			"uri":"inspectable/Image_0.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"drugs/Image_1.png"
+			"uri":"inspectable/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_2",
-			"uri":"drugs/Image_2.png"
+			"uri":"inspectable/Image_2.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_cosmetics_lightmap",
+			"uri":"inspectable/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"drugs/Image_1-1.png"
+			"uri":"inspectable/Image_1-1.png"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":66,
+			"count":70,
 			"max":[
-				0.5691698789596558,
-				0.1073455810546875,
-				0.3176143765449524
+				0.04155375063419342,
+				0.02813350036740303,
+				0.03029896505177021
 			],
 			"min":[
-				-0.5691699981689453,
-				-0.1073455810546875,
-				-0.31761443614959717
+				-0.046424880623817444,
+				-0.028324533253908157,
+				-0.030298955738544464
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":66,
+			"count":70,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":66,
+			"count":70,
 			"type":"VEC2"
 		},
 		{
@@ -173,26 +174,26 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":792,
+			"byteLength":840,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":792,
-			"byteOffset":792,
+			"byteLength":840,
+			"byteOffset":840,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":528,
-			"byteOffset":1584,
+			"byteLength":560,
+			"byteOffset":1680,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":264,
-			"byteOffset":2112,
+			"byteOffset":2240,
 			"target":34963
 		}
 	],
@@ -204,7 +205,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":2376,
+			"byteLength":2504,
 			"uri":"drugs.bin"
 		}
 	]

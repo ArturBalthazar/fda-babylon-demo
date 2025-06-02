@@ -15,23 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"mk_fish_bad",
-			"rotation":[
-				0.11839500814676285,
-				0.9927956461906433,
-				0.012764004059135914,
-				0.013284686952829361
-			],
-			"scale":[
-				0.13731920719146729,
-				0.13731920719146729,
-				0.13731920719146729
-			],
-			"translation":[
-				-0.004816684406250715,
-				0.00412035034969449,
-				-0.0023976825177669525
-			]
+			"name":"mk_fish_bad"
 		}
 	],
 	"materials":[
@@ -49,13 +33,16 @@
 			"normalTexture":{
 				"index":1
 			},
+			"occlusionTexture":{
+				"index":2
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":4
 				}
 			}
 		}
@@ -88,28 +75,37 @@
 		},
 		{
 			"sampler":0,
+			"source":2
+		},
+		{
+			"sampler":0,
 			"source":0
 		},
 		{
 			"sampler":0,
-			"source":2
+			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
 			"name":"mk_Fish_Rotten_BaseColor",
-			"uri":"fish/mk_Fish_Rotten_BaseColor.png"
+			"uri":"inspectable/mk_Fish_Rotten_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_Fish_Rotten_Normal",
-			"uri":"fish/mk_Fish_Rotten_Normal.png"
+			"uri":"inspectable/mk_Fish_Rotten_Normal.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_cosmetics_lightmap",
+			"uri":"inspectable/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_Fish_Rotten_Roughness",
-			"uri":"fish/mk_Fish_Rotten_Roughness.png"
+			"uri":"inspectable/mk_Fish_Rotten_Roughness.png"
 		}
 	],
 	"accessors":[
@@ -118,14 +114,14 @@
 			"componentType":5126,
 			"count":1333,
 			"max":[
-				0.38631966710090637,
-				0.16880366206169128,
-				0.11108316481113434
+				0.08681830018758774,
+				0.028116967529058456,
+				0.01504288986325264
 			],
 			"min":[
-				-0.6734029650688171,
-				-0.2472255975008011,
-				-0.12134958803653717
+				-0.05575694888830185,
+				-0.03302597627043724,
+				-0.018681973218917847
 			],
 			"type":"VEC3"
 		},

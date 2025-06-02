@@ -30,9 +30,12 @@
 				"index":0
 			},
 			"name":"mk_Fish",
+			"occlusionTexture":{
+				"index":1
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":2
 				},
 				"metallicFactor":0.2151295691728592,
 				"roughnessFactor":0.3824124336242676
@@ -63,6 +66,10 @@
 		},
 		{
 			"sampler":0,
+			"source":1
+		},
+		{
+			"sampler":0,
 			"source":0
 		}
 	],
@@ -70,7 +77,12 @@
 		{
 			"mimeType":"image/jpeg",
 			"name":"Image_0",
-			"uri":"fish/Image_0.jpg"
+			"uri":"inspectable/Image_0.jpg"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_Fishes_lightmap",
+			"uri":"inspectable/mk_Fishes_lightmap.png"
 		}
 	],
 	"accessors":[
@@ -80,12 +92,12 @@
 			"count":1469,
 			"max":[
 				0.08904512226581573,
-				0.02884817309677601,
+				0.028752654790878296,
 				0.014803646132349968
 			],
 			"min":[
 				-0.056001145392656326,
-				-0.028508154675364494,
+				-0.028603672981262207,
 				-0.017914732918143272
 			],
 			"type":"VEC3"
