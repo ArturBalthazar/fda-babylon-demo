@@ -525,8 +525,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    async function enableVR(scene, ground) {
-        const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
+    function enableVR(scene, ground) {
+        const xrHelper = scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
         // Flip X scale once on entering VR
         xrHelper.baseExperience.onStateChangedObservable.add((state) => {
@@ -619,7 +619,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     scene.onBeforeRenderObservable.add(() => {
         if (!window.inInspectMode) {
             const isBoosting = inputMap["shift"] === true;
-            const baseSpeed = isBoosting ? 2.5 : 1;
+            const baseSpeed = isBoosting ? 2.5 : 1.25;
             const gravityAssist = -0.3;
         
             // Flatten forward vector for horizontal movement
@@ -1185,7 +1185,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         if (!wrapper) {
             wrapper = new BABYLON.TransformNode(`inspectWrapper-${productName}`, scene);
             wrapper.setParent(camera);
-            wrapper.position = new BABYLON.Vector3(0, -0.019, 0.16);
+            wrapper.position = new BABYLON.Vector3(0, -0.005, 0.16);
             rootNode.setParent(wrapper);
             rootNode.position.set(0, 0, 0);
             setupObjectRotation(wrapper);

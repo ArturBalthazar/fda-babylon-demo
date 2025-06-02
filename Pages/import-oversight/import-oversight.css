@@ -233,7 +233,8 @@ input[readonly] {
     width: 95%;
     margin-left: auto;
     margin-right: auto;
-    overflow: auto; /* prevents overflow outside tab-content */
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -401,7 +402,17 @@ textarea {
     display: flex;
     gap: 8px;
     margin-top: 6px;
-}
+  
+    width: 100%;           /* constrain it to its parent’s width */
+    max-width: 100%;
+    overflow-x: auto;      /* enable horizontal scroll */
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;   /* prevent wrapping to next line */
+  }
+  
+
 
 .photo-item {
     position: relative;
@@ -412,9 +423,17 @@ textarea {
 .photo-thumb {
     position: relative;
     display: inline-block;
-    width: 100px;
+    width: 180px;
 }
 
+.photo-grid .photo-thumb {
+    flex: 0 0 auto;      /* no grow, no shrink, use its own width */
+  }
+
+  .facility-fields,
+.product-inspect-fields {
+  min-width: 0;        /* allow children (the grid) to overflow */
+}
 
 .thumb-img {
     width: 100%;
