@@ -526,7 +526,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysRight = [];
 
     async function enableVR(scene, ground) {
-        const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
+        const xrOptions = {
+          floorMeshes: [ground],
+          optionalFeatures: [
+            "local-floor",
+            "bounded-floor",
+            "hand-tracking",
+            "controller-pointer-selection"
+          ]
+        };
+      
+        const xrHelper = await scene.createDefaultXRExperienceAsync(xrOptions);
     
         // Flip X scale once on entering VR
         xrHelper.baseExperience.onStateChangedObservable.add((state) => {
@@ -607,7 +617,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     });
 
     // ✅ Input tracking
-    const inputMap = {};
     scene.actionManager = new BABYLON.ActionManager(scene);
     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, evt => {
         inputMap[evt.sourceEvent.key.toLowerCase()] = true;
