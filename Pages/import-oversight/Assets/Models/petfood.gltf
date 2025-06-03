@@ -21,25 +21,17 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				0.4000000059604645,
-				0.4000000059604645,
-				0.4000000059604645
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"name":"Pack",
 			"occlusionTexture":{
-				"index":1
+				"index":0
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":1
 				},
 				"metallicFactor":0.30000001192092896,
 				"metallicRoughnessTexture":{
-					"index":3
+					"index":2
 				},
 				"roughnessFactor":0.5
 			}
@@ -49,11 +41,11 @@
 			"name":"ColorAtlas_Circle.004",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":4,
+					"index":3,
 					"texCoord":3
 				},
 				"metallicRoughnessTexture":{
-					"index":5,
+					"index":4,
 					"texCoord":4
 				}
 			}
@@ -66,18 +58,18 @@
 				1
 			],
 			"emissiveTexture":{
-				"index":6
+				"index":5
 			},
 			"name":"gingerbread_cookie.003",
 			"normalTexture":{
-				"index":7
+				"index":6
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":8
+					"index":7
 				},
 				"metallicRoughnessTexture":{
-					"index":9
+					"index":8
 				}
 			}
 		}
@@ -139,10 +131,6 @@
 		},
 		{
 			"sampler":0,
-			"source":0
-		},
-		{
-			"sampler":0,
 			"source":2
 		},
 		{
@@ -172,49 +160,49 @@
 	],
 	"images":[
 		{
-			"mimeType":"image/jpeg",
-			"name":"Image_1",
-			"uri":"inspectable/Image_1.jpg"
-		},
-		{
 			"mimeType":"image/png",
 			"name":"mk_cosmetics_lightmap",
-			"uri":"inspectable/mk_cosmetics_lightmap.png"
+			"uri":"petfood/mk_cosmetics_lightmap.png"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"Image_1",
+			"uri":"petfood/Image_1.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"inspectable/Image_1.png"
+			"uri":"petfood/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasColorTexture",
-			"uri":"inspectable/AtlasColorTexture.png"
+			"uri":"petfood/AtlasColorTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasGrayTexture",
-			"uri":"inspectable/AtlasGrayTexture.png"
+			"uri":"petfood/AtlasGrayTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_metallic",
-			"uri":"inspectable/gingerbread_cookie_metallic.png"
+			"uri":"petfood/gingerbread_cookie_metallic.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_Gingerbread_Cookie_normal",
-			"uri":"inspectable/gingerbread_cookie_Gingerbread_Cookie_normal.png"
+			"uri":"petfood/gingerbread_cookie_Gingerbread_Cookie_normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_baseColor",
-			"uri":"inspectable/gingerbread_cookie_baseColor.png"
+			"uri":"petfood/gingerbread_cookie_baseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"gingerbread_cookie_metallic-gingerbread_cookie_roughness",
-			"uri":"inspectable/gingerbread_cookie_metallic-gingerbread_cookie_roughness.png"
+			"uri":"petfood/gingerbread_cookie_metallic-gingerbread_cookie_roughness.png"
 		}
 	],
 	"accessors":[

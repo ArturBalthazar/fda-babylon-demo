@@ -25,14 +25,6 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				0.15000000596046448,
-				0.15000000596046448,
-				0.15000000596046448
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"extensions":{
 				"KHR_materials_specular":{
 					"specularColorFactor":[
@@ -41,7 +33,7 @@
 						0
 					],
 					"specularColorTexture":{
-						"index":1
+						"index":0
 					}
 				},
 				"KHR_materials_ior":{
@@ -50,18 +42,18 @@
 			},
 			"name":"mk_drugs",
 			"normalTexture":{
-				"index":2
+				"index":1
 			},
 			"occlusionTexture":{
-				"index":3
+				"index":2
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":4
+					"index":3
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":5
+					"index":4
 				}
 			}
 		}
@@ -101,38 +93,34 @@
 		},
 		{
 			"sampler":0,
-			"source":0
-		},
-		{
-			"sampler":0,
 			"source":4
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"Image_0",
-			"uri":"inspectable/Image_0.png"
-		},
-		{
-			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"inspectable/Image_1.png"
+			"uri":"drugs/Image_1.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_2",
-			"uri":"inspectable/Image_2.png"
+			"uri":"drugs/Image_2.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_cosmetics_lightmap",
-			"uri":"inspectable/mk_cosmetics_lightmap.png"
+			"uri":"drugs/mk_cosmetics_lightmap.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"Image_0",
+			"uri":"drugs/Image_0.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Image_1",
-			"uri":"inspectable/Image_1-1.png"
+			"uri":"drugs/Image_1-1.png"
 		}
 	],
 	"accessors":[

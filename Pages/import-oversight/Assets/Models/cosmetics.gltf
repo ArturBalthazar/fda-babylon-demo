@@ -20,22 +20,14 @@
 	],
 	"materials":[
 		{
-			"emissiveFactor":[
-				0.30000001192092896,
-				0.30000001192092896,
-				0.30000001192092896
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"name":"mk_cosmetics",
 			"occlusionTexture":{
-				"index":1,
+				"index":0,
 				"texCoord":1
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":1
 				},
 				"metallicFactor":0,
 				"roughnessFactor":0.10000000149011612
@@ -45,16 +37,16 @@
 			"doubleSided":true,
 			"name":"ColorAtlas_Cosmetics",
 			"occlusionTexture":{
-				"index":3,
+				"index":2,
 				"texCoord":1
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":4,
+					"index":3,
 					"texCoord":2
 				},
 				"metallicRoughnessTexture":{
-					"index":5,
+					"index":4,
 					"texCoord":3
 				}
 			}
@@ -106,10 +98,6 @@
 		},
 		{
 			"sampler":0,
-			"source":1
-		},
-		{
-			"sampler":0,
 			"source":2
 		},
 		{
@@ -120,23 +108,23 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"Image_6",
-			"uri":"inspectable/Image_6.png"
+			"name":"mk_cosmetics_lightmap",
+			"uri":"cosmetics/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"mk_cosmetics_lightmap",
-			"uri":"inspectable/mk_cosmetics_lightmap.png"
+			"name":"Image_6",
+			"uri":"cosmetics/Image_6.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasColorTexture",
-			"uri":"inspectable/AtlasColorTexture.png"
+			"uri":"cosmetics/AtlasColorTexture.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"AtlasGrayTexture",
-			"uri":"inspectable/AtlasGrayTexture.png"
+			"uri":"cosmetics/AtlasGrayTexture.png"
 		}
 	],
 	"accessors":[

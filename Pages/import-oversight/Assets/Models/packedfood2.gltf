@@ -66,12 +66,12 @@
 		{
 			"mimeType":"image/png",
 			"name":"mk_packagedProducts_lightmap",
-			"uri":"inspectable/mk_packagedProducts_lightmap.png"
+			"uri":"packedfood/mk_packagedProducts_lightmap.png"
 		},
 		{
 			"mimeType":"image/jpeg",
-			"name":"Crackers_color",
-			"uri":"inspectable/Crackers_color.jpg"
+			"name":"packedfood2-good-COLOR",
+			"uri":"packedfood/packedfood2-good-COLOR.jpg"
 		}
 	],
 	"accessors":[

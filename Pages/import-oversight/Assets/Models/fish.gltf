@@ -21,21 +21,13 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				1,
-				1,
-				1
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"name":"mk_Fish",
 			"occlusionTexture":{
-				"index":1
+				"index":0
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":1
 				},
 				"metallicFactor":0.2151295691728592,
 				"roughnessFactor":0.3824124336242676
@@ -67,22 +59,18 @@
 		{
 			"sampler":0,
 			"source":1
-		},
-		{
-			"sampler":0,
-			"source":0
 		}
 	],
 	"images":[
 		{
-			"mimeType":"image/jpeg",
-			"name":"Image_0",
-			"uri":"inspectable/Image_0.jpg"
-		},
-		{
 			"mimeType":"image/png",
 			"name":"mk_Fishes_lightmap",
-			"uri":"inspectable/mk_Fishes_lightmap.png"
+			"uri":"fish/mk_Fishes_lightmap.png"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"Image_0",
+			"uri":"fish/Image_0.jpg"
 		}
 	],
 	"accessors":[

@@ -21,28 +21,20 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				1,
-				1,
-				1
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"name":"mk_Fish_rotten",
 			"normalTexture":{
-				"index":1
+				"index":0
 			},
 			"occlusionTexture":{
-				"index":2
+				"index":1
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":3
+					"index":2
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":4
+					"index":3
 				}
 			}
 		}
@@ -79,33 +71,29 @@
 		},
 		{
 			"sampler":0,
-			"source":0
-		},
-		{
-			"sampler":0,
 			"source":3
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"mk_Fish_Rotten_BaseColor",
-			"uri":"inspectable/mk_Fish_Rotten_BaseColor.png"
-		},
-		{
-			"mimeType":"image/png",
 			"name":"mk_Fish_Rotten_Normal",
-			"uri":"inspectable/mk_Fish_Rotten_Normal.png"
+			"uri":"fish/mk_Fish_Rotten_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_cosmetics_lightmap",
-			"uri":"inspectable/mk_cosmetics_lightmap.png"
+			"uri":"fish/mk_cosmetics_lightmap.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"mk_Fish_Rotten_BaseColor",
+			"uri":"fish/mk_Fish_Rotten_BaseColor.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_Fish_Rotten_Roughness",
-			"uri":"inspectable/mk_Fish_Rotten_Roughness.png"
+			"uri":"fish/mk_Fish_Rotten_Roughness.png"
 		}
 	],
 	"accessors":[

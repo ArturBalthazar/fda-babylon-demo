@@ -76,23 +76,23 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"Crackers box_Normal",
-			"uri":"inspectable/Crackers%20box_Normal.png"
+			"name":"packedfood3-NORMAL",
+			"uri":"packedfood/packedfood3-NORMAL.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_cosmetics_lightmap",
-			"uri":"inspectable/mk_cosmetics_lightmap.png"
+			"uri":"packedfood/mk_cosmetics_lightmap.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"Crackers box_BaseColor",
-			"uri":"inspectable/Crackers%20box_BaseColor.png"
+			"name":"packedfood2-COLOR",
+			"uri":"packedfood/packedfood2-COLOR.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"Crackers box_Roughness",
-			"uri":"inspectable/Crackers%20box_Roughness.png"
+			"name":"packedfood3-ARM",
+			"uri":"packedfood/packedfood3-ARM.png"
 		}
 	],
 	"accessors":[

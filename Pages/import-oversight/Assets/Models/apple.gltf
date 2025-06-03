@@ -25,14 +25,6 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"emissiveFactor":[
-				1,
-				1,
-				1
-			],
-			"emissiveTexture":{
-				"index":0
-			},
 			"extensions":{
 				"KHR_materials_specular":{
 					"specularFactor":0.4424242377281189
@@ -43,20 +35,20 @@
 			},
 			"name":"Apple1_u1_v1.002",
 			"normalTexture":{
-				"index":1,
+				"index":0,
 				"scale":0.75
 			},
 			"occlusionTexture":{
-				"index":2,
+				"index":1,
 				"texCoord":1
 			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":3
+					"index":2
 				},
 				"metallicFactor":0,
 				"metallicRoughnessTexture":{
-					"index":4
+					"index":3
 				}
 			}
 		}
@@ -93,33 +85,29 @@
 		},
 		{
 			"sampler":0,
-			"source":0
-		},
-		{
-			"sampler":0,
 			"source":3
 		}
 	],
 	"images":[
 		{
-			"mimeType":"image/jpeg",
-			"name":"Apple1_u1_v1_diffuse",
-			"uri":"inspectable/Apple1_u1_v1_diffuse.jpg"
-		},
-		{
 			"mimeType":"image/png",
 			"name":"Apple1_u1_v1_normal",
-			"uri":"inspectable/Apple1_u1_v1_normal.png"
+			"uri":"apple/Apple1_u1_v1_normal.png"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"mk_apple_lightmap",
-			"uri":"inspectable/mk_apple_lightmap.png"
+			"uri":"apple/mk_apple_lightmap.png"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"Apple1_u1_v1_diffuse",
+			"uri":"apple/Apple1_u1_v1_diffuse.jpg"
 		},
 		{
 			"mimeType":"image/png",
 			"name":"Floor Dirt  2",
-			"uri":"inspectable/Floor%20Dirt%20%202.png"
+			"uri":"apple/Floor%20Dirt%20%202.png"
 		}
 	],
 	"accessors":[
