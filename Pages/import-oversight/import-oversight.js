@@ -27,7 +27,7 @@ const emissionStrengths = {
     medicaldevice: 0.2,
     packedfood1: 0.3,
     packedfood2: 0.05,
-    packedfood3: 0.05,
+    packedfood3: 1,
     petfood: 0.4
 };
 
@@ -2268,7 +2268,6 @@ window.addEventListener("DOMContentLoaded", async () => {
             // ➖ Separator Line
         });
         
-    
         doc.save("FDA-Inspection-Report.pdf");
     }
 
@@ -2335,7 +2334,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         };
     }
     
-    
     // 📸 Render inspection photos in column layout with full width
     function renderColumnImages(doc, imgList, startY, x, maxWidth) {
         let y = startY;
@@ -2390,11 +2388,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         return y;
     }
     
-    
     submitReportButton.addEventListener("click", generateFinalPDF);
-
-    
-    
 
     engine.runRenderLoop(() => {
         scene.render();
