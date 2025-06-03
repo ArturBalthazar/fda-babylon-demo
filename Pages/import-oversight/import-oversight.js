@@ -525,8 +525,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     camera.keysLeft = [];
     camera.keysRight = [];
 
-    function enableVR(scene, ground) {
-        const xrHelper = scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
+    async function enableVR(scene, ground) {
+        const xrHelper = await scene.createDefaultXRExperienceAsync({ floorMeshes: [ground] });
     
         // Flip X scale once on entering VR
         xrHelper.baseExperience.onStateChangedObservable.add((state) => {
